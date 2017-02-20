@@ -32,3 +32,18 @@ class apiRequest():
 		url="""https://eu.api.battle.net/data/sc2/league/31/201/0/5?access_token="""+self.access_token	
 		print(url)
 		return self.getJsonData(url)
+
+
+#season current donne id, year, timestamp start et timestamp end
+#https://eu.api.battle.net/data/sc2/season/current?access_token=ts7yw3qvxntcn6q54rw229p5
+# league id
+#https://eu.api.battle.net/data/sc2/league/:SEASON_ID/:QUEUE_ID/:TEAM_TYPE/:LEAGUE_ID
+#https://eu.api.battle.net/data/sc2/league/31/201/0/6?access_token=ts7yw3qvxntcn6q54rw229p5
+#history of player
+#https://eu.api.battle.net/sc2/profile/2101268/1/Stephano/matches?locale=en_GB&apikey=rgvqqgg6tue3g5f5fu4r82v2xgy2dk7z
+
+#ladder ranking and mmr
+#https://eu.api.battle.net/data/sc2/ladder/189166?access_token=kkcbfz8ask4568aprq3v5aue
+#63870
+
+	

@@ -1,5 +1,5 @@
-import sqlhandle
-import apiRequest
+from sqlhandle import *
+from apiRequest import *
 import time
 import datetime
 
@@ -7,19 +7,6 @@ if __name__ == '__main__':
 	sql=Ladder_DatabaseSQL()
 	#test	
 
-#season current donne id, year, timestamp start et timestamp end
-#https://eu.api.battle.net/data/sc2/season/current?access_token=ts7yw3qvxntcn6q54rw229p5
-# league id
-#https://eu.api.battle.net/data/sc2/league/:SEASON_ID/:QUEUE_ID/:TEAM_TYPE/:LEAGUE_ID
-#https://eu.api.battle.net/data/sc2/league/31/201/0/6?access_token=ts7yw3qvxntcn6q54rw229p5
-#history of player
-#https://eu.api.battle.net/sc2/profile/2101268/1/Stephano/matches?locale=en_GB&apikey=rgvqqgg6tue3g5f5fu4r82v2xgy2dk7z
-
-#ladder ranking and mmr
-#https://eu.api.battle.net/data/sc2/ladder/189166?access_token=kkcbfz8ask4568aprq3v5aue
-#63870
-
-	
 #we go fetch ladder
 # if new player we add and  go fetch player history
 #if old player we compare last_played_time_stamp
@@ -35,10 +22,11 @@ class 	updateDB():
 		#only GM and Master X24
 		self.season_id=31
 		self.ladders_id={"GM":[191177],"M":[]}
-		self.getLadderId
+		self.getLadderId()
 		self.tierM1=5192
-		#request that failed
-		self.requestPool=[]
+		#game that have just been added to the db in the last update, we can use this to findOpponent and display the result
+		self.newGames=[]
+		self.msg=[]
 	def getLadderId(self,lvl=5):
 		"""update liste of self.ladders_id"""
 		M1=self.api.getLadderId(lvl)["tier"][0]["division"] #only M1
@@ -105,7 +93,8 @@ class 	updateDB():
 		if All:
 			for league_id in self.ladders_id["M"]:
 				self.updateLadder(league_id)
-				
+		self.displayNewGames()		
+		self.newGames=[]		
 	def updatePlayer(self,name,id_blizz,legacy_id,realm=1,mmr=1000,rank=1000,league=0,win=-1,losses=-1,ties=-1):
 		if mmr>self.tierM1 and self.players_blizz[id_blizz]["main"]=="NULL":
 			print("Looking for new game for",name,legacy_id, id_blizz,mmr,win,losses)
@@ -125,7 +114,10 @@ class 	updateDB():
 						decision=m["decision"]
 						speed=m["speed"]
 						self.db.addNewGame(db_id,sc2map,sc2type,decision,speed,date,mmr,rank,league,win,losses,ties,deltaMMR)
-						deltaMMR=0 #if we add more than one game then we dont really know the mmr change
+						game_id_in_db=self.db.getGamesBydateAndPlayer(date,db_id)[0][0]
+						self.newGames.append(game_id_in_db)
+						self.findOneOpponent(game_id_in_db)
+						deltaMMR=0 #if we add more than one game then we dont really know the mmr change this is a pretty crappy solution 
 						self.players_blizz[id_blizz]["mmr"]=mmr #this is here because we want to change mmr only when we add game because API strange behavior (mmr back and forth)
 						if date>maxdate:
 							maxdate=date
@@ -191,9 +183,9 @@ class 	updateDB():
 				else:
 					change_reason=""	
 					if self.players_blizz[id_blizz]["last_played"]!=last_played:
-						change_reason="Last played went from "+str(self.players_blizz[id_blizz]["last_played"])+" to "+str(last_played)+"\n"
+						change_reason="LP |"
 					if self.players_blizz[id_blizz]["mmr"]!=rating:
-						change_reason+="MMR went from "+ str(self.players_blizz[id_blizz]["mmr"])+" to "+ str(rating)
+						change_reason+="MMR: "+ str(self.players_blizz[id_blizz]["mmr"])+" to "+ str(rating)
 					if change_reason!="":
 						print("-----------------------------------",change_reason)
 						isUpdateSucces=self.updatePlayer(name.split("#")[0],id_blizz,legacy_id,realm,rating,current_rank,ladder_id,wins,loses,ties)
@@ -220,6 +212,7 @@ class 	updateDB():
 				last=True
 	def findOneOpponent(self,gameid):
 		game=self.db.getWhere("Games",["idGames"],[gameid])[0]
+		id_in_db=game[2]
 		sc2map=game[3]
 		sc2type=game[4]
 		decision=game[5]
@@ -227,17 +220,27 @@ class 	updateDB():
 		if decision=="TIE" or decision=="BAILER":
 			decision2=decision
 		else:
-			if decision="WIN":
+			if decision=="WIN":
 				decision2="LOSS" 
-			else
+			else:
 				decision2="WIN"
 		games=self.db.getWhere("NoOpponent",["map","type","decision","date"],[sc2map,sc2type,decision2,date])
 		if len(games)>1:
 			print("many possible match",date,sc2map)
+			self.msg.append("many possible match "+str(date))
 		if len(games)==1:
-			self.db.updateWhere("Games",[],[],"idGames",gameid)
+			opgameid=games[0][0]
+			opid=games[0][2]
+			self.db.updateWhere("Games",["GuessOpId","GuessOpGameId"],[opid,opgameid],"idGames",gameid)
+			self.db.updateWhere("Games",["GuessOpId","GuessOpGameId"],[id_in_db,gameid],"idGames",opgameid)
 					
-							
+	def displayNewGames(self):
+		print("New game found in this update:",len(self.newGames))
+		print("-------------------------------------------------------------")
+		for gameid in self.newGames:
+			game=self.db.getGamesById(gameid)[0]
+			print(game)
+									
 	def findOpponent(self):
 		noOpponent=self.db.getNoOpponent()
 		num=0
