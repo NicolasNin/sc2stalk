@@ -1,139 +1,25 @@
-import _mysql
-import MySQLdb as mdb
+import sqlhandle
+import apiRequest
 import time
 import datetime
-import json
-from urllib.request import urlopen
-from urllib.error import HTTPError
-import urllib.parse
-
 
 if __name__ == '__main__':	
-sql=Ladder_DatabaseSQL()
+	sql=Ladder_DatabaseSQL()
 	#test	
-sql.addNewPlayer("EU",3000,2000,150,120,5,123456,1111,789,1,"moi",'/aseazse/',"Z",0,0)
-sql.addNewGame(1,"daybreak","1v1","win","faster",124167,3650)
 
 #season current donne id, year, timestamp start et timestamp end
-https://eu.api.battle.net/data/sc2/season/current?access_token=ts7yw3qvxntcn6q54rw229p5
+#https://eu.api.battle.net/data/sc2/season/current?access_token=ts7yw3qvxntcn6q54rw229p5
 # league id
-https://eu.api.battle.net/data/sc2/league/:SEASON_ID/:QUEUE_ID/:TEAM_TYPE/:LEAGUE_ID
-https://eu.api.battle.net/data/sc2/league/31/201/0/6?access_token=ts7yw3qvxntcn6q54rw229p5
+#https://eu.api.battle.net/data/sc2/league/:SEASON_ID/:QUEUE_ID/:TEAM_TYPE/:LEAGUE_ID
+#https://eu.api.battle.net/data/sc2/league/31/201/0/6?access_token=ts7yw3qvxntcn6q54rw229p5
 #history of player
-https://eu.api.battle.net/sc2/profile/2101268/1/Stephano/matches?locale=en_GB&apikey=rgvqqgg6tue3g5f5fu4r82v2xgy2dk7z
+#https://eu.api.battle.net/sc2/profile/2101268/1/Stephano/matches?locale=en_GB&apikey=rgvqqgg6tue3g5f5fu4r82v2xgy2dk7z
 
 #ladder ranking and mmr
-https://eu.api.battle.net/data/sc2/ladder/189166?access_token=kkcbfz8ask4568aprq3v5aue
-63870
+#https://eu.api.battle.net/data/sc2/ladder/189166?access_token=kkcbfz8ask4568aprq3v5aue
+#63870
 
-
-class Ladder_DatabaseSQL():
-	""" a class that query an sql database with player table, and games tables"""
-	def __init__(self):
-		#to connect to db
-		self.user="testuser"
-		self.password="testpass"
-		self.db="starcraft"
 	
-	def escapeString(self, txt):
-		""" escape single quote into double"""
-		return txt.replace("'","''")	
-	def addNewGame(self,player_id,sc2map,sc2type,decision,speed,date,mmr,rank,ladderid,win,losses,ties,deltaMMR):
-		""" this add a basic new game	 """
-		query="""INSERT INTO `starcraft`.`Games` (`server`, `player_id`, `map`, `type`, `decision`, `speed`, `date`,`Current_MMR`,`Current_Rank`,`Current_league`,`Current_win`,`Current_losses`,`Current_ties`,`GuessMMRChange`)VALUES """
-		query+="""('EU', '{0}', '{1}', '{2}', '{3}', '{4}', '{5}','{6}','{7}','{8}','{9}','{10}','{11}','{12}');""".format(player_id,self.escapeString(sc2map),sc2type,decision,speed,date,mmr,rank,str(ladderid),str(win),str(losses),str(ties),str(deltaMMR))
-		print("adding a new game to database")
-		self.executeQuery(query)
-		
-	def addNewPlayer(self,server,rating,points,wins,loses,ties,last_played,join_time,legacy_id,realm,name,path,mainrace,clan_id,idblizz,Battletag):
-		query="""INSERT INTO `starcraft`.`Players` (`name`, `server`, `rating`, `points`, `wins`, `loses`, `ties`, `last_played`, `join_time`,
-		 `legacy_id`, `realm`, `path`, `Clan_id`, `idblizz`, `mainrace`, `Battletag`) VALUES 
-		 ('{0}', 'eu', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', '{11}', '{12}', '{13}','{14}')
-		 """.format(self.escapeString(name),rating,points,wins,loses,ties,last_played,join_time,legacy_id,realm,path,clan_id,idblizz,mainrace,self.escapeString(Battletag))
-		print("adding player to database")
-		self.executeQuery(query)
-	def getAllPlayer(self):
-		query="""SELECT * FROM starcraft.Players """+""";"""
-		return self.executeQuery(query)
-	def getAllGames(self,id_in_db):
-		query="""SELECT * FROM starcraft.Games where player_id="""+ str(id_in_db) +""" ORDER BY date asc;"""
-		return self.executeQuery(query)		
-	def getPLayerByBlizzId(self,blizz_id):
-		query="""SELECT * FROM starcraft.Players where idblizz="""+str(blizz_id)+""";"""
-		return self.executeQuery(query)
-	def getPlayerByLegacyId(self,legacy_id):	
-		query="""SELECT * FROM starcraft.Players where legacy_id="""+str(legacy_id)+""";"""#there can be many
-		return self.executeQuery(query)
-
-	def getPlayerById(self,id_in_db):	
-		query="""SELECT * FROM starcraft.Players where idPlayer="""+str(id_in_db)+""";"""#there can be many
-		return self.executeQuery(query)
-	def getGamesBydateAndPlayer(self,date,player_id):
-		query="""SELECT * FROM starcraft.Games where date="""+str(date)+""" and player_id="""+str(player_id)+""";"""
-		return self.executeQuery(query)
-	def getGamesById(self,gameid):
-		query="""SELECT * FROM starcraft.Games where idGames="""+str(gameid)+""";"""
-		return self.executeQuery(query)	
-	def getLastGames(self,player_id):
-		query="""SELECT *,date FROM starcraft.Games where player_id="""+str(player_id)+""" and date=(select max(date)  FROM starcraft.Games where player_id="""+str(player_id)+""");"""
-		return self.executeQuery(query)	
-	def getNoOpponent(self):
-		query="""SELECT * FROM starcraft.NoOpponent;"""
-		return self.executeQuery(query)	
-	def updateOpponent(self,gameid,opponentid):
-		query="""UPDATE `starcraft`.`Games` SET `GuessOpId`='"""+str(opponentid)+"""' WHERE `idGames`='"""+str(gameid)+"""';"""
-		return self.executeQuery(query)
-				
-	def updateDeltaMMR(self,gameid,delta):
-		query="""UPDATE `starcraft`.`Games` SET `GuessMMRChange`='"""+str(delta)+"""' WHERE `idGames`='"""+str(gameid)+"""';"""
-		return self.executeQuery(query)
-				
-	def executeQuery(self,query):
-		ret=""	 
-		try:
-			con=mdb.connect('localhost', 'testuser', 'testpass', 'starcraft')
-			con.set_character_set('utf8')
-			cur = con.cursor()
-			#utf8 issue
-			cur.execute('SET NAMES utf8;')
-			cur.execute('SET CHARACTER SET utf8;')
-			cur.execute('SET character_set_connection=utf8;')
-			#
-			cur.execute(query)
-			ret=cur.fetchall()
-			con.commit()
-				
-		except mdb.Error as e:
-			print(e)
-			print(query)
-		con.close()
-		return ret
-		
-class apiRequest():
-	def __init__(self):
-		self.access_token="ts7yw3qvxntcn6q54rw229p5"
-		self.apikey="rgvqqgg6tue3g5f5fu4r82v2xgy2dk7z"	
-	
-	def getJsonData(self,url):
-		#we change url to avoid unicode problem
-		url = urllib.parse.urlsplit(url)
-		url=list(url)
-		url[2] = urllib.parse.quote(url[2])
-		url = urllib.parse.urlunsplit(url)
-		try:
-			html=urlopen(url).read()
-			return json.loads(html.decode('utf-8'))	
-		except 	HTTPError as e:
-			print ("error",e.reason)
-			return "error"	
-	def getLadder(self,ladderid):
-		url="""https://eu.api.battle.net/data/sc2/ladder/"""+str(ladderid)+"""?access_token="""+self.access_token
-		return self.getJsonData(url)
-	def getMatchHistory(self,name,player_id,realm=1):
-		url="""https://eu.api.battle.net/sc2/profile/"""+str(player_id)+"""/"""+str(realm)+"""/"""+name+"""/matches?locale=en_GB&apikey=rgvqqgg6tue3g5f5fu4r82v2xgy2dk7z"""
-		print(url)
-		return self.getJsonData(url)		
-		
 #we go fetch ladder
 # if new player we add and  go fetch player history
 #if old player we compare last_played_time_stamp
@@ -148,11 +34,19 @@ class 	updateDB():
 		#dict of current season ladder id
 		#only GM and Master X24
 		self.season_id=31
-		self.ladders_id={"GM":[191177],"M":[190560,190651,190328,190718,190806,190901,191018,190662,191087,190608,190791,191148,191579,191159,190353,191349,190321,190914,
-		191281,190847,190682,191036,191443]}
+		self.ladders_id={"GM":[191177],"M":[]}
+		self.getLadderId
 		self.tierM1=5192
 		#request that failed
 		self.requestPool=[]
+	def getLadderId(self,lvl=5):
+		"""update liste of self.ladders_id"""
+		M1=self.api.getLadderId(lvl)["tier"][0]["division"] #only M1
+		id_M1=[]
+		for l in M1:
+			id_M1.append(l["ladder_id"])
+		self.ladders_id["M"]=id_M1
+		
 	def checkConsistencyWithDb(self,create=False):
 		players=self.db.getAllPlayer()
 		for p in players:
@@ -173,6 +67,10 @@ class 	updateDB():
 			idblizz=str(p[14])
 			race=p[15]
 			battletag=p[16]
+			smurf=p[17]
+			offrace=p[18]
+			if offrace==None:
+				offrace="NULL"
 			last_game_in_db=self.db.getLastGames(id_in_db) 
 			if last_game_in_db==():
 				last_games_played=0
@@ -184,7 +82,7 @@ class 	updateDB():
 			if idblizz not in self.players_blizz.keys():
 				print("player in SQL db but not in memory")
 				if create:
-					self.players_blizz[idblizz]={"last_played":last_played,"name":name,"last_game":last_games_played,"db_id":id_in_db,"mmr":last_mmr}
+					self.players_blizz[idblizz]={"last_played":last_played,"name":name,"last_game":last_games_played,"db_id":id_in_db,"mmr":last_mmr,"main":offrace}
 			else:
 				p2=self.players_blizz[idblizz]
 				#"last_played":last_played,"name":name,"last_game":0,"db_id":db_id,"mmr":rating}
@@ -209,9 +107,8 @@ class 	updateDB():
 				self.updateLadder(league_id)
 				
 	def updatePlayer(self,name,id_blizz,legacy_id,realm=1,mmr=1000,rank=1000,league=0,win=-1,losses=-1,ties=-1):
-		if mmr>self.tierM1:
+		if mmr>self.tierM1 and self.players_blizz[id_blizz]["main"]=="NULL":
 			print("Looking for new game for",name,legacy_id, id_blizz,mmr,win,losses)
-			legacy_id
 			db_id=self.players_blizz[id_blizz]["db_id"]
 			#last_game_in_db=self.db.getLastGames(player_id)
 			last_game_in_db=self.players_blizz[id_blizz]["last_game"]
@@ -272,12 +169,24 @@ class 	updateDB():
 				last_played=player["last_played_time_stamp"]
 				# we check if the player exist with idblizz !
 				if id_blizz not in self.players_blizz.keys():
-					print("first Time seing this long blizz id")
-					self.db.addNewPlayer("EU",rating,points,wins,loses,ties,last_played,join_time,legacy_id,realm,name,path,mainrace,clan_id,id_blizz,battletag)
-				#	db_id=self.db.getPlayerByLegacyId(legacy_id)[0][0] #TO CHANGE THERE CAN BE many name change
+					print("first Time seing this long blizz id",id_blizz)
+					#we check if the path exist ie legacy/name/realm which is the data for the match history in this case we add id_in_db of said player as main
+					main_id="NULL"
+					samepath=self.db.getPlayerByPath(path)
+					if samepath!=():
+						main_id=0
+						print("player already exist with a different blizz id but same path")
+						if len(samepath)==1:
+							main_id=samepath[0][0]
+						else:
+							for p in samepath:
+								if p[18]!=None:
+									main_id=p[18]
+							
+					self.db.addNewPlayer("EU",rating,points,wins,loses,ties,last_played,join_time,legacy_id,realm,name,path,mainrace,clan_id,id_blizz,battletag,main_id)
+					
 					db_id=self.db.getPLayerByBlizzId(id_blizz)[0][0] 
-					self.players_blizz[id_blizz]={"last_played":last_played,"name":name,"last_game":0,"db_id":db_id,"mmr":rating}
-					self.players[legacy_id]={"last_played":last_played,"name":name,"last_game":0,"db_id":db_id,"mmr":rating}
+					self.players_blizz[id_blizz]={"last_played":last_played,"name":name,"last_game":0,"db_id":db_id,"mmr":rating,"main":main_id}
 					self.updatePlayer(name.split("#")[0],id_blizz,legacy_id,realm,rating,current_rank,ladder_id,wins,loses,ties)
 				else:
 					change_reason=""	
@@ -290,6 +199,7 @@ class 	updateDB():
 						isUpdateSucces=self.updatePlayer(name.split("#")[0],id_blizz,legacy_id,realm,rating,current_rank,ladder_id,wins,loses,ties)
 						if isUpdateSucces:
 							self.players_blizz[id_blizz]["last_played"]=last_played
+							self.db.updateWhere("Players",["rating","last_played","wins","loses","ties"],[rating,last_played,wins,loses,ties],"idblizz",id_blizz)
 	def deltaMMR(self):
 		for blizzid in self.players_blizz:
 			print("computing delta MMR for", blizzid)
@@ -307,7 +217,27 @@ class 	updateDB():
 						gameid=g[0]
 						self.db.updateDeltaMMR(gameid,delta)
 				last_mmr=newmmr
-				last=True		
+				last=True
+	def findOneOpponent(self,gameid):
+		game=self.db.getWhere("Games",["idGames"],[gameid])[0]
+		sc2map=game[3]
+		sc2type=game[4]
+		decision=game[5]
+		date=game[7]
+		if decision=="TIE" or decision=="BAILER":
+			decision2=decision
+		else:
+			if decision="WIN":
+				decision2="LOSS" 
+			else
+				decision2="WIN"
+		games=self.db.getWhere("NoOpponent",["map","type","decision","date"],[sc2map,sc2type,decision2,date])
+		if len(games)>1:
+			print("many possible match",date,sc2map)
+		if len(games)==1:
+			self.db.updateWhere("Games",[],[],"idGames",gameid)
+					
+							
 	def findOpponent(self):
 		noOpponent=self.db.getNoOpponent()
 		num=0
@@ -333,31 +263,7 @@ class 	updateDB():
 						self.db.updateOpponent(gameid,playerid2)
 						self.db.updateOpponent(gameid2,playerid)
 		return num				
-	def showPlayerHistory(self,legacy_id):
-		id_in_db=self.players[legacy_id]["db_id"]
-		name=self.players[legacy_id]["name"]
-		print("---------- Games History of ",name,legacy_id,"----------------------------------")
-		print("""# Date  \t\tOpponent \t\t Map \t\t\t Result MMR """)
-		allgames=self.db.getAllGames(id_in_db)		 
-		for games in allgames:
-			date=datetime.datetime.fromtimestamp(games[7]).strftime('%Y-%m-%d %H:%M')
-			result=games[5]
-			sc2map=games[3]
-			mmr=games[12]
-			pad=""
-			if games[8]!=None:
-				op=self.db.getPlayerById(games[8])
-				opname=op[0][1].split("#")[0]
-				oprace=op[0][15]
-				if len(opname)<=11:
-					pad="\t"
-				if len(opname)<=4:
-					pad+="\t"			
-			else:
-				opname="NA     "
-				oprace="NA"
-				pad="\t"
-			print("""{0} {1}\t{2}({3}){7} \t {4}\t {5} \t{6}""".format(games[0],date,opname,oprace,sc2map[0:min(20,len(sc2map))],result,mmr,pad))
+
 GM=updateDB()
 GM.checkConsistencyWithDb(True)
 GM.updateLeagues()
@@ -365,28 +271,62 @@ GM.updateLeagues()
 
 ##check for offracing
 listeplayer=db1.getAllPlayer()
-
 count=0
 exclude=[]
+idem={}
 for i,p1 in enumerate(listeplayer):
 	path1=p1[12]
 	mmr=p1[3]
 	disp=""
-	if(mmr>5100):
+	none=0
+	if p1[18]==None:
+		none=1
+	if(mmr>4000):
 		for j,p2 in enumerate(listeplayer[i+1:]):
 			path2=p2[12]
+		
 			if path2 not in exclude:
-				if path1==path2:				
+				if path1==path2:
+					if path1 not in idem.keys():
+						idem[path1]=[p1]
+					idem[path1].append(p2)
+					if 	p2[18]==None:
+						none+=1		
 					disp+=str(p2)+"\n"
-		if disp!="":
+		if disp!="" and none>1:
 			exclude.append(path1)
 			count+=1
-			print(" ---------------- ", count, "-----------------")
+			print(" ---------------- ", count,none, "-----------------")
 			print(p1)
 			print(disp)		
-	
+for group in idem:
+	mmrmax=0
+	totalmax=0
+	imaxmmr=-1
+	imaxtotal=-1
+	print("-----------------",group,"---------------------------------------------")	
+	for i,p in enumerate(idem[group]):
+		print(i,p)
+		mmri=p[3]
+		totalgamei=p[5]+p[6]
+		if mmri>mmrmax:
+			imaxmmr=i
+			mmrmax=mmri			
+		if totalgamei>totalmax:
+			imaxtotal=i
+			totalmax=totalgamei
+	if imaxmmr==imaxtotal:
+		print("best mmr ", imaxmmr," bestotal ", imaxtotal, "decided main ",imaxmmr,idem[group][imaxmmr][0])
+		main_id=idem[group][imaxmmr][0]
+		for i,p in enumerate(idem[group]):
+			if i!=imaxmmr:
+				id_in_db=p[0]
+				print("updating ",id_in_db, "with offrace of main", main_id)
+				#db1.updateOffrace(id_in_db,main_id)			
+	else:
+		print("best mmr ", imaxmmr," bestotal ", imaxtotal)
+				
 			
 	    
-	
-	
+
 		
