@@ -1,0 +1,4 @@
+SC2-Stalk
+=========================
+This code use the battlenet api of starcraft to monitor and save in a mysql db the games.
+The aims is to stalk the activity of our favorites pro GNARK GNARK GNARK.
