@@ -4,8 +4,8 @@ class Ladder_DatabaseSQL():
 	""" a class that query an sql database with player table, and games tables"""
 	def __init__(self):
 		#to connect to db
-		self.user="testuser"
-		self.password="testpass"
+		self.user=
+		self.password=
 		self.db="starcraft"
 	
 	def escapeString(self, txt):
@@ -46,6 +46,14 @@ class Ladder_DatabaseSQL():
 	def getPlayerById(self,id_in_db):	
 		query="""SELECT * FROM starcraft.Players where idPlayer="""+str(id_in_db)+""";"""
 		return self.executeQuery(query)
+	def getRecentGames(self,timeframe):
+		query="""SELECT A.*,B.name,B.mainrace,B.legacy_id,C.Pseudo FROM starcraft.Games as A 
+					INNER JOIN Players as B 
+						ON A.player_id=B.idPlayer
+					LEFT OUTER JOIN Progamer as C
+						ON B.smurf=C.idProgamer
+					where date>"""+str(timeframe)+""" order by date desc ;"""
+		return self.executeQuery(query)	
 	def getGamesBydateAndPlayer(self,date,player_id):
 		query="""SELECT * FROM starcraft.Games where date="""+str(date)+""" and player_id="""+str(player_id)+""";"""
 		return self.executeQuery(query)
