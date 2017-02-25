@@ -1,0 +1,42 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
+
+
+Games of {{name}}
+
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>date</th>
+      <th>Opponent</th>
+      <th>type</th>
+      <th>decision</th>
+      <th>MMR</th>
+    </tr>
+  </thead>
+  <tbody>
+
+   {% for g in games %}
+	   <tr>
+	     <th scope="row">{{forloop.counter}}</th>
+    	 <td>{{g.date_human}}</td>
+    	 <td>{{g.guessopid}}</td>
+      	<td>{{g.type}}</td>
+      	<td>{{g.decision}}</td>
+      	<td>{{g.current_mmr}}({{g.guessmmrchange}})</td>
+    </tr>
+ 
+
+       
+
+   {% endfor %}
+
+    
+  </tbody>
+</table>
+    <ul>
+  
+
+  {% endblock content %} 
