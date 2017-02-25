@@ -4,8 +4,10 @@ class Ladder_DatabaseSQL():
 	""" a class that query an sql database with player table, and games tables"""
 	def __init__(self):
 		#to connect to db
+
 		self.user=
 		self.password=
+
 		self.db="starcraft"
 	
 	def escapeString(self, txt):
