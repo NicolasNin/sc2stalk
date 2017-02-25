@@ -81,6 +81,7 @@ DATABASES = {
         'NAME': 'django',
         'USER': 'USER',
         'PASSWORD': 'PASSWORD'
+
     }
 }
 
