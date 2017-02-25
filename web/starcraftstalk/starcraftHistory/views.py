@@ -2,19 +2,17 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from logging import getLogger
 # Create your views here.
 from background_task import background
-from logging import getLogger
 from django.http import HttpResponse
 from django.template import loader
 
-from .apiRequest import apiRequest
+#from .apiRequest import apiRequest
 from .models import League
 from .updateDB import *
 
 import datetime
-logger = getLogger(__name__)
+
 
 def index(request):
 	return render(request, 'starcraftHistory/index.html')

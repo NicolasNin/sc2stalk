@@ -5,12 +5,21 @@
   <h2> Goals </h2>
 <p>  This website aims to reproduces a match history for GM and pro players. The ingame history gives much more data that the battle.net api does. Nevertheless we are mostly able to find some data that are not explicitely given
   in the api.</p>
+  <h2> Methodology</h2>
+  We compare the date, maps, win/loss to find who played who. The date is precise to the second and is the most helpful data, maps and win/loss are there to confirmed. Also the MMR helps us in case of more than 2 games at the same second (when the map doesnt discriminate).
 <h2> Restrictions</h2>
 <p>Most of the data we infer is not always 100% accurate, nottably some opponent found may sometimes
-not be the right one, though quite unlikeky. All in all it should'nt afect the stats much</p>
+not be the right one, though quite unlikeky. All in all it should'nt afect the stats much.</p>
+<p> Some players have not game because we start adding game the first time we saw an evolution in the player data,
+so we need them to play at least a match to add the ~25 games stored in the match history. Some players also have match history issue on blizzard side, so we cant for example be sure of the map (we can sometimes infer the map)
+when there is an opponent found, but there is also a greater chance to have an error since we dont have the 
 
 <h2> Current possibilities</h2>
 you can access a list of players profile on the <a href="/players">players page</a>. It is ordered by MMR with only GM and Master 1 players from the eu server. Other server should be added but not others league since it would not be that interesting and very ressource intensive to keep track of more than a few thousands players (around 1K per server). Each players has a page which is currently populated by a list of games. It is thus basically the match history you have on the profile bnet page . 
+
+<h2> Smurf finding</h2>
+Finding smurf is not a primary purpose of this site, but we will use in the future the informations gathered at
+<a href="http://www.sc2unmasked.com/">SC2 Unmasked</a> .
 </div>
 
 {% endblock content %}
