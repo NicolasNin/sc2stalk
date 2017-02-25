@@ -1,9 +1,16 @@
 {% extends 'starcraftHistory/base.html' %}
 {% block content %}
 
-<div class="starter-template">
-  <h1>Bootstrap starter template</h1>
-    <p class="lead">Use this document as a way to quickly azezstart any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+<div >
+  <h2> Goals </h2>
+<p>  This website aims to reproduces a match history for GM and pro players. The ingame history gives much more data that the battle.net api does. Nevertheless we are mostly able to find some data that are not explicitely given
+  in the api.</p>
+<h2> Restrictions</h2>
+<p>Most of the data we infer is not always 100% accurate, nottably some opponent found may sometimes
+not be the right one, though quite unlikeky. All in all it should'nt afect the stats much</p>
+
+<h2> Current possibilities</h2>
+you can access a list of players profile on the <a href="/players">players page</a>. It is ordered by MMR with only GM and Master 1 players from the eu server. Other server should be added but not others league since it would not be that interesting and very ressource intensive to keep track of more than a few thousands players (around 1K per server). Each players has a page which is currently populated by a list of games. It is thus basically the match history you have on the profile bnet page . 
 </div>
 
 {% endblock content %}
