@@ -325,6 +325,11 @@ def FindAllOpponent():
 
 def LookForOpponentBygames(games):
 	LookForOpponent(games.idgames,games.date,games.decision,games.map,games.type)
+def poolPossibleOpponnent(games):
+	"""return a queryset of games that might be opponent according to date
+		since a games without map can have a date that is slighly off
+		ie date=lastplayed-1 ie date(withmap)=datewithoutmap-1
+	"""
 def LookForOpponent(idgame,date,decision,sc2map,sc2type):
 	""" we look for the opponent of the game with id idgame
 		if map="" this means we have less data to find match
@@ -332,18 +337,21 @@ def LookForOpponent(idgame,date,decision,sc2map,sc2type):
 		also look at date=lp-1 this might add uncertainty to result in case
 		of mutliple same date within 1sec
 	"""
-	games=Games.objects.exclude(idgames=idgame).filter(guessopgameid__isnull=True,type=sc2type)
-	### if 2 date are equal and other stuff are good
-	gamesdate=games.filter(date=date)
-	if len(gamesdate)!=0 :
-		count=0
-		for g in gamesdate:
-			
-			#print("potential",g.idgames)
-			if checkGamesIsOpponent(date,decision,sc2map,sc2type,g):
-				count+=1
-		if count>1:
-			print("many matches",count,date,idgame)	
+	if map=="":
+		print("")
+	else:	
+		games=Games.objects.exclude(idgames=idgame).filter(guessopgameid__isnull=True,type=sc2type)
+		### if 2 date are equal and other stuff are good
+		gamesdate=games.filter(date=date)
+		if len(gamesdate)!=0 :
+			count=0
+			for g in gamesdate:
+				
+				#print("potential",g.idgames)
+				if checkGamesIsOpponent(date,decision,sc2map,sc2type,g):
+					count+=1
+			if count>1:
+				print("many matches",count,date,idgame)	
 
 		#on va chercher avec date-1 car on a LP 
 		# si opmap=="" alors ca sert a rien car lui aussi a LP
@@ -381,6 +389,7 @@ def oppositeDecision(decision):
 		return "WIN"
 	if decision=="TIE" or "BAILER" or "NA" or "WATCHER":
 		return decision
+
 """
 for p in Players.objects.all():
 	path=p.path
