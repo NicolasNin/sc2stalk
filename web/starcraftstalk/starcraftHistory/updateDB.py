@@ -155,9 +155,6 @@ def addNewGamePlayer(pdb,p,lid):
 			nomapsgame=Games.objects.filter(path=p["path"],map="")
 			compareDbandHistory(nomapsgame,newinMH["SOLO"],p,pdb,msg,lid,
 					deltaMMR,deltawins,deltalosses,deltaties)
-			
-		
-
 		else:#pas de match history on ajoute l'unique game sans map
 			#ranked ou many=> partie ranked, on ajoute le count
 			if msg=="ranked" or msg=="many":
@@ -211,22 +208,32 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 				deltaMMR,"Unknown",lid,pdb.idplayer,True)
 
 def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player_id,unknown=False):
-	print(p["path"],date,unknown)
+	print(p["path"],date,unknown,lid,deltaMMR,decision)
+	map=map[0:44]
 	try:
 		with transaction.atomic():
 			if unknown:#in those game we dont know the player but we know the map (from MH)
-				Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,ranked=ranked,
-				  path=p["path"],decision=decision).save()
+				g=Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,ranked=ranked,
+				  path=p["path"],decision=decision)
+				g.save()
+				return g.pk
 			else:
 				#In those games we know the player, map might be empty (from MH and/or LP)
-				Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,current_mmr=p["rating"],
+				g=Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,current_mmr=p["rating"],
 				  current_rank=p["current_rank"],current_league=lid,current_win=p["wins"],current_losses=p["losses"],
 				  current_ties=p["ties"],current_points=p["points"],player_id=player_id,ranked=ranked,
 				  path=p["path"],current_win_streak=p["current_win_streak"],guessmmrchange=deltaMMR,
-				  lastplayed_date=p["last_played"],decision=decision).save()
+				  lastplayed_date=p["last_played"],decision=decision)
+				g.save()
+				return g.pk
 	except 	IntegrityError as e:
 			print("error",e)
-			print(p,unknown,player_id,Players.objects.filter(path=p["path"]))
+			print(p,unknown,player_id,sc2type,sc2map)
+
+			l=Players.objects.filter(path=p["path"])
+			for ga in l:
+				print(ga.date,ga.decision,ga.type)
+			print("############END LISTE GAME IN DB FOR PATH##############")	
 
 def getNewMatchHistory(path,alternate_path,lastMHupdate):
 	""" return match in match history since last matchHistory lookup"""
@@ -304,7 +311,7 @@ def lookForDiscrepancy(dmmr, dwin, dloss, dties, dcount, dlp):
 	return ("wtf", False)
 
 
-def updateOldPath():
+def updateOldPath(up=False):
 	api=apiRequest()
 	for league in League.objects.all():
 		lid=league.ladderid
@@ -315,8 +322,12 @@ def updateOldPath():
 				path=p["character"]["profilePath"]
 				legacy_id=p["character"]["id"]
 				for pobj in Players.objects.filter(legacy_id=legacy_id):
-					pobj.alternate_path=path
-					pobj.save()
+					if up:
+						pobj.alternate_path=path
+						pobj.save()
+					else:
+						if pobj.alternate_path!=path:
+							print(path,pobj.alternate_path,pobj.path)
 
 
 
@@ -328,11 +339,20 @@ def FindAllOpponent():
 
 def LookForOpponentBygames(games):
 	LookForOpponent(games.idgames,games.date,games.decision,games.map,games.type)
-def poolPossibleOpponnent(games):
+def poolOfPossibleOpponnent(game):
 	"""return a queryset of games that might be opponent according to date
 		since a games without map can have a date that is slighly off
-		ie date=lastplayed-1 ie date(withmap)=datewithoutmap-1
+		ie if map="" we can have lastplayed_date==date+1
+		so we have to look into date-1
 	"""
+
+	gdate=Games.objects.filter(type=game.type,date=g.date)
+	c=0
+	if len(gdate>2):
+		c+=1
+	print(c)
+	#for the moment we dont care about the shift
+
 def LookForOpponent(idgame,date,decision,sc2map,sc2type):
 	""" we look for the opponent of the game with id idgame
 		if map="" this means we have less data to find match

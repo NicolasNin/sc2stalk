@@ -16,15 +16,39 @@ import time
 
 def index(request):
 	return render(request, 'starcraftHistory/index.html')
-	
+###########	
 def recent(request):
-	games_dict=Games.objects.filter(date__gte=int(time.time()-1800)).order_by("-date").values()
+	games_dict=Games.objects.filter(date__gte=int(time.time()-1800)).order_by("-date").values("date",
+		"path","map","type","decision","current_mmr","guessmmrchange","player__mainrace",
+		"current_win",
+		"current_losses")
 	for g in games_dict:
-		timestamp=g["date"]
-		g["date_human"]=datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%Y-%m-%d %H:%M:%S')
 		g["path_human"]=g["path"].split("/")[-1]
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
+
+
+def playerbypath(request,path):
+	games_dict=Games.objects.filter(path=path).order_by("-date").values("date",
+		"path","map","type","decision","current_mmr","guessmmrchange","player__mainrace","current_win",
+		"current_losses")
+	for g in games_dict:
+		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%Y-%m-%d %H:%M:%S')
+		g["path_human"]=g["path"].split("/")[-1]
+	context={"games":games_dict,"name":path.split("/")[-1]}
+	return render(request, 'starcraftHistory/player.html', context)
+		
+def player2(request,legacy,realm,name):
+	#gamesdb=Players.objects.get(pk=sc2id)
+	path="/profile/"+legacy+"/"+realm+"/"+name
+	return playerbypath(request,path)
+	
+
+def player(request,sc2id):
+	path=Players.objects.get(pk=sc2id).path
+	return playerbypath(request,path)
+############################	
 
 def update(request):
 	#updateCycle(repeat=60, repeat_until=None)
@@ -39,31 +63,6 @@ def players(request):
 	#return HttpResponse(template.render(context, request))
 
 
-def player2(request,legacy,realm,name):
-	#gamesdb=Players.objects.get(pk=sc2id)
-	path="/profile/"+legacy+"/"+realm+"/"+name
-	games_dict=Games.objects.filter(path=path).order_by("-date").values()
-	for g in games_dict:
-		timestamp=g["date"]
-		g["date_human"]=datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
-		g["path_human"]=name
-	context={"games":games_dict,"name":name}
-	return render(request, 'starcraftHistory/player.html', context)
-	
-
-def player(request,sc2id):
-	if type(sc2id)==int:
-	#gamesdb=Players.objects.get(pk=sc2id)
-		path=Players.objects.get(pk=sc2id).path
-	else:
-		path=sc2id
-	name=Players.objects.get(pk=sc2id).name
-	games_dict=Games.objects.filter(path=path).order_by("-date").values()
-	for g in games_dict:
-		timestamp=g["date"]
-		g["date_human"]=datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
-	context={"games":games_dict,"sc2id":sc2id,"name":name}
-	return render(request, 'starcraftHistory/player.html', context)
 	
 def updateLeagues():
 	#first we retrieve the already existing leagues

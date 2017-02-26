@@ -17,6 +17,8 @@ Games of {{name}}
       <th>type</th>
       <th>decision</th>
       <th>MMR</th>
+      <th>Wins</th>
+      <th>Losses</th>
     </tr>
   </thead>
   <tbody>
@@ -26,12 +28,14 @@ Games of {{name}}
 	     <th scope="row">{{forloop.counter}}</th>
     	 <td>{{g.date_human}}</td>
     	 <td><a href="{{g.path}}">{{g.path_human}}</a></td>
-    	 <td>{{g.path_human}}</td>
+    	 <td>{{g.player__mainrace}}</td>
     	 <td>{{g.guessopid}}</td>
     	 <td>{{g.map}}</td>
       	<td>{{g.type}}</td>
       	<td>{{g.decision}}</td>
       	<td>{{g.current_mmr}}({{g.guessmmrchange}})</td>
+      	<td>{{g.current_win}}</td>
+      	<td>{{g.current_losses}}</td>
     </tr>
  
 
