@@ -11,6 +11,7 @@ Games of {{name}}
       <th>#</th>
       <th>date</th>
       <th>Player</th>
+      <th>Race Played</th>
       <th>Opponent</th>
       <th>Map</th>
       <th>type</th>
@@ -25,6 +26,7 @@ Games of {{name}}
 	     <th scope="row">{{forloop.counter}}</th>
     	 <td>{{g.date_human}}</td>
     	 <td><a href="{{g.path}}">{{g.path_human}}</a></td>
+    	 <td>{{g.path_human}}</td>
     	 <td>{{g.guessopid}}</td>
     	 <td>{{g.map}}</td>
       	<td>{{g.type}}</td>

@@ -121,7 +121,7 @@ def updateCycle():
 #						lastMHupdate=0).save()
 
 
-
+	print("update finished")
 
 def addNewGamePlayer(pdb,p,lid):
 	""" pdb is an object player, p is a dict from the api
@@ -211,19 +211,20 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player_id,unknown=False):
 	print(p["path"],date,unknown)
 	try:
-		if unknown:#in those game we dont know the player but we know the map (from MH)
-			Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,ranked=ranked,
-			  path=p["path"],decision=decision).save()
-		else:
-			#In those games we know the player, map might be empty (from MH and/or LP)
-			Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,current_mmr=p["rating"],
-			  current_rank=p["current_rank"],current_league=lid,current_win=p["wins"],current_losses=p["losses"],
-			  current_ties=p["ties"],current_points=p["points"],player_id=player_id,ranked=ranked,
-			  path=p["path"],current_win_streak=p["current_win_streak"],guessmmrchange=deltaMMR,
-			  lastplayed_date=p["last_played"],decision=decision).save()
+		with transaction.atomic():
+			if unknown:#in those game we dont know the player but we know the map (from MH)
+				Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,ranked=ranked,
+				  path=p["path"],decision=decision).save()
+			else:
+				#In those games we know the player, map might be empty (from MH and/or LP)
+				Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,current_mmr=p["rating"],
+				  current_rank=p["current_rank"],current_league=lid,current_win=p["wins"],current_losses=p["losses"],
+				  current_ties=p["ties"],current_points=p["points"],player_id=player_id,ranked=ranked,
+				  path=p["path"],current_win_streak=p["current_win_streak"],guessmmrchange=deltaMMR,
+				  lastplayed_date=p["last_played"],decision=decision).save()
 	except 	IntegrityError as e:
-		print("error",e)
-		print(p,unknown,player_id,Players.objects.filter(path=p["path"]))
+			print("error",e)
+			print(p,unknown,player_id,Players.objects.filter(path=p["path"]))
 
 def getNewMatchHistory(path,alternate_path,lastMHupdate):
 	""" return match in match history since last matchHistory lookup"""
