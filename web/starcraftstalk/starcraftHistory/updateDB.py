@@ -3,6 +3,8 @@ from .models import League, Players, Games, Progamer
 from django.db.models import  Max
 from django.db import IntegrityError
 from background_task import background
+from django.db import transaction
+
 
 def gettingLadderPlayers(liste_ladderid):
 	""" from a liste of ladder_id we return a dict  of player from
