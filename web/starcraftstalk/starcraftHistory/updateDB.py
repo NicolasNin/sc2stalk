@@ -209,7 +209,7 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 
 def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player_id,unknown=False):
 	print(p["path"],date,unknown,lid,deltaMMR,decision)
-	map=map[0:44]
+	sc2map=sc2map[0:44]
 	try:
 		with transaction.atomic():
 			if unknown:#in those game we dont know the player but we know the map (from MH)
