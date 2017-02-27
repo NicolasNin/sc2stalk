@@ -2,17 +2,19 @@ import json
 from urllib.request import urlopen
 from urllib.error import HTTPError
 import urllib.parse
+from .apisettings import access_token, api_key
 
 class apiRequest():
 	def __init__(self,server="eu"):
 		self.server=server
-		if self.server=="eu":
-			self.access_token="ts7yw3qvxntcn6q54rw229p5"
-		if self.server=="us":
-			self.access_token="h88936j5q7gnqx88s7tg9gdy"
-		if self.server=="kr":
-			self.access_token=""
-		self.apikey="rgvqqgg6tue3g5f5fu4r82v2xgy2dk7z"	
+		#if self.server=="eu":
+		#	self.access_token="ts7yw3qvxntcn6q54rw229p5"
+		#if self.server=="us":
+		#	self.access_token="h88936j5q7gnqx88s7tg9gdy"
+		#if self.server=="kr":
+		#	self.access_token=""
+		self.access_token=access_token[server]
+		self.apikey=api_key
 	def checkNameConsistencyBnet(self,url):
 		return url
 	def getJsonData(self,url):
