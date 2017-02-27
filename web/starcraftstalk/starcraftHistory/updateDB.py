@@ -4,7 +4,7 @@ from django.db.models import  Max
 from django.db import IntegrityError
 from background_task import background
 from django.db import transaction
-
+from math import log10
 
 def gettingLadderPlayers(liste_ladderid):
 	""" from a liste of ladder_id we return a dict  of player from
@@ -102,13 +102,15 @@ def updateCycle():
 
 	player_from_api = gettingLadderPlayers(
 		liste_ladderid)  # a dict on which we loop to update
-
+	newgames=[]
 	for lid in liste_ladderid:
 		for player in player_from_api[lid]:
 			p = beautifulPlayer(player)
 			if str(p["id_blizz"]) in db_players:
 				pdb = db_players[str(p["id_blizz"])]
-				lastMHupdate=addNewGamePlayer(pdb,p,lid)
+				#big loop start here
+				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid)
+				newgames.extend(newgamesp)
 			#	print("cycle",lastMHupdate)
 				updatePlayer(pdb, p, lid,lastMHupdate)
 			else:
@@ -121,7 +123,9 @@ def updateCycle():
 #						  race_count=p["race_count"], points=p["points"],
 #						current_win_streak=p["current_win_streak"], league=int(str(lid)),
 #						lastMHupdate=0).save()
-
+	#we look for opponent of newgames
+	print(newgames)
+	findOpList(newgames,save=True)
 
 	print("update finished")
 
@@ -129,9 +133,10 @@ def addNewGamePlayer(pdb,p,lid):
 	""" pdb is an object player, p is a dict from the api
 		thus pdb is old state, while p i new
 	"""
+	list_newgamesid=[]
 	player_id=pdb.idplayer
 	deltaMMR = p["rating"] - pdb.rating
-	deltawins = p["wins"] - pdb.wins 
+	deltawins = p["wins"] - pdb.wins
 	deltalosses = p["losses"] - pdb.loses
 	deltaties = p["ties"] - pdb.ties
 	deltaLP = p["last_played"] - pdb.last_played
@@ -149,44 +154,52 @@ def addNewGamePlayer(pdb,p,lid):
 		if newinMH!="error":
 			#we add the notsolo
 			for g in newinMH["notSOLO"]:
-				addGamesinDB(p,g["map"],g["type"],g["decision"],
+				returngame=addGamesinDB(p,g["map"],g["type"],g["decision"],
 					g["speed"],g["date"],deltaMMR,msg,lid,player_id,True)
+				list_newgamesid.append(returngame)
+
 			#we add the solo match or update the one in db
 			nomapsgame=Games.objects.filter(path=p["path"],map="")
-			compareDbandHistory(nomapsgame,newinMH["SOLO"],p,pdb,msg,lid,
+			otherlist=compareDbandHistory(nomapsgame,newinMH["SOLO"],p,pdb,msg,lid,
 					deltaMMR,deltawins,deltalosses,deltaties)
+
+			list_newgamesid.extend(otherlist)
 		else:#pas de match history on ajoute l'unique game sans map
 			#ranked ou many=> partie ranked, on ajoute le count
 			if msg=="ranked" or msg=="many":
 				msg=str(deltacount)
-			addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),"FASTER",p["last_played"],
+			returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),"FASTER",p["last_played"],
 				deltaMMR,msg,lid,player_id)
-	return maxdate
+			list_newgamesid.append(returngame)
+	return (maxdate,list_newgamesid)
 
 def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses,deltaties):
 	""" match_db is the games list without maps, we try to reconstruct the match
 		history (ranked unranked ) by comparing with actual data from MH
-	"""	
+	"""
+	list_newgamesid=[]
 	mh.sort(reverse=True) #most recent ones first
 	#the first match should be the last_played_one from p
 	shiftMH=0
 	if len(mh)!=0  :
 		m=mh[0][1]
-		firstMH=mh[0][0] 
+		firstMH=mh[0][0]
 		if firstMH==p["last_played"] or firstMH==p["last_played"]-1:
 
-			addGamesinDB(p,m["map"],m["type"],m["decision"],
+			returngame=addGamesinDB(p,m["map"],m["type"],m["decision"],
 						m["speed"],m["date"],deltaMMR,msg,lid,pdb.idplayer)
+			list_newgamesid.append(returngame)
 			shiftMH=1
 		else:
 			print("last played not in match history",p["path"],p["last_played"])
-			addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
+			returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
 				"FASTER",p["last_played"],				deltaMMR,msg,lid,pdb.idplayer)
 			shiftMH=0
 	else:
 		print("last played not in match history",p["path"],p["last_played"])
-		addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
+		returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
 			"FASTER",p["last_played"],deltaMMR,msg,lid,pdb.idplayer)
+		list_newgamesid.append(returngame)
 		shiftMH=0
 
 	for (date,m) in mh[shiftMH:]:
@@ -204,8 +217,10 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 			print("we updated the date to the one in MH",p["path"],date)
 		else:
 			# we dont know who played that we might know after looking at LP and dc
-			addGamesinDB(p,m["map"],m["type"],m["decision"],m["speed"],m["date"],
+			returngame=addGamesinDB(p,m["map"],m["type"],m["decision"],m["speed"],m["date"],
 				deltaMMR,"Unknown",lid,pdb.idplayer,True)
+			list_newgamesid.append(returngame)
+	return list_newgamesid
 
 def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player_id,unknown=False):
 	print(p["path"],date,unknown,lid,deltaMMR,decision)
@@ -214,8 +229,10 @@ def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player
 		with transaction.atomic():
 			if unknown:#in those game we dont know the player but we know the map (from MH)
 				g=Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,ranked=ranked,
-				  path=p["path"],decision=decision)
+				  path=p["path"],decision=decision,current_league=lid)
+
 				g.save()
+
 				return g.pk
 			else:
 				#In those games we know the player, map might be empty (from MH and/or LP)
@@ -225,15 +242,17 @@ def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player
 				  path=p["path"],current_win_streak=p["current_win_streak"],guessmmrchange=deltaMMR,
 				  lastplayed_date=p["last_played"],decision=decision)
 				g.save()
+
 				return g.pk
 	except 	IntegrityError as e:
 			print("error",e)
 			print(p,unknown,player_id,sc2type,sc2map)
 
-			l=Players.objects.filter(path=p["path"])
+			l=Games.objects.filter(path=p["path"])
 			for ga in l:
 				print(ga.date,ga.decision,ga.type)
-			print("############END LISTE GAME IN DB FOR PATH##############")	
+			print("############END LISTE GAME IN DB FOR PATH##############")
+			return 0
 
 def getNewMatchHistory(path,alternate_path,lastMHupdate):
 	""" return match in match history since last matchHistory lookup"""
@@ -251,12 +270,12 @@ def getNewMatchHistory(path,alternate_path,lastMHupdate):
 			if date>maxdate:
 				maxdate=date
 			sc2type=m["type"]
-			if date>lastMHupdate:			
+			if date>lastMHupdate:
 				if sc2type=="SOLO":
 					newgame["SOLO"].append((date,m))
 				else:
 					newgame["notSOLO"].append(m)
-		return (newgame,maxdate)											
+		return (newgame,maxdate)
 	else:
 		return ("error",maxdate)
 def getDecision(deltawins,deltalosses,deltaties):
@@ -327,18 +346,183 @@ def updateOldPath(up=False):
 						pobj.save()
 					else:
 						if pobj.alternate_path!=path:
-							print(path,pobj.alternate_path,pobj.path)
+							print("new alternate",path,"old_alternate",pobj.alternate_path,
+								"current path",pobj.path)
+##########Opp lookup#################
+def findOpList(listgames,save=False):
+	for g in listgames:
+		print(g)
+		findOppNewgame(Games.objects.get(pk=g),save)
+def findOppNewgame(g,save=False):
+	""" we do the basic, no same id, same date, same type, then we check map and decision"""
+	base_game=Games.objects.exclude(idgames=g.idgames).filter(type=g.type
+		,date=g.date,guessopgameid__isnull=True)
+	if len(base_game)==1:
+		opgame=base_game[0]
+		if checkGamesIsOpponent(g.decision,g.map,opgame):
+			if save:
+				g.guessopgameid=opgame.idgames
+				if opgame.player_id!=None:
+					g.guessopid=opgame.player_id
 
+				opgame.guessopgameid=g.idgames
+
+				if g.player_id!=None:
+					opgame.guessopid=g.player_id
+				opgame.save()
+				g.save()
+				print(g.date,g.idgames,opgame.idgames)
+			else:
+				print(g.date,g.idgames,opgame.idgames)
+			return (1,0)
+	elif len(base_game)>1:
+		print("more than 1 date match")
+		return (0,1)
+	return (0,0)
+def updateDbOpponent(save=False,datelimit=0):
+	allgames=Games.objects.all().exclude(guessopgameid__isnull=False).filter(date__gt=datelimit)
+	c=0
+	ok=0
+	okplus=0
+	for g in allgames:
+		(un,plus)=findOppNewgame(g,save)
+		ok+=un
+		okplus+=plus
+		c+=1
+		print(c,ok,okplus)
+	print(c,ok,okplus)
+def checkGamesIsOpponent(decision,sc2map,gameop):
+	opmap=gameop.map
+	if sc2map=="" or opmap=="":
+		ismapok=True
+	else:
+		if  sc2map==opmap:
+			ismapok=True
+		else:
+			return False #if map="" we cant decide
+	#idem for decision if its NA on either side we are cant decide
+	opdecision=gameop.decision
+	otherdecision=oppositeDecision(decision)
+	if decision=="NA" or opdecision=="NA":
+		isdecisionok=True
+	else:
+		if opdecision==otherdecision:
+			isdecisionok=True
+		else:
+			return False
+	return True
+
+def oppositeDecision(decision):
+	if decision=="WIN":
+		return "LOSS"
+	if decision=="LOSS":
+		return "WIN"
+	if decision=="TIE" or "BAILER" or "NA" or "WATCHER":
+		return decision
+
+####################################
 
 
 def FindAllOpponent():
 	allgames=Games.objects.all().exclude(guessopgameid__isnull=False)
+	c=0
+	cok=0
 	for g in allgames:
-		LookForOpponentBygames(g)
-		#print("-----------------")
+		cok+=LookForOpponentBygames(g)
+		c+=1
+		print(c,cok)
+	print(c,cok)
 
-def LookForOpponentBygames(games):
-	LookForOpponent(games.idgames,games.date,games.decision,games.map,games.type)
+def FindAllOpponentNomap():
+	allgames=Games.objects.all().exclude(guessopgameid__isnull=False)
+	c=0
+	cok=0
+	for g in allgames:
+		cok+=LookForOpponentNomap(g)
+		c+=1
+		#print(c,cok)
+	print(c,cok)
+		#print("-----------------")
+def LookForOpponentNomap(g):
+	idgame=g.idgames
+	date=g.date
+	decision=g.decision
+	sc2map=g.map
+	sc2type=g.type
+	guessmmrchange=g.guessmmrchange
+	games=Games.objects.exclude(idgames=idgame).filter(type=sc2type
+		,date=date,guessopgameid__isnull=True)
+	games2=games.exclude(decision=decision)
+	if len(games)==1 and len(games2)==0 and sc2type=="SOLO":
+		if sc2map!=""  and sc2map==games[0].map :
+			print(games[0].idgames)
+			print(date,idgame)
+			return 1
+		else:
+			return 0
+	else:
+		return 0
+
+def LookForOpponentEZ(g):
+	idgame=g.idgames
+	date=g.date
+	decision=g.decision
+	sc2map=g.map
+	sc2type=g.type
+	guessmmrchange=g.guessmmrchange
+	games=Games.objects.exclude(idgames=idgame,guessopgameid__isnull=False).filter(type=sc2type
+		,date=date)
+
+	if len(games)==1:
+		if games[0].map==sc2map and games[0].decision==oppositeDecision(decision):
+			if True: #games[0].guessmmrchange!= None and guessmmrchange != None :
+				if True:#abs(games[0].guessmmrchange +guessmmrchange)<=1:
+					g.guessopgameid=games[0].idgames
+
+					if games[0].player_id!=None:
+						g.guessopid=games[0].player_id
+					g.save()
+					games[0].guessopgameid=idgame
+					if g.player_id!=None:
+						games[0].guessopid=g.player_id
+					games[0].save()
+
+					print(idgame,date)
+					return 1
+	return 0
+
+def LookForOpponent(idgame,date,decision,sc2map,sc2type):
+	""" we look for the opponent of the game with id idgame
+		if map="" this means we have less data to find match
+		moreover the date could be "lp" in this case so we should
+		also look at date=lp-1 this might add uncertainty to result in case
+		of mutliple same date within 1sec
+	"""
+	if map=="":
+		print("")
+	else:
+		games=Games.objects.exclude(idgames=idgame).filter(guessopgameid__isnull=True,type=sc2type)
+		### if 2 date are equal and other stuff are good
+		gamesdate=games.filter(date=date)
+		if len(gamesdate)!=0 :
+			count=0
+			for g in gamesdate:
+
+				#print("potential",g.idgames)
+				if checkGamesIsOpponent(date,decision,sc2map,sc2type,g):
+					count+=1
+			if count>1:
+				print("many matches",count,date,idgame)
+
+		#on va chercher avec date-1 car on a LP
+		# si opmap=="" alors ca sert a rien car lui aussi a LP
+		# si opmap!="" alors ok
+		#=> donc on cherche a matcher date-1 avec un map!=""
+
+
+
+
+
 def poolOfPossibleOpponnent(game):
 	"""return a queryset of games that might be opponent according to date
 		since a games without map can have a date that is slighly off
@@ -353,66 +537,6 @@ def poolOfPossibleOpponnent(game):
 	print(c)
 	#for the moment we dont care about the shift
 
-def LookForOpponent(idgame,date,decision,sc2map,sc2type):
-	""" we look for the opponent of the game with id idgame
-		if map="" this means we have less data to find match
-		moreover the date could be "lp" in this case so we should
-		also look at date=lp-1 this might add uncertainty to result in case
-		of mutliple same date within 1sec
-	"""
-	if map=="":
-		print("")
-	else:	
-		games=Games.objects.exclude(idgames=idgame).filter(guessopgameid__isnull=True,type=sc2type)
-		### if 2 date are equal and other stuff are good
-		gamesdate=games.filter(date=date)
-		if len(gamesdate)!=0 :
-			count=0
-			for g in gamesdate:
-				
-				#print("potential",g.idgames)
-				if checkGamesIsOpponent(date,decision,sc2map,sc2type,g):
-					count+=1
-			if count>1:
-				print("many matches",count,date,idgame)	
-
-		#on va chercher avec date-1 car on a LP 
-		# si opmap=="" alors ca sert a rien car lui aussi a LP
-		# si opmap!="" alors ok
-		#=> donc on cherche a matcher date-1 avec un map!=""
-
-
-def checkGamesIsOpponent(date,decision,sc2map,sc2type,gameop):
-	opmap=gameop.map
-	if sc2map=="" or opmap=="":
-		ismapok=True
-	else:
-		if  sc2map==opmap:
-			ismapok=True
-		else:
-		#	print("map not ok",sc2map,opmap)
-			return False #if map="" we cant decide
-	#idem for decision if its NA on either side we are cant decide
-	opdecision=gameop.decision
-	otherdecision=oppositeDecision(decision)
-	if decision=="NA" or opdecision=="NA":
-		isdecisionok=True
-	else:
-		if opdecision==otherdecision:
-			isdecisionok=True	
-		else:
-			#print("decision not ok",decision,opdecision)
-			return False
-	return True
-
-def oppositeDecision(decision):
-	if decision=="WIN":
-		return "LOSS"
-	if decision=="LOSS":
-		return "WIN"
-	if decision=="TIE" or "BAILER" or "NA" or "WATCHER":
-		return decision
-
 """
 for p in Players.objects.all():
 	path=p.path
@@ -420,4 +544,49 @@ for p in Players.objects.all():
 	if maxdate!=None:
 		p.lastmhupdate=maxdate
 		p.save()
+"""
+
+def getMagicK(deltapoints):
+	if deltapoints<=30  and deltapoints>=20:
+		return 46
+	if deltapoints>30:
+		return 46+0.5*(deltapoints-30)
+	else:
+		return 46-0.5*(deltapoints-20)
+
+def getMMRmagic(newMMR1,deltammr1):
+	return getMMR(newMMR1,deltammr1,getMagicK(abs(deltammr1)))
+
+def getMMR(newMMR1,deltammr1,K):
+	if deltammr1==0:
+		print("000000000")
+		return 0
+	if deltammr1>0:
+		w=1
+	else:
+		w=0
+	p=w-deltammr1/K
+
+	if abs(deltammr1)>K or p==0:
+	#	print(deltammr1)
+		return 0
+	if 1/p-1<=0:
+	#	print(deltammr1,w,p)
+		return 0
+	return newMMR1+800*log10(1/p-1)
+"""
+r=Games.objects.all()
+print(len(r))
+r1=Games.objects.exclude(idgames=g.idgames)
+print(len(r1))
+r2=Games.objects.exclude(guessopgameid__isnull=False)
+print(len(r2))
+r11=r1.exclude(guessopgameid__isnull=False)
+print(len(r11))
+r3=Games.objects.exclude(idgames=g.idgames).exclude(guessopgameid__isnull=False)
+print(len(r3))
+r4=Games.objects.exclude(guessopgameid__isnull=False).exclude(idgames=g.idgames)
+print(len(r4))
+r5=Games.objects.exclude(idgames=g.idgames).filter(guessopgameid__isnull=True)
+print(len(r5))
 """

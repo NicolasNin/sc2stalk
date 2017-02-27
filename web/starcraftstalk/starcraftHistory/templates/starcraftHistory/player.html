@@ -14,9 +14,12 @@ Games of {{name}}
       <th>Race Played</th>
       <th>Opponent</th>
       <th>Map</th>
-      <th>type</th>
-      <th>decision</th>
+      <th>Result</th>
       <th>MMR</th>
+      <th>OpMMR</th>
+      <th>Op MMR(estim)</th>
+
+      <th>type</th>
       <th>Wins</th>
       <th>Losses</th>
     </tr>
@@ -29,24 +32,28 @@ Games of {{name}}
     	 <td>{{g.date_human}}</td>
     	 <td><a href="{{g.path}}">{{g.path_human}}</a></td>
     	 <td>{{g.player__mainrace}}</td>
-    	 <td>{{g.guessopid}}</td>
+      <td><a href="{{g.oppath}}">{{g.nameop}}</a></td>
+
     	 <td>{{g.map}}</td>
-      	<td>{{g.type}}</td>
-      	<td>{{g.decision}}</td>
+      	<td>{{g.decision_human}}</td>
       	<td>{{g.current_mmr}}({{g.guessmmrchange}})</td>
+      	<td>{{g.opmmr}}({{g.opdmmr}})</td>
+        <td>{{g.estimated_mmr}}</td>
+
+      	<td>{{g.type_human}}</td>
       	<td>{{g.current_win}}</td>
       	<td>{{g.current_losses}}</td>
     </tr>
- 
 
-       
+
+
 
    {% endfor %}
 
-    
+
   </tbody>
 </table>
     <ul>
-  
 
-  {% endblock content %} 
+
+  {% endblock content %}

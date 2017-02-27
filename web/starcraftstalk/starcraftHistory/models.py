@@ -14,13 +14,16 @@ class Games(models.Model):
     idgames = models.AutoField(db_column='idGames', primary_key=True)  # Field name made lowercase.
     path= models.CharField(max_length=45, blank=True, null=True)
     server = models.CharField(max_length=45, blank=True, null=True)
-    player = models.ForeignKey('Players', models.DO_NOTHING, blank=True, null=True)
+    player = models.ForeignKey('Players', models.DO_NOTHING, blank=True
+    , null=True,related_name="games_as_p")
     map = models.CharField(max_length=45, blank=True, null=True)
     type = models.CharField(max_length=45, blank=True, null=True)
     decision = models.CharField(max_length=45, blank=True, null=True)
     speed = models.CharField(max_length=45, blank=True, null=True)
     date = models.IntegerField(blank=True, null=True)
-    guessopid = models.IntegerField(db_column='GuessOpId', blank=True, null=True)  # Field name made lowercase.
+    guessopid = models.ForeignKey('Players', models.DO_NOTHING, db_column='GuessOpId', blank=True,
+     null=True,related_name="games_as_op")  # Field name made lowercase.
+    #guessopid = models.IntegerField(db_column='GuessOpId', blank=True, null=True)  # Field name made lowercase.
     guessopgameid = models.IntegerField(db_column='GuessOpGameId', blank=True, null=True)  # Field name made lowercase.
     current_mmr = models.CharField(db_column='Current_MMR', max_length=45, blank=True, null=True)  # Field name made lowercase.
     guessmmrchange = models.IntegerField(db_column='GuessMMRChange', blank=True, null=True)  # Field name made lowercase.
@@ -65,7 +68,7 @@ class Players(models.Model):
     league = models.IntegerField(blank=True, null=True)
     lastmhupdate = models.IntegerField(blank=True, null=True)
     alternate_path = models.CharField(max_length=45, blank=True, null=True)
-    
+
 
     class Meta:
         managed = True
