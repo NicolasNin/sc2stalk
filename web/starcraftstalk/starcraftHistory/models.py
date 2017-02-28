@@ -37,6 +37,13 @@ class Games(models.Model):
     ranked = models.CharField(max_length=10, blank=True, null=True)
     current_win_streak = models.IntegerField(blank=True, null=True)
     lastplayed_date = models.IntegerField(blank=True, null=True)
+    total_season_games=models.IntegerField(blank=True, null=True)
+    twins=models.IntegerField(blank=True, null=True)
+    pwins=models.IntegerField(blank=True, null=True)
+    zwins=models.IntegerField(blank=True, null=True)
+    rankedwins=models.IntegerField(blank=True, null=True)
+    rankedlosses=models.IntegerField(blank=True, null=True)
+
     class Meta:
         managed = True
         db_table = 'Games'
@@ -68,6 +75,14 @@ class Players(models.Model):
     league = models.IntegerField(blank=True, null=True)
     lastmhupdate = models.IntegerField(blank=True, null=True)
     alternate_path = models.CharField(max_length=45, blank=True, null=True)
+    total_career_games=models.IntegerField(blank=True, null=True)
+    total_season_games=models.IntegerField(blank=True, null=True)
+    twins=models.IntegerField(blank=True, null=True)
+    pwins=models.IntegerField(blank=True, null=True)
+    zwins=models.IntegerField(blank=True, null=True)
+    rankedwins=models.IntegerField(blank=True, null=True)
+    rankedlosses=models.IntegerField(blank=True, null=True)
+
 
 
     class Meta:
@@ -79,6 +94,9 @@ class League(models.Model):
 	ladderid=models.IntegerField(unique=True,blank=True, null=True)
 	season=models.IntegerField(blank=True, null=True)
 	level = models.IntegerField(blank=True, null=True)
+	sigle = models.CharField(max_length=13,blank=True, null=True)
+	member_count = models.IntegerField(blank=True, null=True)
+
 	def __str__(self):
 		return str(self.ladderid)
 
@@ -89,3 +107,13 @@ class Progamer(models.Model):
     class Meta:
         managed = True
         db_table = 'Progamer'
+
+class Global(models.Model):
+    idglobal = models.AutoField(db_column='idglobal', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(db_column='name', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    value = models.CharField(db_column='value', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    def __str__(self):
+        return str(self.name+" "+self.value)
+    class Meta:
+        managed = True
+        db_table = 'Global'
