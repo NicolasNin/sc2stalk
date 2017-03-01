@@ -43,7 +43,8 @@ class Games(models.Model):
     zwins=models.IntegerField(blank=True, null=True)
     rankedwins=models.IntegerField(blank=True, null=True)
     rankedlosses=models.IntegerField(blank=True, null=True)
-
+    def __str__(self):
+        return str(self.idgames)
     class Meta:
         managed = True
         db_table = 'Games'

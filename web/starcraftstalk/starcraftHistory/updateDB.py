@@ -213,6 +213,7 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 			print("last played not in match history",p["path"],p["last_played"])
 			returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
 				"FASTER",p["last_played"],				deltaMMR,msg,lid,pdb.idplayer)
+			list_newgamesid.append(returngame)
 			shiftMH=0
 	else:
 		print("last played not in match history",p["path"],p["last_played"])
@@ -227,13 +228,14 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 			mdb.map=m["map"]
 			mdb.decision=m["decision"]
 			mdb.save()
+			print("update of map ",p["path"],date,mdb.idgames)
 		elif match_db.filter(date=date+1).exists():
 			mdb=match_db.filter(date=date+1)[0]
 			mdb.map=m["map"]
 			mdb.decision=m["decision"]
 			mdb.date=date
 			mdb.save()
-			print("we updated the date to the one in MH",p["path"],date)
+			print("we updated the date to the one in MH",p["path"],date,mdb.idgames)
 		else:
 			# we dont know who played that we might know after looking at LP and dc
 			returngame=addGamesinDB(p,m["map"],m["type"],m["decision"],m["speed"],m["date"],
@@ -368,10 +370,25 @@ def updateOldPath(up=False):
 							print("new alternate",path,"old_alternate",pobj.alternate_path,
 								"current path",pobj.path)
 ##########Opp lookup#################
+def findOpListObject(listobject,save=False):
+	total=0
+	ok=0
+	many=0
+	for g in listobject:
+		(a,b)=findOppNewgame(g,save)
+		total+=1
+		ok+=b
+		many+=a
+	print("total",total," found",many," many",ok)
 def findOpList(listgames,save=False):
+	total=0
+	ok=0
 	for g in listgames:
 		print(g)
-		findOppNewgame(Games.objects.get(pk=g),save)
+		(a,b)=findOppNewgame(Games.objects.get(pk=g),save)
+		total+=a
+		ok+=b
+	print("total",total," found",ok)
 def findOppNewgame(g,save=False):
 	""" we do the basic, no same id, same date, same type, then we check map and decision"""
 	base_game=Games.objects.exclude(idgames=g.idgames).filter(type=g.type
@@ -380,24 +397,37 @@ def findOppNewgame(g,save=False):
 		opgame=base_game[0]
 		if checkGamesIsOpponent(g.decision,g.map,opgame):
 			if save:
-				g.guessopgameid=opgame.idgames
-				if opgame.player_id!=None:
-					g.guessopid=opgame.player
-
-				opgame.guessopgameid=g.idgames
-
-				if g.player_id!=None:
-					opgame.guessopid=g.player
-				opgame.save()
-				g.save()
-				print(g.date,g.idgames,opgame.idgames)
-			else:
-				print(g.date,g.idgames,opgame.idgames)
+				exchangeId(g,opgame)
+			print(g.date,g.idgames,opgame.idgames)
 			return (1,0)
 	elif len(base_game)>1:
-		print("more than 1 date match")
+		if g.map!="" and len(base_game.filter(map=""))==0:
+			samemap=base_game.filter(map=g.map)
+			if len(samemap)==1:
+				opgame=samemap[0]
+				if checkGamesIsOpponent(g.decision,g.map,opgame):
+					if save:
+						exchangeId(g,opgame)
+					print(g.date,g.idgames,opgame.idgames)
+					return(1,0)
+				else:
+					print("more thand 2date, only 1 map, decision fail",g.date,g.idgames)
+			else:
+				print("more than 2 date, more than 1 map",g.date,g.idgames)
+				return(0,1)
+		print("more than 2 date match",len(base_game),g.date,g.idgames)
+
 		return (0,1)
 	return (0,0)
+def exchangeId(g1,g2):
+	g1.guessopgameid=g2.idgames
+	if g2.player_id!=None:
+		g1.guessopid=g2.player
+	g2.guessopgameid=g1.idgames
+	if g1.player_id!=None:
+		g2.guessopid=g1.player
+	g2.save()
+	g1.save()
 def updateDbOpponent(save=False,datelimit=0):
 	allgames=Games.objects.all().exclude(guessopgameid__isnull=False).filter(date__gt=datelimit)
 	c=0

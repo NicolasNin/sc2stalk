@@ -14,9 +14,9 @@ from mmr import *
 
 import datetime
 import time
-
+from random import randrange
 def index(request):
-	return render(request, 'starcraftHistory/index.html')
+	return renderrandomtitle(request, 'starcraftHistory/index.html',{})
 ###########
 def getalldict(games):
 	games_dict=games.order_by("-date").values("date",
@@ -53,6 +53,15 @@ def getalldict(games):
 		#Win lose
 		g["decision_human"]=g["decision"][0]
 	return games_dict
+def randomTitle():
+	titles=["sc2stalk or is your boyfriend ditching you to play starcraft",
+	"sc2stalk, because pornhub was down",
+	"sc2stalk because everybodies love a good graph",
+	"sc2stalk because graph is life, nana na nana!"]
+	return titles[randrange(0,len(titles))]
+def renderrandomtitle(request,page,context):
+	context["title"]=randomTitle()
+	return render(request,page,context)
 
 def recent(request):
 	games=Games.objects.filter(date__gte=int(time.time()-1800))
@@ -60,7 +69,12 @@ def recent(request):
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
 
-
+def last100(request):
+	lastid=Games.objects.latest("idgames").idgames
+	games=Games.objects.filter(idgames__gte=lastid-100)
+	games_dict=getalldict(games)
+	context={"games":games_dict,"name":" last 30min"}
+	return render(request, 'starcraftHistory/player.html', context)
 def playerbypath(request,path):
 	games=Games.objects.filter(path=path)
 	games_dict=getalldict(games)

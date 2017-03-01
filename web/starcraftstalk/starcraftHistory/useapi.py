@@ -28,7 +28,7 @@ class Useapi(apiRequest):
 		return the list of matches	which are dict	"""
 
 		MH=self.getMatchHistoryByPath(path)
-		if alternate_path[0:-1]
+		#if alternate_path!=path
 		if type(MH)!=dict and alt_path !=None and alt_path!="":
 			MH=self.getMatchHistoryByPath(alt_path)
 		if type(MH)==dict:
