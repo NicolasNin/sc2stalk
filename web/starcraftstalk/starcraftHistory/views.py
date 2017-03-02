@@ -14,6 +14,7 @@ from mmr import *
 
 import datetime
 import time
+from .displayname import *
 from random import randrange
 def index(request):
 	return renderrandomtitle(request, 'starcraftHistory/index.html',{})
@@ -24,21 +25,27 @@ def getalldict(games):
 		,"player__mainrace",
 		"current_win",
 		"current_losses","guessopid__name","guessopid"
-		,"guessopgameid","ranked","player__smurf__pseudo")
+		,"guessopgameid","ranked","player__smurf__pseudo","current_league",
+		"guessopid__smurf__pseudo","guessopid__mainrace")
 	for g in games_dict:
+		
 		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%m-%d %H:%M:%S')
 		g["path_human"]=g["path"].split("/")[-1]
 		if g["player__smurf__pseudo"]!=None:
 			g["path_human"]=g["player__smurf__pseudo"]+"("+g["path_human"] +")"
 		#op
-		if g["guessopid"]!=None:
-			p=Players.objects.get(pk=g["guessopid"])
-			g["nameop"]=p.name+"("+p.mainrace+")"
-			g["oppath"]=p.path
 		if g["guessopgameid"]!=None:
 			opgame=Games.objects.get(pk=g["guessopgameid"])
 			g["opmmr"]=opgame.current_mmr
 			g["opdmmr"]=opgame.guessmmrchange
+			g["nameop"]=opgame.path.split("/")[-1]
+		if g["guessopid"]!=None:
+			p=Players.objects.get(pk=g["guessopid"])
+			g["nameop"]=p.name
+			if g["guessopid__smurf__pseudo"]!=None:
+				g["nameop"]=g["guessopid__smurf__pseudo"]
+			g["oppath"]=p.path
+
 		if g["current_mmr"]== None or g["guessmmrchange"]==None:
 			g["estimated_mmr"]="NA"
 		else:
@@ -99,15 +106,16 @@ def update(request):
 	return HttpResponse("updating database")
 
 def players(request):
-	player_in_db=Players.objects.all().order_by("-rating").values()
+	player_in_db=Players.objects.all().order_by("-rating").values("rating",
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer")
+	for p in player_in_db:
+		if p["smurf__pseudo"]!=None:
+			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
+		else:
+			p["name_human"]=p["name"]
 
 	context={"players":player_in_db}
 	return render(request, 'starcraftHistory/players.html', context)
-	#return HttpResponse(template.render(context, request))
-
-
-
-
 
 
 def about(request):

@@ -11,7 +11,7 @@ Games of {{name}}
       <th>#</th>
       <th>date</th>
       <th>Player</th>
-      <th>Race Played</th>
+      <th>MU</th>
       <th>Opponent</th>
       <th>Map</th>
       <th>Result</th>
@@ -22,6 +22,8 @@ Games of {{name}}
       <th>type</th>
       <th>Wins</th>
       <th>Losses</th>
+      <th>League</th>
+
     </tr>
   </thead>
   <tbody>
@@ -31,7 +33,7 @@ Games of {{name}}
 	     <th scope="row">{{forloop.counter}}</th>
     	 <td>{{g.date_human}}</td>
     	 <td><a href="{{g.path}}">{{g.path_human}}</a></td>
-    	 <td>{{g.player__mainrace}}</td>
+    	 <td>{{g.player__mainrace}}v{{g.guessopid__mainrace}}</td>
       <td><a href="{{g.oppath}}">{{g.nameop}}</a></td>
 
     	 <td>{{g.map}}</td>
@@ -43,17 +45,68 @@ Games of {{name}}
       	<td>{{g.type_human}}</td>
       	<td>{{g.current_win}}</td>
       	<td>{{g.current_losses}}</td>
+      	<td>{{g.current_league}}</td>
     </tr>
-
-
-
-
    {% endfor %}
-
-
   </tbody>
 </table>
-    <ul>
+<div id='chart_div' style='width: 900px; height: 500px;'></div>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type='text/javascript'>
+    google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+
+        function drawChart() {
+
+          var data = new google.visualization.DataTable();
+          data.addColumn('date', 'Time of Day');
+          data.addColumn('number', 'Rating');
+
+          data.addRows([
+               {% for g in games %}
+                        {%if g.current_mmr is not  None %}
+                          [new Date({%widthratio g.date 1 1000%}),{{g.current_mmr}}],
+                          {%endif%}
+                {% endfor %}
+
+
+          ]);
+
+
+          var options = {
+            title: 'MMR ',
+            width: 900,
+            height: 500,
+            hAxis: {
+              format: 'M/d h:m',
+              gridlines: {count: 15}
+            },
+            vAxis: {
+              gridlines: {color: 'none'},
+              minValue: 6400
+            }
+          };
+
+          var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+
+          chart.draw(data, options);
+
+          var button = document.getElementById('change');
+
+          button.onclick = function () {
+
+            // If the format option matches, change it to the new option,
+            // if not, reset it to the original format.
+            options.hAxis.format === 'M/d/yy' ?
+            options.hAxis.format = 'MMM dd, yyyy' :
+            options.hAxis.format = 'M/d/yy';
+
+            chart.draw(data, options);
+          };
+        }
+
+    </script>
+
 
 
   {% endblock content %}

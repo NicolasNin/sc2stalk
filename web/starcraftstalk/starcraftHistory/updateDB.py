@@ -49,7 +49,8 @@ def gettingLadderPlayers(liste_ladderid):
 			api_players[lid] = ladder["team"]
 			print("success", end=" | ")
 		else:
-			#error in retrieving
+			#error in retrieving we put an empty list
+			api_players[lid]=[]
 			print(ladder[0])
 	print("--")
 	return api_players
@@ -135,18 +136,19 @@ def updateCycle():
 			if str(p["id_blizz"]) in db_players:
 				pdb = db_players[str(p["id_blizz"])]
 				#big loop start here
-				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid)
+				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid.ladderid)
 				newgames.extend(newgamesp)
-				updatePlayer(pdb, p, lid,lastMHupdate)
+				updatePlayer(pdb, p, lid.ladderid,lastMHupdate)
 			else:
 				updatePlayer(Players(),p,lid,0)
 	print(newgames)
-	findOpList(newgames,save=True)
+	found=findOpListObject(newgames,save=False)
+	checkReciprocal(found,save=True)
 	print("update finished")
 
 
 def syncDbwithMH(player):
-	"""we update he games without maps and add newgames if MH was
+	"""we update the games without maps and add newgames if MH was
 	never look at, if there is new game  """
 	return 0
 def addNewGamePlayer(pdb,p,lid):
@@ -254,7 +256,7 @@ def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player
 
 				g.save()
 
-				return g.pk
+				return g
 			else:
 				#In those games we know the player, map might be empty (from MH and/or LP)
 				g=Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,current_mmr=p["rating"],
@@ -264,7 +266,7 @@ def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player
 				  lastplayed_date=p["last_played"],decision=decision)
 				g.save()
 
-				return g.pk
+				return g
 	except 	IntegrityError as e:
 			print("error",e)
 			print(p,unknown,player_id,sc2type,sc2map)
@@ -350,7 +352,7 @@ def lookForDiscrepancy(dmmr, dwin, dloss, dties, dcount, dlp):
 	print("wtf")
 	return ("wtf", False)
 
-
+##
 def updateOldPath(up=False):
 	api=apiRequest()
 	for league in League.objects.all():
@@ -360,8 +362,9 @@ def updateOldPath(up=False):
 		if type(l)==dict:
 			for p in l["ladderMembers"]:
 				path=p["character"]["profilePath"]
+				realm=p["character"]["realm"]
 				legacy_id=p["character"]["id"]
-				for pobj in Players.objects.filter(legacy_id=legacy_id):
+				for pobj in Players.objects.filter(legacy_id=legacy_id,realm=realm):
 					if up:
 						pobj.alternate_path=path
 						pobj.save()
@@ -370,36 +373,63 @@ def updateOldPath(up=False):
 							print("new alternate",path,"old_alternate",pobj.alternate_path,
 								"current path",pobj.path)
 ##########Opp lookup#################
+def checkReciprocal(founddict,save=False):
+	""" we take a dict of games with games as key
+		and we check that the finding in reciproqual
+	"""
+	for g1 in founddict:
+		g2=founddict[g1]
+		if g2 not in founddict and g2!="":
+			#we have to comoute it maybe again
+			(a,b,findee)=findOppNewgame(g2)
+		elif g2!="":
+			findee=founddict[g2]
+		else:
+			findee="space "
+		if findee==g1:
+			print(g1,g2,g1.date,"match reciproqual")
+			if save:
+				exchangeId(g1,g2)
+		else:
+			print(g1,g2,g1.date,"not reciproqual")
 def findOpListObject(listobject,save=False):
 	total=0
 	ok=0
 	many=0
+	found={}
 	for g in listobject:
-		(a,b)=findOppNewgame(g,save)
+		(a,b,opgame)=findOppNewgame(g,save)
+		if opgame!="":
+			found[g]=opgame
 		total+=1
 		ok+=b
 		many+=a
 	print("total",total," found",many," many",ok)
+	return found
 def findOpList(listgames,save=False):
 	total=0
 	ok=0
+	found={}
 	for g in listgames:
 		print(g)
-		(a,b)=findOppNewgame(Games.objects.get(pk=g),save)
+		(a,b,opgame)=findOppNewgame(Games.objects.get(pk=g),save)
 		total+=a
 		ok+=b
 	print("total",total," found",ok)
 def findOppNewgame(g,save=False):
 	""" we do the basic, no same id, same date, same type, then we check map and decision"""
-	base_game=Games.objects.exclude(idgames=g.idgames).filter(type=g.type
+	if g!=0:
+		base_game=Games.objects.exclude(idgames=g.idgames).filter(type=g.type
 		,date=g.date,guessopgameid__isnull=True)
+	else:#this means that addgameindDBfailed
+		return (0,0,"")
 	if len(base_game)==1:
 		opgame=base_game[0]
 		if checkGamesIsOpponent(g.decision,g.map,opgame):
 			if save:
 				exchangeId(g,opgame)
 			print(g.date,g.idgames,opgame.idgames)
-			return (1,0)
+			return (1,0,opgame)
 	elif len(base_game)>1:
 		if g.map!="" and len(base_game.filter(map=""))==0:
 			samemap=base_game.filter(map=g.map)
@@ -409,16 +439,16 @@ def findOppNewgame(g,save=False):
 					if save:
 						exchangeId(g,opgame)
 					print(g.date,g.idgames,opgame.idgames)
-					return(1,0)
+					return(1,0,opgame)
 				else:
 					print("more thand 2date, only 1 map, decision fail",g.date,g.idgames)
 			else:
 				print("more than 2 date, more than 1 map",g.date,g.idgames)
-				return(0,1)
+				return(0,1,"")
 		print("more than 2 date match",len(base_game),g.date,g.idgames)
 
-		return (0,1)
-	return (0,0)
+		return (0,1,"")
+	return (0,0,"")
 def exchangeId(g1,g2):
 	g1.guessopgameid=g2.idgames
 	if g2.player_id!=None:

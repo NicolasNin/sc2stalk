@@ -29,6 +29,9 @@ class apiRequest():
 		except 	HTTPError as e:
 			print ("error",e.reason)
 			return ("error",e.reason)
+	def getOldPlayerLadder(self,path):
+		url="https://"+self.server+".api.battle.net/sc2"+path+"/ladders?locale=en_GB&apikey="+self.apikey
+		return self.getJsonData(url)
 	def getOldProfile(self,path):
 		url="https://"+self.server+".api.battle.net/sc2"+path+"/?locale=en_GB&apikey="+self.apikey
 		return self.getJsonData(url)

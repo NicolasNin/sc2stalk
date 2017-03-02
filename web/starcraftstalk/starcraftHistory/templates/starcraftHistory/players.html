@@ -18,23 +18,21 @@
    {% for player in players %}
 	   <tr>
 	     <th scope="row">{{forloop.counter}}</th>
-    	 <td><a href="../player/{{player.idplayer}}" >{{player.name}}</a></td>
+    	 <td><a href="../player/{{player.idplayer}}" >{{player.name_human}}</a></td>
       	<td>{{player.rating}}</td>
       	<td>{{player.mainrace}}</td>
       	<td>{{player.wins}}</td>
       	<td>{{player.loses}}</td>
       	<td>{{player.league}}</td>
     </tr>
- 
 
-       
+
+
 
    {% endfor %}
 
-    
+
   </tbody>
 </table>
 
 {% endblock content %}
-  
-
