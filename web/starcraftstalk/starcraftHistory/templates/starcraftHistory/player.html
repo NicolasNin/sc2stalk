@@ -1,9 +1,39 @@
 {% extends 'starcraftHistory/base.html' %}
 {% block content %}
 
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-5"><h3> {{displayname}}</h3> </div>
+</div>
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-5 ">
+    <span> <a href="{{bneturl}}"> {{name}}</a></span> </div>
+</div>
+<div class="row">
+{%for r in racep%}
 
-Games of {{name}}
+  <div class="col-lg-3 col-lg-offset-2" class="text-left" >
 
+
+    <div class="row" ><div class=col-lg-12 >
+    Race: {{r.mainrace}}   </div></div>
+    <div class="row"><div class=col-lg-12>
+      League: {{r.league}} </div></div>
+      <div class="row"><div class=col-lg-6>
+        MMR: {{r.rating}} </div>
+        <div class=col-lg-6>
+          Rk: {{r.rank}} </div></div>
+          <div class="row"><div class=col-lg-6>
+            Wins: {{r.wins}} </div>
+            <div class=col-lg-6>
+              Losses: {{r.loses}} </div></div>
+  </div>
+{%endfor%}
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col-lg-12">
 
 <table class="table">
   <thead>
@@ -33,7 +63,10 @@ Games of {{name}}
 	     <th scope="row">{{forloop.counter}}</th>
     	 <td>{{g.date_human}}</td>
     	 <td><a href="{{g.path}}">{{g.path_human}}</a></td>
-    	 <td>{{g.player__mainrace}}v{{g.guessopid__mainrace}}</td>
+    	 <td>
+           {%if g.player__mainrace is not  None %} {{g.player__mainrace}}{%endif%}v{%if g.guessopid__mainrace is not  None %}{{g.guessopid__mainrace}} {%endif%}
+  </td>
+
       <td><a href="{{g.oppath}}">{{g.nameop}}</a></td>
 
     	 <td>{{g.map}}</td>
@@ -50,63 +83,9 @@ Games of {{name}}
    {% endfor %}
   </tbody>
 </table>
-<div id='chart_div' style='width: 900px; height: 500px;'></div>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type='text/javascript'>
-    google.charts.load('current', {'packages':['corechart']});
-        google.charts.setOnLoadCallback(drawChart);
 
-        function drawChart() {
-
-          var data = new google.visualization.DataTable();
-          data.addColumn('date', 'Time of Day');
-          data.addColumn('number', 'Rating');
-
-          data.addRows([
-               {% for g in games %}
-                        {%if g.current_mmr is not  None %}
-                          [new Date({%widthratio g.date 1 1000%}),{{g.current_mmr}}],
-                          {%endif%}
-                {% endfor %}
-
-
-          ]);
-
-
-          var options = {
-            title: 'MMR ',
-            width: 900,
-            height: 500,
-            hAxis: {
-              format: 'M/d h:m',
-              gridlines: {count: 15}
-            },
-            vAxis: {
-              gridlines: {color: 'none'},
-              minValue: 6400
-            }
-          };
-
-          var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-
-          chart.draw(data, options);
-
-          var button = document.getElementById('change');
-
-          button.onclick = function () {
-
-            // If the format option matches, change it to the new option,
-            // if not, reset it to the original format.
-            options.hAxis.format === 'M/d/yy' ?
-            options.hAxis.format = 'MMM dd, yyyy' :
-            options.hAxis.format = 'M/d/yy';
-
-            chart.draw(data, options);
-          };
-        }
-
-    </script>
-
+    </div>
+</div>
 
 
   {% endblock content %}

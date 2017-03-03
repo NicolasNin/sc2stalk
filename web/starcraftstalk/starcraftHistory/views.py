@@ -28,7 +28,7 @@ def getalldict(games):
 		,"guessopgameid","ranked","player__smurf__pseudo","current_league",
 		"guessopid__smurf__pseudo","guessopid__mainrace")
 	for g in games_dict:
-		
+
 		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%m-%d %H:%M:%S')
 		g["path_human"]=g["path"].split("/")[-1]
 		if g["player__smurf__pseudo"]!=None:
@@ -85,8 +85,13 @@ def last100(request):
 def playerbypath(request,path):
 	games=Games.objects.filter(path=path)
 	games_dict=getalldict(games)
-
-	context={"games":games_dict,"name":path.split("/")[-1]}
+	raceplayers=Players.objects.filter(path=path)
+	racep=[]
+	for p in raceplayers:
+		racep.append(p)
+	context={"games":games_dict,"name":racep[0].name,
+	"displayname":displayNameAccount(path),"racep":racep,
+	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2))}
 	return render(request, 'starcraftHistory/player.html', context)
 
 def player2(request,legacy,realm,name):
