@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from background_task import background
 from django.http import HttpResponse
 from django.template import loader
-
+from django.db.models import F
 #from .apiRequest import apiRequest
 from .models import League
 from .updateDB import *
@@ -19,8 +19,10 @@ from random import randrange
 def index(request):
 	return renderrandomtitle(request, 'starcraftHistory/index.html',{})
 ###########
-def getalldict(games):
-	games_dict=games.order_by("-date").values("date",
+def getalldict(games,orderbydate=True):
+	if orderbydate:
+		games=games.order_by("-date")
+	games_dict=games.values("date",
 		"path","map","type","decision","current_mmr","guessmmrchange"
 		,"player__mainrace",
 		"current_win",
@@ -75,7 +77,21 @@ def recent(request):
 	games_dict=getalldict(games)
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
-
+def highmmr(request):
+	games=Games.objects.filter(
+	date__gte=int(time.time()-3600)).select_related(
+	"guessopgameid")
+	games=games.annotate(
+	sum=F("current_mmr")+F("guessopgameid__current_mmr")).filter(
+	sum__gte=12000	).order_by("-sum")
+#	,current_mmr__gte=6000)
+	#games=games.order_by("-current_mmr")
+	#games=games.extra(
+	#select={"summmr":'current_mmr+guessopgameid__current_mmr'})
+	games_dict=getalldict(games,False)
+	context={"games":games_dict,"name":" last 24h"}
+	return renderrandomtitle(request, 'starcraftHistory/highmmr.html',context)
+#	highmmr=Games.objects.filter()
 def last100(request):
 	lastid=Games.objects.latest("idgames").idgames
 	games=Games.objects.filter(idgames__gte=lastid-100)
@@ -112,7 +128,7 @@ def update(request):
 
 def players(request):
 	player_in_db=Players.objects.all().order_by("-rating").values("rating",
-	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer")
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank")
 	for p in player_in_db:
 		if p["smurf__pseudo"]!=None:
 			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"

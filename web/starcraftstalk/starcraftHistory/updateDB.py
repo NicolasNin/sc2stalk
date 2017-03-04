@@ -91,6 +91,7 @@ def beautifulPlayer(player):
 		p["mainrace"] = "P"
 	p["last_played"] = player["last_played_time_stamp"]
 	p["current_win_streak"] = player["current_win_streak"]
+	p["current_rank"] = player["current_rank"]
 	return p
 def updatePlayer(pobj, p, lid,lastMHupdate):
 	"""update the Player object pobj with the data from api"""
@@ -114,6 +115,7 @@ def updatePlayer(pobj, p, lid,lastMHupdate):
 	pobj.current_win_streak = p["current_win_streak"]
 	pobj.league = int(str(lid))
 	pobj.lastmhupdate=lastMHupdate
+	pobj.rank=p["current_rank"]
 	pobj.save()
 @background(schedule=10)
 def updateCycle():
@@ -315,7 +317,7 @@ def getDecision(deltawins,deltalosses,deltaties):
 def lookForDiscrepancy(dmmr, dwin, dloss, dties, dcount, dlp):
 	""" we check many possible configuration according to what
 	 should be returned, False should never be returned """
-	if dcount < 0:
+	if dcount < 0 or dwin<0 or dloss<0:
 		return ("reset", True)
 	if dlp == 0:
 		if dmmr == 0 and dwin == 0 and dloss == 0 and dcount == 0 and dties == 0:

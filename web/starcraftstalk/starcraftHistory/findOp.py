@@ -76,10 +76,10 @@ def findOppNewgame(g,save=False):
 		return (0,1,"")
 	return (0,0,"")
 def exchangeId(g1,g2):
-	g1.guessopgameid=g2.idgames
+	g1.guessopgameid=g2#.idgames
 	if g2.player_id!=None:
 		g1.guessopid=g2.player
-	g2.guessopgameid=g1.idgames
+	g2.guessopgameid=g1#.idgames
 	if g1.player_id!=None:
 		g2.guessopid=g1.player
 	g2.save()
