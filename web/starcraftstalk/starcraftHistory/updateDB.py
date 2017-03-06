@@ -291,6 +291,7 @@ def getNewMatchHistory(path,alternate_path,lastMHupdate):
 
 	newgame={"SOLO":[],"notSOLO":[]}
 	maxdate=lastMHupdate
+	prevdate=0
 	if type(matchHistory)==dict:
 		for m in matchHistory["matches"]:
 			date=m["date"]
@@ -298,10 +299,15 @@ def getNewMatchHistory(path,alternate_path,lastMHupdate):
 				maxdate=date
 			sc2type=m["type"]
 			if date>lastMHupdate:
-				if sc2type=="SOLO":
-					newgame["SOLO"].append((date,m))
+				if prevdate==m["date"]:
+					print("error TWOO GAME SAME DATE")
 				else:
-					newgame["notSOLO"].append(m)
+					if sc2type=="SOLO":
+						newgame["SOLO"].append((date,m))
+					else:
+						newgame["notSOLO"].append(m)
+			prevdate=m["date"]
+
 		return (newgame,maxdate)
 	else:
 		return ("error",maxdate)

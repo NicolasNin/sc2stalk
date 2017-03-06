@@ -110,6 +110,19 @@ def playerbypath(request,path):
 	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2))}
 	return render(request, 'starcraftHistory/player.html', context)
 
+def graph(request):
+	path="/profile/4233584/1/lIIllllIIlll"
+	games=Games.objects.filter(path=path)
+	games_dict=getalldict(games)
+	raceplayers=Players.objects.filter(path=path)
+	racep=[]
+	for p in raceplayers:
+		racep.append(p)
+	context={"games":games_dict,"name":racep[0].name,
+	"displayname":displayNameAccount(path),"racep":racep,
+	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2))}
+	return render(request, 'starcraftHistory/graphtest.html', context)
+
 def player2(request,legacy,realm,name):
 	#gamesdb=Players.objects.get(pk=sc2id)
 	path="/profile/"+legacy+"/"+realm+"/"+name
