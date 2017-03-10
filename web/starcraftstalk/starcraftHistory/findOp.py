@@ -1,4 +1,5 @@
 from .models import Games
+from mmr import *
 def checkReciprocal(founddict,save=False):
 	""" we take a dict of games with games as key
 		and we check that the finding in reciproqual
@@ -18,6 +19,8 @@ def checkReciprocal(founddict,save=False):
 				exchangeId(g1,g2)
 		else:
 			print(g1,g2,g1.date,"not reciproqual")
+			
+
 def findOpListObject(listobject,save=False):
 	total=0
 	ok=0
@@ -69,12 +72,79 @@ def findOppNewgame(g,save=False):
 				else:
 					print("more thand 2date, only 1 map, decision fail",g.date,g.idgames)
 			else:
-				print("more than 2 date, more than 1 map",g.date,g.idgames)
+				#we look at the mmr consistency if there is only one its good
+				mmrmatch=checkMMRconsistencyGroup(g,base_game)
+				if len(mmrmatch)==1:
+					print(g.date,g.idgames,mmrmatch[0].idgames,"mmr decided, many maps")
+					return(1,0,mmrmatch[0])
+				else:
+					print("more than 2 date, more than 1 map,mmrdontmatch",
+					len(mmrmatch),g.date,g.idgames)
+					return(0,1,"")
+		else:
+			#we look at mmr when map failed
+			mmrmatch=checkMMRconsistencyGroup(g,base_game)
+			if len(mmrmatch)==1:
+				print(g.date,g.idgames,mmrmatch[0].idgames,'mmr decision not map')
+				return(1,0,mmrmatch[0])
+			else:
+				print("nor mmr nor map can decide",len(base_game),
+				      len(mmrmatch),g.date,g.idgames)
 				return(0,1,"")
-		print("more than 2 date match",len(base_game),g.date,g.idgames)
-
 		return (0,1,"")
 	return (0,0,"")
+def checkMMRconsistencyGroup(g1,listegame):
+	OK=[]
+	if g1.current_mmr==None:
+		return []
+	for g in listegame:
+		if g.current_mmr!=None:
+			if checkMMRconsistency(g1,g):
+				OK.append(g)
+	return OK
+def checkMMRconsistency(g1,g2):
+	"""  we lookt at mmr in case of multiple match"""
+	MMR1=int(g1.current_mmr)
+	deltammr1=g1.guessmmrchange
+	MMR2=int(g2.current_mmr)
+	deltammr2=g2.guessmmrchange
+	if abs(deltammr2+deltammr1)<=1:
+		ddmmr=(deltammr1-deltammr2)/2
+		if deltammr1>0:
+			deltammr1=abs(ddmmr)
+			deltammr2=-abs(ddmmr)
+
+		else:
+			deltammr1=-abs(ddmmr)
+			deltammr2=abs(ddmmr)
+		estimmmr2=getMMRmagic(MMR1,deltammr1)
+		estimmmr1=getMMRmagic(MMR2,deltammr2)
+		d1=estimmmr1-MMR1
+		d2=estimmmr2-MMR2
+
+		if abs(d1)>50 or abs(d2)>50 or abs(d1+d2)>1 :
+			print(g1.date,g1.idgames,g2.idgames,estimmmr1-MMR1,
+			estimmmr2-MMR2, deltammr2)
+			return False
+		else:
+			return True
+	else:
+		return False
+def checkAllMMR(liste):
+	total=0
+	a=0
+	b=0
+	c=0
+#	for g in  Games.objects.filter(guessopgameid__isnull=False,
+#	guessopgameid__guessmmrchange__isnull=False,
+#	guessmmrchange__isnull=False):
+	for (k,g) in enumerate(liste):
+		(d,e,f)=checkMMRconsistency(g,g.guessopgameid)
+		a+=d
+		b+=e
+		c+=f
+		total+=1
+	print(total,a,b,c)
 def exchangeId(g1,g2):
 	g1.guessopgameid=g2#.idgames
 	if g2.player_id!=None:
@@ -123,3 +193,15 @@ def oppositeDecision(decision):
 		return "WIN"
 	if decision=="TIE" or "BAILER" or "NA" or "WATCHER":
 		return decision
+
+def findError(listegame):
+	for g in listegame:
+		g1=g
+		if g.guessopgameid!=None:
+			g2=g.guessopgameid
+			if g.map!="" and g2.map!="":
+				if g.map!=g2.map:
+					print("MAP",g1.date,g1,g2)
+
+			if g.decision!=oppositeDecision(g2.decision):
+					print("decision",g1.date,g1.decision,g2.decision)

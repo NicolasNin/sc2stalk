@@ -1,0 +1,74 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
+
+<div class="row">
+  <div class="col-lg-12 "><h3> {{displayname}}</h3> </div>
+</div>
+<div class="row">
+  <div class="col-lg-12  ">
+    <span> <a href="{{bneturl}}"> {{name}}</a></span> </div>
+</div>
+<div class="row">
+{%for r in rs%}
+
+  <div class="col-lg-4 col-lg-offset-2" class="text-left" >
+
+
+    <div class="row" ><div class=col-lg-6 >
+    Race: {{r.0.mainrace}}   </div>
+
+    <div class=col-lg-6 >
+    Last  played: {{lm}}   </div></div>
+    <div class="row"><div class=col-lg-12>
+      League: {{r.0.league}} </div></div>
+    <div class="row"><div class=col-lg-6>
+        MMR: {{r.0.rating}} </div>
+        <div class=col-lg-6>
+          Rk: {{r.0.rank}} </div></div>
+    <div class="row"><div class=col-lg-6>
+            Wins: {{r.0.wins}} </div>
+            <div class=col-lg-6>
+              Losses: {{r.0.loses}} </div></div>
+
+    <div class="row">
+      <div class=col-lg-4>
+            {{r.0.mainrace}}vT  : W{{r.1.T.0}} L:{{r.1.T.1}} {{r.1.T.3}}%  </div>
+      <div class=col-lg-4>
+            {{r.0.mainrace}}vP  : W{{r.1.P.0}} L:{{r.1.P.1}} {{r.1.P.3}}%</div>
+      <div class=col-lg-4>
+            {{r.0.mainrace}}vZ  : W{{r.1.Z.0}} L:{{r.1.Z.1}} {{r.1.Z.3}}% </div>
+
+
+    </div>
+
+  </div>
+  {%endfor%}
+</div>
+
+<hr />
+
+ {% for g in games %}
+<div class="row  {{g.decision}} {{g.type}} games">
+    <div class="col-lg-2"> {{forloop.counter}}: {{g.date_human}} {{g.timesincelastgame}}</div>
+    <div class="col-lg-2">  {{g.map}}</div>
+    <div class="col-lg-1">  {{g.current_mmr}}({{g.guessmmrchange}})</div>
+              {% load static %}
+
+    <div class="col-lg-2 ">
+      <img src="{% static g.current_league__sigle %}icon.png "  alt="" >
+       <img src="{% static g.player__mainrace %}icon_small.png "  alt="" >
+          <a href="{{g.path}}">{{g.path_human}}</a>
+       </div>
+       <div class="col-lg-2 ">
+       <img src="{% static g.guessopgameid__current_league__sigle %}icon.png "  alt="" >
+<img src="{% static g.guessopid__mainrace %}icon_small.png "  alt="" >
+      <a href="{{g.oppath}}">{{g.nameop}}</a>
+
+    </div>
+    <div class="col-lg-1"> {{g.opmmr}}({{g.opdmmr}})</div>
+    <div class="col-lg-1"> W:{{g.current_win}} L:{{g.current_losses}}</div>
+</div>
+{%endfor%}
+
+
+  {% endblock content %}

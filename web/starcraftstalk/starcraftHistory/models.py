@@ -31,7 +31,8 @@ class Games(models.Model):
     guessmmrchange = models.IntegerField(db_column='GuessMMRChange', blank=True, null=True)  # Field name made lowercase.
     current_rank = models.IntegerField(db_column='Current_Rank', blank=True, null=True)  # Field name made lowercase.
 
-    current_league = models.CharField(db_column='Current_league', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    #current_league = models.CharField(db_column='Current_league', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    current_league = models.ForeignKey('League',db_column='Current_league', max_length=45, blank=True, null=True)  # Field name made lowercase.
 
     current_win = models.IntegerField(db_column='Current_win', blank=True, null=True)  # Field name made lowercase.
     current_losses = models.IntegerField(db_column='Current_losses', blank=True, null=True)  # Field name made lowercase.
@@ -79,7 +80,8 @@ class Players(models.Model):
     smurf = models.ForeignKey('Progamer', models.DO_NOTHING, db_column='smurf', blank=True, null=True)
     offrace = models.IntegerField(blank=True, null=True)
 
-    league = models.IntegerField(blank=True, null=True)
+    #league = models.IntegerField(blank=True, null=True)
+    league = models.ForeignKey('League',blank=True, null=True)
 
     lastmhupdate = models.IntegerField(blank=True, null=True)
     alternate_path = models.CharField(max_length=45, blank=True, null=True)

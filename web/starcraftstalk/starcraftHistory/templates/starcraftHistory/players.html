@@ -24,7 +24,8 @@
       	<td>{{player.mainrace}}</td>
       	<td>{{player.wins}}</td>
       	<td>{{player.loses}}</td>
-      	<td>{{player.league}}</td>
+          {% load static %}
+      	<td><img src="{% static player.league__sigle %}icon.png "  alt="{{player.league__sigle}}" ></td>
       	<td>{{player.rank}}</td>
     </tr>
 

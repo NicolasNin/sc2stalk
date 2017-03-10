@@ -65,7 +65,8 @@ function hidenotsolo() {
       	<td>{{g.type_human}}</td>
       	<td>{{g.current_win}}</td>
       	<td>{{g.current_losses}}</td>
-      	<td>{{g.current_league}}</td>
+          {% load static %}
+      	<td><img src="{% static g.current_league__sigle %}icon.png "  alt="{{g.current_league.league__sigle}}" ></td>
     </tr>
    {% endfor %}
   </tbody>

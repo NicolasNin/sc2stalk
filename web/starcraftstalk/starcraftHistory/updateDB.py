@@ -10,12 +10,14 @@ def updateLeagues():
 	if Global.objects.filter(name="lastupdateleagues").exists():
 		val=Global.objects.filter(name="lastupdateleagues")[0]
 		lastup=int(val.value)
+
 	else:
 		val=Global(name="lastupdateleagues",value=str(int(time())))
 		lastup=int(time())-3610
 		val.save()
 	#first we retrieve the already existing leagues
 	if time()>lastup+3600:
+		updateOldPath(up=True)
 		existingLeagues=League.objects.all()
 		liste_existing_ladderid=[]
 		for exl in existingLeagues:
@@ -113,7 +115,7 @@ def updatePlayer(pobj, p, lid,lastMHupdate):
 	pobj.race_count = p["race_count"]
 	pobj.points = p["points"]
 	pobj.current_win_streak = p["current_win_streak"]
-	pobj.league = int(str(lid))
+	pobj.league = lid
 	pobj.lastmhupdate=lastMHupdate
 	pobj.rank=p["current_rank"]
 	pobj.save()
@@ -139,9 +141,9 @@ def updateCycle():
 			if str(p["id_blizz"]) in db_players:
 				pdb = db_players[str(p["id_blizz"])]
 				#big loop start here
-				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid.ladderid)
+				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid)
 				newgames.extend(newgamesp)
-				updatePlayer(pdb, p, lid.ladderid,lastMHupdate)
+				updatePlayer(pdb, p, lid,lastMHupdate)
 			else:
 				updatePlayer(Players(),p,lid,0)
 	print(newgames)

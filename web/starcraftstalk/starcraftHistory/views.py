@@ -19,6 +19,7 @@ from random import randrange
 def index(request):
 	return renderrandomtitle(request, 'starcraftHistory/index.html',{})
 ###########
+
 def getalldict(games,orderbydate=True):
 	if orderbydate:
 		games=games.order_by("-date")
@@ -28,10 +29,23 @@ def getalldict(games,orderbydate=True):
 		"current_win",
 		"current_losses","guessopid__name","guessopid"
 		,"guessopgameid","ranked","player__smurf__pseudo","current_league",
-		"guessopid__smurf__pseudo","guessopid__mainrace")
+		"guessopid__smurf__pseudo","guessopid__mainrace","current_league__sigle",
+		"guessopgameid__current_league__sigle")
+	statMU={"Z":{},"T":{},"P":{},"R":{}}
+	previousgame=None
+	lastmatch=0
 	for g in games_dict:
+		if previousgame==None:
+			previousgame=g
+			lastmatch=int(time.time()-g["date"])
+		else:
+			previousgame["timesincelastgame"]=datetime.timedelta(
+			seconds=previousgame["date"]-g["date"])
+			previousgame=g
 
-		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%m-%d %H:%M:%S')
+		g["map"]=g["map"].split("(")[0]
+
+		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%m-%d %H:%M')
 		g["path_human"]=g["path"].split("/")[-1]
 		if g["player__smurf__pseudo"]!=None:
 			g["path_human"]=g["player__smurf__pseudo"]+"("+g["path_human"] +")"
@@ -41,12 +55,13 @@ def getalldict(games,orderbydate=True):
 			g["opmmr"]=opgame.current_mmr
 			g["opdmmr"]=opgame.guessmmrchange
 			g["nameop"]=opgame.path.split("/")[-1]
+			g["oppath"]=opgame.path
 		if g["guessopid"]!=None:
 			p=Players.objects.get(pk=g["guessopid"])
 			g["nameop"]=p.name
 			if g["guessopid__smurf__pseudo"]!=None:
 				g["nameop"]=g["guessopid__smurf__pseudo"]
-			g["oppath"]=p.path
+
 
 		if g["current_mmr"]== None or g["guessmmrchange"]==None:
 			g["estimated_mmr"]="NA"
@@ -59,9 +74,20 @@ def getalldict(games,orderbydate=True):
 				g["type_human"]+="(urk)"
 		else:
 			g["type_human"]=g["type"]
-		#Win lose
 		g["decision_human"]=g["decision"][0]
-	return games_dict
+		#stats
+
+		if g["guessopid"]!=None and g["player__mainrace"]!=None:
+			drace=statMU[g["player__mainrace"]]
+			prev=drace.get(g["guessopid__mainrace"],[0,0,0,0])
+			if g["decision"]=="WIN":
+				drace[g["guessopid__mainrace"]]=[prev[0]+1,prev[1],prev[2]+1,
+				round(100*(prev[0]+1)/(prev[2]+1))]
+
+			elif g["decision"]=="LOSS":
+				drace[g["guessopid__mainrace"]]=[prev[0],prev[1]+1,prev[2]+1,
+								round(100*(prev[0])/(prev[2]+1))]
+	return (games_dict,statMU,datetime.timedelta(seconds=lastmatch))
 def randomTitle():
 	titles=["sc2stalk or is your boyfriend ditching you to play starcraft",
 	"sc2stalk, because pornhub was down",
@@ -74,46 +100,52 @@ def renderrandomtitle(request,page,context):
 
 def recent(request):
 	games=Games.objects.filter(date__gte=int(time.time()-1800))
-	games_dict=getalldict(games)
+	(games_dict,stat,lastmatch)=getalldict(games)
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
 def highmmr(request):
 	games=Games.objects.filter(
-	date__gte=int(time.time()-3600)).select_related(
+	date__gte=int(time.time()-5000)).select_related(
 	"guessopgameid")
 	games=games.annotate(
 	sum=F("current_mmr")+F("guessopgameid__current_mmr")).filter(
-	sum__gte=12000	).order_by("-sum")
+	sum__gte=12000	).order_by("-date")
 #	,current_mmr__gte=6000)
 	#games=games.order_by("-current_mmr")
 	#games=games.extra(
 	#select={"summmr":'current_mmr+guessopgameid__current_mmr'})
-	games_dict=getalldict(games,False)
+	(games_dict,stat,lastmatch)=getalldict(games,False)
 	context={"games":games_dict,"name":" last 24h"}
 	return renderrandomtitle(request, 'starcraftHistory/highmmr.html',context)
 #	highmmr=Games.objects.filter()
 def last100(request):
 	lastid=Games.objects.latest("idgames").idgames
 	games=Games.objects.filter(idgames__gte=lastid-100)
-	games_dict=getalldict(games)
+	(games_dict,stat,lastmatch)=getalldict(games)
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
 def playerbypath(request,path):
 	games=Games.objects.filter(path=path)
-	games_dict=getalldict(games)
-	raceplayers=Players.objects.filter(path=path)
+	(games_dict,stat,lastmatch)=getalldict(games)
+	raceplayers=Players.objects.filter(path=path).select_related("league")
 	racep=[]
+	statrace=[]
+	raceandstat=[]
 	for p in raceplayers:
 		racep.append(p)
+		statrace.append(stat[p.mainrace])
+		raceandstat.append((p,stat[p.mainrace]))
+	print(raceandstat)
 	context={"games":games_dict,"name":racep[0].name,
 	"displayname":displayNameAccount(path),"racep":racep,
-	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2))}
-	return render(request, 'starcraftHistory/player.html', context)
+	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2)),"stat":statrace,
+	"rs":raceandstat,"lm":lastmatch}
+	return render(request, 'starcraftHistory/player2.html', context)
 
 def graph(request):
 	path="/profile/4233584/1/lIIllllIIlll"
 	games=Games.objects.filter(path=path)
-	games_dict=getalldict(games)
+	(games_dict,stat,lastmatch)=getalldict(games)
 	raceplayers=Players.objects.filter(path=path)
 	racep=[]
 	for p in raceplayers:
@@ -141,7 +173,8 @@ def update(request):
 
 def players(request):
 	player_in_db=Players.objects.all().order_by("-rating").values("rating",
-	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank")
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
+	"league__sigle")
 	for p in player_in_db:
 		if p["smurf__pseudo"]!=None:
 			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"

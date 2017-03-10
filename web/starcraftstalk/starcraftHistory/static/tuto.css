@@ -2,9 +2,24 @@ body {
   padding-top: 10px;
 }
 [class*="col-"], footer {
-  background-color: lightgrey;
-  border: 2px solid black;
-  border-radius: 6px;
-  line-height: 40px;
-  text-align: center;
+/*  border: 2px grey;
+  border-radius: 6px;*/
+  line-height: 30px;
+/*  text-align: center;*/
+}
+.LOSS{
+  background-color:rgba(239, 0, 3, 0.05)
+}
+.WIN{
+  background-color:hsla(119, 100%, 47%, 0.05)
+}
+
+.games{
+  padding-top: 5px;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.CUSTOM{
+  display: none;
 }
