@@ -19,8 +19,6 @@ def checkReciprocal(founddict,save=False):
 				exchangeId(g1,g2)
 		else:
 			print(g1,g2,g1.date,"not reciproqual")
-			
-
 def findOpListObject(listobject,save=False):
 	total=0
 	ok=0
@@ -135,9 +133,9 @@ def checkAllMMR(liste):
 	a=0
 	b=0
 	c=0
-#	for g in  Games.objects.filter(guessopgameid__isnull=False,
-#	guessopgameid__guessmmrchange__isnull=False,
-#	guessmmrchange__isnull=False):
+	#	for g in  Games.objects.filter(guessopgameid__isnull=False,
+	#	guessopgameid__guessmmrchange__isnull=False,
+	#	guessmmrchange__isnull=False):
 	for (k,g) in enumerate(liste):
 		(d,e,f)=checkMMRconsistency(g,g.guessopgameid)
 		a+=d
@@ -194,7 +192,7 @@ def oppositeDecision(decision):
 	if decision=="TIE" or "BAILER" or "NA" or "WATCHER":
 		return decision
 
-def findError(listegame):
+def findErrorWithOp(listegame):
 	for g in listegame:
 		g1=g
 		if g.guessopgameid!=None:
@@ -205,3 +203,11 @@ def findError(listegame):
 
 			if g.decision!=oppositeDecision(g2.decision):
 					print("decision",g1.date,g1.decision,g2.decision)
+
+def findGamewithoutp():
+	""" for when you find holes"""
+	games=Games.objects.filter(guessopgameid__isnull=False,
+	guessopid__isnull=True,guessopgameid__player__isnull=False)
+	for g in games:
+		g.guessopid=g.guessopgameid.player
+		g.save()

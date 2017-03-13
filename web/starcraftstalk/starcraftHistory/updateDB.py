@@ -151,7 +151,6 @@ def updateCycle():
 	checkReciprocal(found,save=True)
 	print("update finished")
 
-
 def syncDbwithMH(player):
 	"""we update the games without maps and add newgames if MH was
 	never look at, if there is new game  """
@@ -363,7 +362,6 @@ def lookForDiscrepancy(dmmr, dwin, dloss, dties, dcount, dlp):
 		return ("dlp negatif", False)
 	print("wtf")
 	return ("wtf", False)
-
 ##
 def updateOldPath(up=False):
 	api=apiRequest()

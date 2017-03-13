@@ -8,10 +8,10 @@ body {
 /*  text-align: center;*/
 }
 .LOSS{
-  background-color:rgba(239, 0, 3, 0.05)
+  background-color:rgba(239, 0, 3, 0.15)
 }
 .WIN{
-  background-color:hsla(119, 100%, 47%, 0.05)
+  background-color:hsla(119, 100%, 47%, 0.15)
 }
 
 .games{
