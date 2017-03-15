@@ -5,13 +5,15 @@
   <thead>
     <tr>
       <th>#</th>
-      <th>Name</th>
+      <th>Account</th>
+      <th>Smurf</th>
       <th>MMR</th>
       <th>Race</th>
       <th>Wins</th>
       <th>Losses</th>
       <th>League</th>
       <th>Rk</th>
+      <th>Last Played</th>
     </tr>
   </thead>
   <tbody>
@@ -19,7 +21,8 @@
    {% for player in players %}
 	   <tr>
 	     <th scope="row">{{forloop.counter}}</th>
-    	 <td><a href="../player/{{player.idplayer}}" >{{player.name_human}}</a></td>
+    	 <td><a href="../player/{{player.idplayer}}" >{{player.name}}</a></td>
+    	 <td>{{player.smurf__pseudo}}</td>
       	<td>{{player.rating}}</td>
       	<td>{{player.mainrace}}</td>
       	<td>{{player.wins}}</td>
@@ -27,6 +30,7 @@
           {% load static %}
       	<td><img src="{% static player.league__sigle %}icon.png "  alt="{{player.league__sigle}}" ></td>
       	<td>{{player.rank}}</td>
+      	<td>{{player.LP}}</td>
     </tr>
 
 

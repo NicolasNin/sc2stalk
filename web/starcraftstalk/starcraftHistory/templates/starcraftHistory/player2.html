@@ -49,7 +49,8 @@
 
  {% for g in games %}
 <div class="row  {{g.decision}} {{g.type}} games">
-    <div class="col-lg-2"> {{forloop.counter}}: {{g.date_human}} {{g.timesincelastgame}}</div>
+    <div class="col-lg-2"> <b>#{{forloop.counter}}</b> {{g.date_human}}
+      <br><small>Duration ~ {{g.timesincelastgame}}</small></br></div>
     <div class="col-lg-2">  {{g.map}}</div>
     <div class="col-lg-1">  {{g.current_mmr}}({{g.guessmmrchange}})</div>
               {% load static %}

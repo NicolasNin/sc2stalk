@@ -45,7 +45,7 @@ def getalldict(games,orderbydate=True):
 
 		g["map"]=g["map"].split("(")[0]
 
-		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%m-%d %H:%M')
+		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%d %b %H:%M')
 		g["path_human"]=g["path"].split("/")[-1]
 		if g["player__smurf__pseudo"]!=None:
 			g["path_human"]=g["player__smurf__pseudo"]+"("+g["path_human"] +")"
@@ -174,8 +174,10 @@ def update(request):
 def players(request):
 	player_in_db=Players.objects.all().order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
-	"league__sigle")
+	"league__sigle","last_played")
 	for p in player_in_db:
+		p["LP"]=datetime.timedelta(
+		seconds=int(time.time())-p["last_played"])
 		if p["smurf__pseudo"]!=None:
 			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
 		else:

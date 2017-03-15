@@ -382,3 +382,61 @@ def updateOldPath(up=False):
 						if pobj.alternate_path!=path:
 							print("new alternate",path,"old_alternate",pobj.alternate_path,
 								"current path",pobj.path)
+
+def compareDbandHistory2(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses,deltaties):
+	""" match_db is the games list without maps, we try to reconstruct the match
+		history (ranked unranked ) by comparing with actual data from MH
+	"""
+	list_newgamesid=[]
+	mh.sort(reverse=True) #most recent ones first
+	#the first match should be the last_played_one from p
+	"""
+	shiftMH=0
+	if len(mh)!=0  :
+		m=mh[0][1]
+		firstMH=mh[0][0]
+		if firstMH==p["last_played"] or firstMH==p["last_played"]-1:
+
+			returngame=addGamesinDB(p,m["map"],m["type"],m["decision"],
+						m["speed"],m["date"],deltaMMR,msg,lid,pdb.idplayer)
+			list_newgamesid.append(returngame)
+			shiftMH=1
+		else:
+			print("last played not in match history",p["path"],p["last_played"])
+			returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
+				"FASTER",p["last_played"],				deltaMMR,msg,lid,pdb.idplayer)
+			list_newgamesid.append(returngame)
+			shiftMH=0
+	else:
+		print("last played not in match history",p["path"],p["last_played"])
+		returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
+			"FASTER",p["last_played"],deltaMMR,msg,lid,pdb.idplayer)
+		list_newgamesid.append(returngame)
+		shiftMH=0
+	"""
+	lpfound=False
+	for (date,m) in mh:
+		islp=False
+		isindb=False
+		if date==p["last_played"] or date==p["last_played"]-1:
+			islp=True
+
+		if match_db.filter(date=date).exists():
+			mdb=match_db.filter(date=date)[0]
+			mdb.map=m["map"]
+			mdb.decision=m["decision"]
+			mdb.save()
+			print("update of map ",p["path"],date,mdb.idgames)
+		elif match_db.filter(date=date+1).exists():
+			mdb=match_db.filter(date=date+1)[0]
+			mdb.map=m["map"]
+			mdb.decision=m["decision"]
+			mdb.date=date
+			mdb.save()
+			print("we updated the date to the one in MH",p["path"],date,mdb.idgames)
+		else:
+			# we dont know who played that we might know after looking at LP and dc
+			returngame=addGamesinDB(p,m["map"],m["type"],m["decision"],m["speed"],m["date"],
+				deltaMMR,"Unknown",lid,pdb.idplayer,True)
+			list_newgamesid.append(returngame)
+	return list_newgamesid

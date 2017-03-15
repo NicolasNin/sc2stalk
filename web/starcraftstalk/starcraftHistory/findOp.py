@@ -191,23 +191,3 @@ def oppositeDecision(decision):
 		return "WIN"
 	if decision=="TIE" or "BAILER" or "NA" or "WATCHER":
 		return decision
-
-def findErrorWithOp(listegame):
-	for g in listegame:
-		g1=g
-		if g.guessopgameid!=None:
-			g2=g.guessopgameid
-			if g.map!="" and g2.map!="":
-				if g.map!=g2.map:
-					print("MAP",g1.date,g1,g2)
-
-			if g.decision!=oppositeDecision(g2.decision):
-					print("decision",g1.date,g1.decision,g2.decision)
-
-def findGamewithoutp():
-	""" for when you find holes"""
-	games=Games.objects.filter(guessopgameid__isnull=False,
-	guessopid__isnull=True,guessopgameid__player__isnull=False)
-	for g in games:
-		g.guessopid=g.guessopgameid.player
-		g.save()
