@@ -82,4 +82,25 @@ def findDuplicate(player):
     for (i,g1) in enumerate(games):
         for g2 in games[i+1:]:
             if g1.date==g2.date:
-                print(g1.idgames,g2.idgames,g1.date)
+                print(g1.idgames,g2.idgames,g1.date,
+                g1.map,g2.map,g1.decision,g2.decision,g1.path)
+                goodgame=None
+                if g1.map=="" and g2.map!="":
+                    goodgame=g2
+
+                if g2.map=="" and g1.map!="":
+                    goodgame=g1
+
+                if goodgame!=None:
+                    print(g1.decision,g2.decision,"True",goodgame.decision,
+                    goodgame.map)
+                else:
+                    print(g1.map,"|",g2.map)
+            if abs(g1.date-g2.date)==1:
+                print("different",
+                g1.idgames,g2.idgames,g1.date,g1.decision,g2.decision,
+                g1.map,g2.map,g1.path)
+
+def findAllduplicate():
+    for p in Players.objects.all():
+        findDuplicate(p)

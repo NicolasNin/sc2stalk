@@ -313,11 +313,11 @@ def getNewMatchHistory(path,alternate_path,lastMHupdate):
 	else:
 		return ("error",maxdate)
 def getDecision(deltawins,deltalosses,deltaties):
-	if deltawins==1:
+	if deltawins>=1 and deltalosses==0 and deltaties==0:
 		return "WIN"
-	elif deltalosses==1:
+	elif deltalosses>=1 and deltawins==0 and deltaties==0:
 		return "LOSS"
-	elif deltaties==1:
+	elif deltaties>=1 and deltawins==0 and deltalosses==0:
 		return "TIE"
 	else:
 		return "NA"

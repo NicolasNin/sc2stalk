@@ -1,4 +1,5 @@
 from .useapi import Useapi
+from .models import *
 ############NEW add new games
 
 def syncDbwithMH(p,save=False):
