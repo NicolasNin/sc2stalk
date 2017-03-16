@@ -114,7 +114,9 @@ class League(models.Model):
 class Progamer(models.Model):
     idprogamer = models.AutoField(db_column='idProgamer', primary_key=True)  # Field name made lowercase.
     pseudo = models.CharField(db_column='Pseudo', max_length=45, blank=True, null=True)  # Field name made lowercase.
-
+    nationality=models.CharField(db_column='nationality', max_length=45, blank=True, null=True)
+    mainrace=models.CharField(db_column='race', max_length=10, blank=True, null=True)
+    aligulac=models.CharField(db_column='aligulac', max_length=45, blank=True, null=True)
     class Meta:
         managed = True
         db_table = 'Progamer'
