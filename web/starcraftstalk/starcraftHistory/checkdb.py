@@ -1,4 +1,5 @@
 from .useapi import Useapi
+from .models import *
 def consistencyMHDB(player):
     useapi=Useapi()
     MH=useapi.getPlayerMatchHistory(player.path,player.alternate_path)
