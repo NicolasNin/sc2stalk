@@ -28,8 +28,10 @@
       	<td>{{player.wins}}</td>
       	<td>{{player.loses}}</td>
           {% load static %}
-      	<td><img src="{% static player.league__sigle %}icon.png "  alt="{{player.league__sigle}}" ></td>
-      	<td>{{player.rank}}</td>
+      	<td><a href="{%url 'index'%}league/{{player.league}}">
+          <img src="{% static player.league__sigle %}icon.png "  alt="{{player.league__sigle}}" ></td>
+        </a>
+        <td>{{player.rank}}</td>
       	<td>{{player.LP}}</td>
     </tr>
 

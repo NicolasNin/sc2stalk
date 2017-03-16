@@ -7,6 +7,7 @@ from background_task import background
 from django.http import HttpResponse
 from django.template import loader
 from django.db.models import F
+from django.db.models import Max
 #from .apiRequest import apiRequest
 from .models import League
 from .updateDB import *
@@ -186,6 +187,38 @@ def players(request):
 	context={"players":player_in_db}
 	return render(request, 'starcraftHistory/players.html', context)
 
+def pro(request):
+	pro=Progamer.objects.all()
+	prodict=[]
+	for pgm in pro:
+		d={}
+		accounts=pgm.players_set.all()
+		d["pseudo"]=pgm.pseudo
+		d["race"]=pgm.mainrace
+		d["nation"]=pgm.nationality
+		d["maxmmr"]=accounts.aggregate(Max("rating"))["rating__max"]
+		prodict.append(d)
+	prodict=sorted(prodict, key=lambda col: (col["nation"]!="kr",col["maxmmr"]),reverse=True)
+	context={"pro":prodict}
+	return renderrandomtitle(request, 'starcraftHistory/pro.html',context)
+
+
+
+def league(request,league):
+	player_in_db=Players.objects.filter(
+	league_id=league).order_by("-rating").values("rating",
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
+	"league__sigle","last_played")
+	for p in player_in_db:
+		p["LP"]=datetime.timedelta(
+		seconds=int(time.time())-p["last_played"])
+		if p["smurf__pseudo"]!=None:
+			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
+		else:
+			p["name_human"]=p["name"]
+
+	context={"players":player_in_db}
+	return renderrandomtitle(request, 'starcraftHistory/players.html',context)
 
 def about(request):
 	return render(request, 'starcraftHistory/about.html')

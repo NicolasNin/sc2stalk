@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^players/$', views.players, name='players'),
+    url(r'^pro/$', views.pro, name='pro'),
+    url(r'^league/(?P<league>[0-9]+)/$', views.league, name='league'),
     url(r'^highmmr/$', views.highmmr, name='highmmr'),
     url(r'^recent/$', views.recent, name='recent'),
     url(r'^last100/$', views.last100, name='last100'),
