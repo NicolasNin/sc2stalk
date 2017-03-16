@@ -7,7 +7,7 @@ from background_task import background
 from django.http import HttpResponse
 from django.template import loader
 from django.db.models import F
-from django.db.models import Max
+from django.db.models import Max,Min
 #from .apiRequest import apiRequest
 from .models import League
 from .updateDB import *
@@ -143,18 +143,21 @@ def playerbypath(request,path):
 	"rs":raceandstat,"lm":lastmatch}
 	return render(request, 'starcraftHistory/player2.html', context)
 
-def graph(request):
-	path="/profile/4233584/1/lIIllllIIlll"
-	games=Games.objects.filter(path=path)
-	(games_dict,stat,lastmatch)=getalldict(games)
-	raceplayers=Players.objects.filter(path=path)
-	racep=[]
-	for p in raceplayers:
-		racep.append(p)
-	context={"games":games_dict,"name":racep[0].name,
-	"displayname":displayNameAccount(path),"racep":racep,
-	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2))}
-	return render(request, 'starcraftHistory/graphtest.html', context)
+def graph(request,playerid):
+	player=Players.objects.get(pk=playerid)
+	games=Games.objects.filter(player=player,
+	current_mmr__isnull=False).order_by("-date").values(
+	"date","current_mmr","guessopid__mainrace","decision",
+	"guessmmrchange","guessopid__name","guessopgameid__current_mmr"	)
+	maxmmr=games.aggregate(Max("current_mmr"))["current_mmr__max"]
+	minmmr=games.aggregate(Min("current_mmr"))["current_mmr__min"]
+	for g in games:
+		if g["decision"]=="WIN":
+			g["color"]="#66b3ff"
+		else:
+			g["color"]="#ff6666"
+	context={"games":games,"min":minmmr,"max":maxmmr,"name":player.name}
+	return render(request, 'starcraftHistory/graphtest2.html', context)
 
 def player2(request,legacy,realm,name):
 	#gamesdb=Players.objects.get(pk=sc2id)

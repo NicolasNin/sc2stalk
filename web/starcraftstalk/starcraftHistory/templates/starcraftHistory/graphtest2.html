@@ -1,0 +1,125 @@
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="container2" style="min-width: 100px; height: 600px; margin: 0 auto"></div>
+<script>
+Highcharts.chart('container', {
+    chart: {
+       zoomType: 'x',
+        type: 'scatter'
+    },
+    title: {
+        text: 'MMR evolution of {{name}} '
+    },
+    //subtitle: {
+    //    text: 'Irregular time data in Highcharts JS'
+    //},
+    xAxis: {
+        type: 'datetime',
+        dateTimeLabelFormats: { // don't display the dummy year
+            hour: '%H:%M',
+            day: '%e'
+        },
+        title: {
+            text: 'Date'
+        }
+    },
+    yAxis: {
+        title: {
+            text: 'MMR'
+        },
+        min: {{min}}
+    },
+    tooltip: {
+        headerFormat: '<b>{series.name}</b><br>',
+        pointFormat: '{point.name}<br>{point.x:%e. %b}: {point.y}  '
+    },
+
+    plotOptions: {
+        spline: {
+            marker: {
+                enabled: true
+            }
+        }
+    },
+
+    series: [{
+        name: '{{name}}',
+        // Define the data points. All series have a dummy year
+        // of 1970/71 in order to be compared on the same x axis. Note
+        // that in JavaScript, months start at 0 for January, 1 for February etc.
+        data: [
+          {%for g in games%}
+        //  [{% widthratio g.date 1 1000 %},{{g.current_mmr}}],
+        {
+    name: '{{g.guessopid__name}}({{g.guessopid__mainrace}})',
+    color: '{{g.color}}',
+    x:{% widthratio g.date 1 1000 %},
+    y: {{g.current_mmr}}
+},
+          {%endfor%}
+
+        ]
+    }]
+});
+</script>
+
+<script>
+Highcharts.chart('container2', {
+    chart: {
+        type: 'scatter'
+    },
+    title: {
+        text: 'MMR evolution of {{name}} '
+    },
+    //subtitle: {
+    //    text: 'Irregular time data in Highcharts JS'
+    //},
+    xAxis: {
+      categories: ['T', 'P', 'Z',"U"],
+        title: {
+            text: 'Experiment No.'
+        }
+    },
+    yAxis: {
+        title: {
+            text: 'MMR'
+        },
+        min: {{min}}
+    },
+    tooltip: {
+        headerFormat: '<b>{series.name}</b><br>',
+        pointFormat: '{point.name}<br>{point.x:%e. %b}: {point.y}  '
+    },
+
+    plotOptions: {
+        spline: {
+            marker: {
+                enabled: true
+            }
+        }
+    },
+
+    series: [{
+        name: '{{name}}',
+        // Define the data points. All series have a dummy year
+        // of 1970/71 in order to be compared on the same x axis. Note
+        // that in JavaScript, months start at 0 for January, 1 for February etc.
+        data: [
+          {%for g in games%}
+        //  [{% widthratio g.date 1 1000 %},{{g.current_mmr}}],
+        {
+    name: '{{g.guessopid__name}}({{g.guessopid__mainrace}})',
+    color: '{{g.color}}',
+    x:{%if g.guessopid__mainrace == "P"%} 1
+    {%elif g.guessopid__mainrace == "T"%} 0
+    {%elif g.guessopid__mainrace == "Z"%} 2 {%else%} 3{%endif%},
+    y: {%if g.guessopgameid__current_mmr != None%}{{ g.guessopgameid__current_mmr}} {%else%} 6500 {%endif%}
+},
+          {%endfor%}
+
+        ]
+    }]
+});
+</script>
