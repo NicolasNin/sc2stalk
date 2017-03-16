@@ -1,0 +1,36 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th> #</th>
+      <th>Name</th>
+      <th>Country</th>
+      <th>Race</th>
+      <th>Highest MMR</th>
+
+    </tr>
+  </thead>
+  <tbody>
+
+   {% for p in pro %}
+	   <tr>
+	     <th scope="row">{{forloop.counter}}</th>
+	     <th scope="row">{{p.pseudo}}</th>
+	     <th scope="row">{{p.nation}}</th>
+	     <th scope="row">{{p.race}}</th>
+	     <th scope="row">{{p.maxmmr}}</th>
+
+    </tr>
+
+
+
+
+   {% endfor %}
+
+
+  </tbody>
+</table>
+
+{% endblock content %}
