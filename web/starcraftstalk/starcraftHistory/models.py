@@ -117,6 +117,8 @@ class Progamer(models.Model):
     nationality=models.CharField(db_column='nationality', max_length=45, blank=True, null=True)
     mainrace=models.CharField(db_column='race', max_length=10, blank=True, null=True)
     aligulac=models.CharField(db_column='aligulac', max_length=45, blank=True, null=True)
+    truename= models.NullBooleanField(null=True)
+    wcsregion=models.CharField(db_column='wcsregion', max_length=45, blank=True, null=True)
     class Meta:
         managed = True
         db_table = 'Progamer'
