@@ -205,6 +205,8 @@ def pro(request):
 	context={"pro":prodict}
 	return renderrandomtitle(request, 'starcraftHistory/pro.html',context)
 
+def wcs(request):
+	pass
 
 
 def league(request,league):

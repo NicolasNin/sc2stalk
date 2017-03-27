@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^players/$', views.players, name='players'),
     url(r'^pro/$', views.pro, name='pro'),
+    url(r'^wcs/$', views.wcs, name='wcs'),
     url(r'^league/(?P<league>[0-9]+)/$', views.league, name='league'),
     url(r'^highmmr/$', views.highmmr, name='highmmr'),
     url(r'^recent/$', views.recent, name='recent'),

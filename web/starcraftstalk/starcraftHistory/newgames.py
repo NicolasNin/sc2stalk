@@ -82,6 +82,7 @@ def	checkGamesindbwithMH(m,gdb):
 #syncDbwithMH(Players.objects.get(pk=1198),True)
 #syncDbwithMH(Players.objects.get(pk=1213),True)
 #syncDbwithMH(Players.objects.get(pk=1288),True)
+#syncDbwithMH(Players.objects.get(pk=1452),True)
 
 #Games.objects.filter(path="/profile/2851847/1/Guru").
 #update(player=Players.objects.get(pk=1025))
