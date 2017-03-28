@@ -8,6 +8,7 @@
       <th>Account</th>
       <th>Smurf</th>
       <th>MMR</th>
+      <th>Delta</th>
       <th>Race</th>
       <th>Wins</th>
       <th>Losses</th>
@@ -20,11 +21,12 @@
 
    {% for player in players %}
 
-	   <tr class="disp{{player.truename}}">
+	   <tr class="disp{{player.truename}} {{player.qualif}}">
 	     <th scope="row">{{player.num}}</th>
     	 <td><a href="../player/{{player.idplayer}}" >{{player.name}}</a></td>
     	 <td>{{player.smurf__pseudo}}</td>
       	<td>{{player.rating}}</td>
+      	<td>{{player.rating|add:basemmr}}</td>
       	<td>{{player.mainrace}}</td>
       	<td>{{player.wins}}</td>
       	<td>{{player.loses}}</td>

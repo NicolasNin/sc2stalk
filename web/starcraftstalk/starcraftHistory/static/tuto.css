@@ -27,3 +27,10 @@ body {
 .dispFalse{
   display: none;
 }
+
+.qualif{
+  background-color:hsla(119, 100%, 47%, 0.15)
+}
+.notqualif{
+  background-color:rgba(239, 0, 3, 0.15)
+}

@@ -209,17 +209,20 @@ def wcs(request):
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	leagueid=14 #inhard cause im lazy
+	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	playerwcs=Players.objects.filter(
 	league_id=leagueid,smurf__wcsregion="eu").order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played")
 	num=1
+	basemmr=0
 	for p in playerwcs:
 
-		####HACK we should add a flag tp player in db
+		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
 		if name2[0:6]=="liquid":
 			name2=name2[6:]
+
 		print(name2)
 		p["truename"]= name2==p["smurf__pseudo"].lower()
 		if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
@@ -227,6 +230,12 @@ def wcs(request):
 		######################
 		if p["truename"]:
 			p["num"]=num
+			if num<=lastQualif:
+				p["qualif"]="qualif"
+			else:
+				p["qualif"]="notqualif"
+			if num==lastQualif:
+				basemmr=p["rating"]
 			num+=1
 		p["LP"]=datetime.timedelta(
 		seconds=int(time.time())-p["last_played"])
@@ -235,7 +244,7 @@ def wcs(request):
 		else:
 			p["name_human"]=p["name"]
 
-	context={"players":playerwcs}
+	context={"players":playerwcs,"basemmr":-basemmr}
 	return renderrandomtitle(request, 'starcraftHistory/wcs.html',context)
 
 
