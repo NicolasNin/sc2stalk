@@ -215,10 +215,19 @@ def wcs(request):
 	"league__sigle","last_played")
 	num=1
 	for p in playerwcs:
-		p["truename"]= p["name"].split("#")[0].lower()==p["smurf__pseudo"].lower()
+
+		####HACK we should add a flag tp player in db
+		name2=p["name"].lower().split("#")[0]
+		if name2[0:6]=="liquid":
+			name2=name2[6:]
+		print(name2)
+		p["truename"]= name2==p["smurf__pseudo"].lower()
+		if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
+			p["truename"]=True
+		######################
 		if p["truename"]:
 			p["num"]=num
-			num+=1	
+			num+=1
 		p["LP"]=datetime.timedelta(
 		seconds=int(time.time())-p["last_played"])
 		if p["smurf__pseudo"]!=None:
