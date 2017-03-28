@@ -21,7 +21,7 @@
    {% for player in players %}
 
 	   <tr class="disp{{player.truename}}">
-	     <th scope="row">{{forloop.counter}}</th>
+	     <th scope="row">{{player.num}}</th>
     	 <td><a href="../player/{{player.idplayer}}" >{{player.name}}</a></td>
     	 <td>{{player.smurf__pseudo}}</td>
       	<td>{{player.rating}}</td>

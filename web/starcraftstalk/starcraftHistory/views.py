@@ -213,8 +213,12 @@ def wcs(request):
 	league_id=leagueid,smurf__wcsregion="eu").order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played")
+	num=1
 	for p in playerwcs:
 		p["truename"]= p["name"].split("#")[0].lower()==p["smurf__pseudo"].lower()
+		if p["truename"]:
+			p["num"]=num
+			num+=1	
 		p["LP"]=datetime.timedelta(
 		seconds=int(time.time())-p["last_played"])
 		if p["smurf__pseudo"]!=None:
