@@ -4,26 +4,37 @@
 <table class="table">
   <thead>
     <tr>
-      <th> #</th>
-      <th>Name</th>
-      <th>Country</th>
+      <th>#</th>
+      <th>Account</th>
+      <th>Smurf</th>
+      <th>MMR</th>
       <th>Race</th>
-      <th>Highest MMR</th>
-
+      <th>Wins</th>
+      <th>Losses</th>
+      <th>League</th>
+      <th>Rk</th>
+      <th>Last Played</th>
     </tr>
   </thead>
   <tbody>
 
-   {% for p in pro %}
-	   <tr>
+   {% for player in players %}
+
+	   <tr class="disp{{player.truename}}">
 	     <th scope="row">{{forloop.counter}}</th>
-	     <th scope="row">{{p.pseudo}}</th>
-	     <th scope="row">{{p.nation}}</th>
-	     <th scope="row">{{p.race}}</th>
-	     <th scope="row">{{p.maxmmr}}</th>
-
+    	 <td><a href="../player/{{player.idplayer}}" >{{player.name}}</a></td>
+    	 <td>{{player.smurf__pseudo}}</td>
+      	<td>{{player.rating}}</td>
+      	<td>{{player.mainrace}}</td>
+      	<td>{{player.wins}}</td>
+      	<td>{{player.loses}}</td>
+          {% load static %}
+      	<td><a href="{%url 'index'%}league/{{player.league}}">
+          <img src="{% static player.league__sigle %}icon.png "  alt="{{player.league__sigle}}" ></td>
+        </a>
+        <td>{{player.rank}}</td>
+      	<td>{{player.LP}}</td>
     </tr>
-
 
 
 

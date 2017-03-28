@@ -206,7 +206,24 @@ def pro(request):
 	return renderrandomtitle(request, 'starcraftHistory/pro.html',context)
 
 def wcs(request):
-	pass
+	""" we get the top GM player who are from the good wcs region
+	with a good name (ie their true name)"""
+	leagueid=14 #inhard cause im lazy
+	playerwcs=Players.objects.filter(
+	league_id=leagueid,smurf__wcsregion="eu").order_by("-rating").values("rating",
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
+	"league__sigle","last_played")
+	for p in playerwcs:
+		p["truename"]= p["name"].split("#")[0].lower()==p["smurf__pseudo"].lower()
+		p["LP"]=datetime.timedelta(
+		seconds=int(time.time())-p["last_played"])
+		if p["smurf__pseudo"]!=None:
+			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
+		else:
+			p["name_human"]=p["name"]
+
+	context={"players":playerwcs}
+	return renderrandomtitle(request, 'starcraftHistory/wcs.html',context)
 
 
 def league(request,league):
