@@ -213,22 +213,23 @@ def wcs(request):
 	playerwcs=Players.objects.filter(
 	league_id=leagueid,smurf__wcsregion="eu").order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
-	"league__sigle","last_played")
+	"league__sigle","last_played","idplayer")
 	num=1
 	basemmr=0
+	listegoodplayerid=[]
 	for p in playerwcs:
-
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
 		if name2[0:6]=="liquid":
 			name2=name2[6:]
 
-		print(name2)
 		p["truename"]= name2==p["smurf__pseudo"].lower()
 		if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
 			p["truename"]=True
+
 		######################
 		if p["truename"]:
+			listegoodplayerid.append(p["idplayer"])
 			p["num"]=num
 			if num<=lastQualif:
 				p["qualif"]="qualif"
@@ -243,9 +244,21 @@ def wcs(request):
 			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
 		else:
 			p["name_human"]=p["name"]
-
-	context={"players":playerwcs,"basemmr":-basemmr}
-	return renderrandomtitle(request, 'starcraftHistory/wcs.html',context)
+	#recent games of thoses players last 12h
+	DELTATIME=3600*330
+	recentwcsgames=Games.objects.filter(
+	date__gte=int(time.time())-DELTATIME,
+	player__in=listegoodplayerid).select_related(
+	"player").order_by(
+	"-date").values(
+	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
+	"player__name","current_mmr","guessmmrchange","guessopid__name"
+	)
+	for g in recentwcsgames:
+			g["date_human"]=datetime.datetime.fromtimestamp(
+			g["date"]).strftime('%d %b %H:%M')
+	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames}
+	return renderrandomtitle(request, 'starcraftHistory/wcs2.html',context)
 
 
 def league(request,league):
