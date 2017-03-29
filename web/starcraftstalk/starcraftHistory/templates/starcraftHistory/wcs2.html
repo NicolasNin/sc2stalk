@@ -1,0 +1,82 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-4">
+    <h3> Current WCS EU ranking </h3>
+    <table class="table-sm">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>MMR</th>
+      <th>Delta</th>
+      <th>Last Played</th>
+    </tr>
+  </thead>
+
+  <tbody>
+
+   {% for player in players %}
+
+	   <tr class="disp{{player.truename}} {{player.qualif}}">
+	     <th scope="row">{{player.num}}</th>
+    	 <td><a href="../player/{{player.idplayer}}" >
+             {% load static %}
+         <img src="{% static player.mainrace %}icon_small.png "  alt="" >
+         {{player.name}}</a></td>
+      	<td>{{player.rating}}</td>
+      	<td>{{player.rating|add:basemmr}}</td>
+      	<td>{{player.LP}}</td>
+    </tr>
+
+
+
+   {% endfor %}
+
+
+  </tbody>
+</table>
+  </div>
+
+  <div class="col-lg-8">
+    <h3> Recent games</h3>
+
+     <table class="table">
+       <thead>
+         <tr>
+           <th> Date</th>
+           <th>Player 1</th>
+           <th>MMR</th>
+           <th>MMR change</th>
+           <th>Player 2</th>
+           <th>MMR</th>
+           <th>MMR change</th>
+         </tr>
+       </thead>
+
+         <tbody>
+
+          {% for g in games %}
+
+       	   <tr >
+             <td>{{g.date_human}}</td>
+           	 <td>{{g.player__name}}</td>
+             	<td>{{g.current_mmr}}</td>
+             	<td>{{g.guessmmrchange}}</td>
+              <td>{{g.guessopid__name}}</td>
+             	<td> {{g.guessopgameid__current_mmr}}</td>
+             	<td> {{g.guessopgameid__guessmmrchange}}</td>
+
+           </tr>
+
+
+
+          {% endfor %}
+
+
+         </tbody>
+     </table>
+
+  </div>
+</div>
+{% endblock content %}
