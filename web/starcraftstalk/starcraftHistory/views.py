@@ -245,7 +245,7 @@ def wcs(request):
 		else:
 			p["name_human"]=p["name"]
 	#recent games of thoses players last 12h
-	DELTATIME=3600*330
+	DELTATIME=3600*12
 	recentwcsgames=Games.objects.filter(
 	date__gte=int(time.time())-DELTATIME,
 	player__in=listegoodplayerid).select_related(
