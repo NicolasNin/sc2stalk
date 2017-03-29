@@ -257,7 +257,10 @@ def wcs(request):
 	for g in recentwcsgames:
 			g["date_human"]=datetime.datetime.fromtimestamp(
 			g["date"]).strftime('%d %b %H:%M')
-	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames}
+	timetowait=str(datetime.datetime(2017,4,2,23,59)-
+	datetime.datetime.fromtimestamp(int(time.time())))
+	print(timetowait)
+	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,"wait":timetowait}
 	return renderrandomtitle(request, 'starcraftHistory/wcs2.html',context)
 
 
