@@ -190,13 +190,15 @@ def graphmmr(request):
 	player__in=listegoodplayerid).order_by("path","date").values(
 	"player__name","current_mmr","date"	)
 	g2=[]
-	#for playerid in listegoodplayerid:
-	#	player=Players.objects.get(pk=playerid)
-		#g2.append({"date":datestart,"player__name":player.name,
-		#"current_mmr":getMMRatDate(player,datestart)})
-#		g2.extend(Games.objects.filter(player=player,date__gte=datestart))
-
-	context={"games":games,"min":6300,"max":7000,"name":"test"}
+	for playerid in listegoodplayerid:
+		player=Players.objects.get(pk=playerid)
+		g2.append({"date":datestart,"player__name":player.name,
+		"current_mmr":getMMRatDate(player,datestart)})
+		g2.extend(Games.objects.filter(player=player,date__gte=datestart).values(
+			"player__name","current_mmr","date"		))
+		g2.append({"date":int(time.time()),"player__name":player.name,
+		"current_mmr":player.rating})
+	context={"games":g2,"min":6300,"max":7000,"name":"test"}
 	print(time.time()-deb)
 	return renderrandomtitle(request, 'starcraftHistory/graphtest3.html',context)
 
