@@ -173,6 +173,9 @@ def graphmmr(request):
 	"league__sigle","last_played","idplayer")
 
 	listegoodplayerid=[]
+	listemmr=[]
+	mmr8=0
+	num=1
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
@@ -184,7 +187,12 @@ def graphmmr(request):
 		######################
 		if p["truename"]:
 			listegoodplayerid.append(p["idplayer"])
-	datestart=int(time.time())-3600*12
+			listemmr.append(p["rating"])
+			if num==8:
+				mmr8=p["rating"]
+			num+=1
+	datestart=int(time.time())-3600*24
+
 #	games=Games.objects.filter(
 	#date__gte=datestart,
 	#player__in=listegoodplayerid).order_by("path","date").values(
@@ -195,10 +203,12 @@ def graphmmr(request):
 		g2.append({"date":datestart,"player__name":player.name,
 		"current_mmr":getMMRatDate(player,datestart)})
 		g2.extend(Games.objects.filter(player=player,date__gte=datestart).values(
-			"player__name","current_mmr","date"		))
+			"player__name","current_mmr","date","guessopid__name",
+			"guessopid__mainrace","guessmmrchange"))
 		g2.append({"date":int(time.time()),"player__name":player.name,
 		"current_mmr":player.rating})
-	context={"games":g2,"min":6300,"max":7000,"name":"test"}
+	context={"games":g2,"min":6300,"max":7000,"name":"test","mmr8":mmr8,
+	"listemmr":listemmr,"mmrtop":mmr8+100,"mmrbottom":mmr8-100}
 	print(time.time()-deb)
 	return renderrandomtitle(request, 'starcraftHistory/graphtest3.html',context)
 

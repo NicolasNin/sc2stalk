@@ -1,10 +1,11 @@
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 
+
 <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
 
 <script>
-Highcharts.chart('container', {
+var chart=Highcharts.chart('container', {
     chart: {
        zoomType: 'x',
         type: 'spline'
@@ -53,6 +54,7 @@ Highcharts.chart('container', {
         data:[
           {% for g in name.list %}
             {
+            name: '{{g.guessmmrchange}}pts vs {{g.guessopid__name}}({{g.guessopid__mainrace}})',
             x:{% widthratio g.date 1 1000 %},
             y: {{g.current_mmr}}
           },
@@ -80,4 +82,9 @@ Highcharts.chart('container', {
         ]
     }]*/
 });
+{% for i in listemmr%}
+{%if i >= mmrtop or i <= mmrbottom%}
+chart.series[{{forloop.counter0}}].hide();
+{% endif%}
+{% endfor %}
 </script>
