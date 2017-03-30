@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'^about/$', views.about, name='about'),
     url(r'^contact/$', views.contact, name='contact'),
     url(r'^graph/(?P<playerid>[0-9]+)/$', views.graph, name='graph'),
+    url(r'^comparemmr/$', views.graphmmr, name='graphmmr'),
 ]

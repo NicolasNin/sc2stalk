@@ -126,9 +126,12 @@ def last100(request):
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
 def playerbypath(request,path):
+
 	games=Games.objects.filter(path=path)
 	(games_dict,stat,lastmatch)=getalldict(games)
-	raceplayers=Players.objects.filter(path=path).select_related("league")
+	realm=int(path.split("/")[3])
+	legacyid=int(path.split("/")[2])
+	raceplayers=Players.objects.filter(realm=realm,legacy_id=legacyid).select_related("league")
 	racep=[]
 	statrace=[]
 	raceandstat=[]
@@ -137,6 +140,8 @@ def playerbypath(request,path):
 		statrace.append(stat[p.mainrace])
 		raceandstat.append((p,stat[p.mainrace]))
 	print(raceandstat)
+	##hack after name change raceplayer is empty cause path is :=
+
 	context={"games":games_dict,"name":racep[0].name,
 	"displayname":displayNameAccount(path),"racep":racep,
 	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2)),"stat":statrace,
@@ -159,6 +164,53 @@ def graph(request,playerid):
 	context={"games":games,"min":minmmr,"max":maxmmr,"name":player.name}
 	return render(request, 'starcraftHistory/graphtest2.html', context)
 
+def graphmmr(request):
+	deb=time.time()
+	leagueid=14 #inhard cause im lazy
+	playerwcs=Players.objects.filter(
+	league_id=leagueid,smurf__wcsregion="eu").order_by("-rating").values("rating",
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
+	"league__sigle","last_played","idplayer")
+
+	listegoodplayerid=[]
+	for p in playerwcs:
+		####HACK we should add a flag wcs to player in db
+		name2=p["name"].lower().split("#")[0]
+		if name2[0:6]=="liquid":
+			name2=name2[6:]
+		p["truename"]= name2==p["smurf__pseudo"].lower()
+		if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
+			p["truename"]=True
+		######################
+		if p["truename"]:
+			listegoodplayerid.append(p["idplayer"])
+	datestart=int(time.time())-3600*12
+	games=Games.objects.filter(
+	date__gte=datestart,
+	player__in=listegoodplayerid).order_by("path").values(
+	"player__name","current_mmr","date"	)
+	g2=[]
+	#for playerid in listegoodplayerid:
+	#	player=Players.objects.get(pk=playerid)
+		#g2.append({"date":datestart,"player__name":player.name,
+		#"current_mmr":getMMRatDate(player,datestart)})
+#		g2.extend(Games.objects.filter(player=player,date__gte=datestart))
+
+	context={"games":games,"min":6300,"max":7000,"name":"test"}
+	print(time.time()-deb)
+	return renderrandomtitle(request, 'starcraftHistory/graphtest3.html',context)
+
+def getMMRatDate(player,date):
+	g=Games.objects.filter(date__lte=date,player=player,
+	current_mmr__isnull=False).order_by("-date").first()
+	if g!=None:
+		return g.current_mmr
+	else:
+		g=Games.objects.filter(date__gte=date,player=player,
+		current_mmr__isnull=False).order_by("date").first()
+		if g!=None:
+			return g.current_mmr
+	return player.rating
 def player2(request,legacy,realm,name):
 	#gamesdb=Players.objects.get(pk=sc2id)
 	path="/profile/"+legacy+"/"+realm+"/"+name

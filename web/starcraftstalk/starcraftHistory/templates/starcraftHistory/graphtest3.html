@@ -1,0 +1,83 @@
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+
+<script>
+Highcharts.chart('container', {
+    chart: {
+       zoomType: 'x',
+        type: 'spline'
+    },
+    title: {
+        text: 'MMR evolution of {{name}} '
+    },
+    //subtitle: {
+    //    text: 'Irregular time data in Highcharts JS'
+    //},
+    xAxis: {
+        type: 'datetime',
+        dateTimeLabelFormats: { // don't display the dummy year
+            hour: '%H:%M',
+            day: '%e'
+        },
+        title: {
+            text: 'Date'
+        }
+    },
+    yAxis: {
+        title: {
+            text: 'MMR'
+        },
+        min: {{min}}
+    },
+    tooltip: {
+        headerFormat: '<b>{series.name}</b><br>',
+        pointFormat: '{point.name}<br>{point.x:%e. %b}: {point.y}  '
+    },
+
+    plotOptions: {
+        spline: {
+            marker: {
+                enabled: true
+            }
+        }
+    },
+
+    series:[
+    {% regroup games by player__name as name_list %}
+      {% for name in name_list %}
+
+      {
+        name:"{{name.grouper}}",
+        data:[
+          {% for g in name.list %}
+            {
+            x:{% widthratio g.date 1 1000 %},
+            y: {{g.current_mmr}}
+          },
+            {% endfor %}
+        ]
+      },
+      {% endfor %}
+    ]
+/*    series: [{
+        name: '{{name}}',
+        // Define the data points. All series have a dummy year
+        // of 1970/71 in order to be compared on the same x axis. Note
+        // that in JavaScript, months start at 0 for January, 1 for February etc.
+        data: [
+          {%for g in games%}
+        //  [{% widthratio g.date 1 1000 %},{{g.current_mmr}}],
+        {
+    name: '{{g.guessopid__name}}({{g.guessopid__mainrace}})',
+    color: '{{g.color}}',
+    x:{% widthratio g.date 1 1000 %},
+    y: {{g.current_mmr}}
+},
+          {%endfor%}
+
+        ]
+    }]*/
+});
+</script>

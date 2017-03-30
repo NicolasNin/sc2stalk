@@ -32,6 +32,10 @@ def displayNameGameOpponent(game):
 
 def displayNameAccount(path):
     players=Players.objects.filter(path=path)
+    if len(players)==0:
+        realm=int(path.split("/")[3])
+        legacyid=int(path.split("/")[2])
+        players=Players.objects.filter(realm=realm,legacy_id=legacyid)
     smurfplayer=players.filter(smurf__isnull=False)
     if len(smurfplayer)!=0 :
         smurf=smurfplayer.values("smurf__pseudo")[0]["smurf__pseudo"]
