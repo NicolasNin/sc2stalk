@@ -187,7 +187,7 @@ def graphmmr(request):
 	datestart=int(time.time())-3600*12
 	games=Games.objects.filter(
 	date__gte=datestart,
-	player__in=listegoodplayerid).order_by("path").values(
+	player__in=listegoodplayerid).order_by("path","date").values(
 	"player__name","current_mmr","date"	)
 	g2=[]
 	#for playerid in listegoodplayerid:
