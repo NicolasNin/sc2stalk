@@ -1,8 +1,20 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 
 
 <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+<script>
+function hideTooFar() {
+
+{% for i in listemmr%}
+{%if i >= mmrtop or i <= mmrbottom%}
+chart.series[{{forloop.counter0}}].hide();
+{% endif%}
+{% endfor %}
+}
+</script>
 
 <script>
 var chart=Highcharts.chart('container', {
@@ -63,28 +75,7 @@ var chart=Highcharts.chart('container', {
       },
       {% endfor %}
     ]
-/*    series: [{
-        name: '{{name}}',
-        // Define the data points. All series have a dummy year
-        // of 1970/71 in order to be compared on the same x axis. Note
-        // that in JavaScript, months start at 0 for January, 1 for February etc.
-        data: [
-          {%for g in games%}
-        //  [{% widthratio g.date 1 1000 %},{{g.current_mmr}}],
-        {
-    name: '{{g.guessopid__name}}({{g.guessopid__mainrace}})',
-    color: '{{g.color}}',
-    x:{% widthratio g.date 1 1000 %},
-    y: {{g.current_mmr}}
-},
-          {%endfor%}
-
-        ]
-    }]*/
-});
-{% for i in listemmr%}
-{%if i >= mmrtop or i <= mmrbottom%}
-chart.series[{{forloop.counter0}}].hide();
-{% endif%}
-{% endfor %}
+})
+//hideTooFar()
 </script>
+{% endblock content %}

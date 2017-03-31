@@ -168,7 +168,8 @@ def graphmmr(request):
 	deb=time.time()
 	leagueid=14 #inhard cause im lazy
 	playerwcs=Players.objects.filter(
-	league_id=leagueid,smurf__wcsregion="eu").order_by("-rating").values("rating",
+	league_id=leagueid,smurf__wcsregion="eu",
+	rating__gte=6300).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 
@@ -191,7 +192,7 @@ def graphmmr(request):
 			if num==8:
 				mmr8=p["rating"]
 			num+=1
-	datestart=int(time.time())-3600*24
+	datestart=int(time.time())-3600*12
 
 #	games=Games.objects.filter(
 	#date__gte=datestart,
@@ -208,7 +209,7 @@ def graphmmr(request):
 		g2.append({"date":int(time.time()),"player__name":player.name,
 		"current_mmr":player.rating})
 	context={"games":g2,"min":6300,"max":7000,"name":"test","mmr8":mmr8,
-	"listemmr":listemmr,"mmrtop":mmr8+100,"mmrbottom":mmr8-100}
+	"listemmr":listemmr,"mmrtop":mmr8+100,"mmrbottom":mmr8-200}
 	print(time.time()-deb)
 	return renderrandomtitle(request, 'starcraftHistory/graphtest3.html',context)
 
@@ -275,7 +276,8 @@ def wcs(request):
 	leagueid=14 #inhard cause im lazy
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	playerwcs=Players.objects.filter(
-	league_id=leagueid,smurf__wcsregion="eu").order_by("-rating").values("rating",
+	league_id=leagueid,smurf__wcsregion="eu",
+		rating__gte=6300).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 	num=1
