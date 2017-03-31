@@ -11,7 +11,9 @@
       <th>Name</th>
       <th>MMR</th>
       <th>Delta</th>
-      <th>Last Played</th>
+      <th><tiny>last played</tiny></th>
+      <th>
+      #games</th>
     </tr>
   </thead>
 
@@ -28,6 +30,7 @@
       	<td>{{player.rating}}</td>
       	<td>{{player.rating|add:basemmr}}</td>
       	<td>{{player.LP}}</td>
+      	<td>{{player.numgames}}</td>
     </tr>
 
 
@@ -37,7 +40,7 @@
 
   </tbody>
 </table>
-Some notes ont this ranking, we have removed
+Some notes on this ranking, we have removed
   <ul>
   <li> Non europeans </li>
   <li> Players not using their names (ie barcodes)</li>

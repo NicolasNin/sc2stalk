@@ -283,6 +283,11 @@ def wcs(request):
 	num=1
 	basemmr=0
 	listegoodplayerid=[]
+	startjeudi=datetime.datetime(2017,3,30,19,0)
+	startvendredi=datetime.datetime(2017,3,31,19,0)
+	gamesbetween=Games.objects.filter(
+		date__gte=startjeudi.timestamp(),
+		date__lte=startvendredi.timestamp(),current_league=14)
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
@@ -295,6 +300,7 @@ def wcs(request):
 
 		######################
 		if p["truename"]:
+			p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
 			listegoodplayerid.append(p["idplayer"])
 			p["num"]=num
 			if num<=lastQualif:
@@ -304,16 +310,18 @@ def wcs(request):
 			if num==lastQualif:
 				basemmr=p["rating"]
 			num+=1
-		p["LP"]=datetime.timedelta(
-		seconds=int(time.time())-p["last_played"])
+		p["LP"]=str(datetime.timedelta(
+		seconds=int(time.time())-p["last_played"]))[0:7]
 		if p["smurf__pseudo"]!=None:
 			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
 		else:
 			p["name_human"]=p["name"]
 	#recent games of thoses players last 12h
 	DELTATIME=3600*12
+	#count the game between promotion
+
 	recentwcsgames=Games.objects.filter(
-	date__gte=int(time.time())-DELTATIME,
+	date__gte=int(startjeudi.timestamp()),
 	player__in=listegoodplayerid).select_related(
 	"player").order_by(
 	"-date").values(
@@ -323,6 +331,8 @@ def wcs(request):
 	for g in recentwcsgames:
 			g["date_human"]=datetime.datetime.fromtimestamp(
 			g["date"]).strftime('%d %b %H:%M')
+	startjeudi=datetime.datetime(2017,3,30,19,0)
+	stardvendredi=datetime.datetime(2017,3,31,19,0)
 	timetowait=str(datetime.datetime(2017,4,2,21,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
 	print(timetowait)
