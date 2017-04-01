@@ -286,9 +286,10 @@ def wcs(request):
 	startjeudi=datetime.datetime(2017,3,30,19,0)
 	startvendredi=datetime.datetime(2017,3,31,19,0)
 	startsamedi=datetime.datetime(2017,4,1,19,0)
+	startdimanche=datetime.datetime(2017,4,2,19,0)
 	gamesbetween=Games.objects.filter(
-		date__gte=startvendredi.timestamp(),
-		date__lte=startsamedi.timestamp(),current_league=14)
+		date__gte=startsamedi.timestamp(),
+		date__lte=startdimanche.timestamp(),current_league=14)
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
