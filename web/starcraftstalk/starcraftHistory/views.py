@@ -285,9 +285,10 @@ def wcs(request):
 	listegoodplayerid=[]
 	startjeudi=datetime.datetime(2017,3,30,19,0)
 	startvendredi=datetime.datetime(2017,3,31,19,0)
+	startsamedi=datetime.datetime(2017,4,1,19,0)
 	gamesbetween=Games.objects.filter(
-		date__gte=startjeudi.timestamp(),
-		date__lte=startvendredi.timestamp(),current_league=14)
+		date__gte=startvendredi.timestamp(),
+		date__lte=startsamedi.timestamp(),current_league=14)
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
@@ -332,7 +333,9 @@ def wcs(request):
 			g["date_human"]=datetime.datetime.fromtimestamp(
 			g["date"]).strftime('%d %b %H:%M')
 	startjeudi=datetime.datetime(2017,3,30,19,0)
-	stardvendredi=datetime.datetime(2017,3,31,19,0)
+	startsamedi=datetime.datetime(2017,3,31,19,0)
+	startsamedi=datetime.datetime(2017,4,1,19,0)
+
 	timetowait=str(datetime.datetime(2017,4,2,21,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
 	print(timetowait)
