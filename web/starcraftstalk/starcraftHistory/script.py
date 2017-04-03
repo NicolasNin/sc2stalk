@@ -9,7 +9,7 @@ syncDbwithMH(Players.objects.get(pk=1452),True)
 attributeAllgameToPlayer(1025)
 
 from starcraftHistory.findOp import *
-found=findOpListObject(Games.objects.filter(idgames__gte=200000))
+found=findOpListObject(Games.objects.filter(idgames__gte=210000))
 checkReciprocal(found,True)
 
 from starcraftHistory.checkdb import *

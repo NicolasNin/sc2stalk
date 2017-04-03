@@ -9,13 +9,14 @@
     <span> <a href="{{bneturl}}"> {{name}}</a></span> </div>
 </div>
 <div class="row">
+  {% load static starcraftHistory_extras %}
 {%for r in rs%}
 
   <div class="col-lg-4 col-lg-offset-2" class="text-left" >
 
 
     <div class="row" ><div class=col-lg-6 >
-    Race: {{r.0.mainrace}}   </div>
+    Race: {{r.0.mainrace|icon:"race"}}   </div>
 
     <div class=col-lg-6 >
     Last  played: {{lm}}   </div></div>
@@ -53,16 +54,16 @@
       <br><small>Duration ~ {{g.timesincelastgame}}</small></br></div>
     <div class="col-lg-2">  {{g.map}}</div>
     <div class="col-lg-1">  {{g.current_mmr}}({{g.guessmmrchange}})</div>
-              {% load static %}
+
 
     <div class="col-lg-2 ">
-      <img src="{% static g.current_league__sigle %}icon.png "  alt="" >
-       <img src="{% static g.player__mainrace %}icon_small.png "  alt="" >
+      {{ g.current_league__sigle|icon:"league"}}
+      {{ g.player__mainrace|icon:"race"}}
           <a href="{{g.path}}">{{g.path_human}}</a>
        </div>
        <div class="col-lg-2 ">
-       <img src="{% static g.guessopgameid__current_league__sigle %}icon.png "  alt="" >
-<img src="{% static g.guessopid__mainrace %}icon_small.png "  alt="" >
+         {{ g.guessopgameid__current_league__sigle|icon:"league"}}
+         {{g.guessopid__mainrace|icon:"race"}}
       <a href="{{g.oppath}}">{{g.nameop}}</a>
 
     </div>

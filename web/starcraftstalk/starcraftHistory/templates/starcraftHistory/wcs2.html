@@ -437,15 +437,16 @@
   </thead>
 
   <tbody>
-
+{% load starcraftHistory_extras %}
    {% for player in players %}
 
 	   <tr class="disp{{player.truename}} {{player.qualif}}">
 	     <th scope="row">{{player.num}}</th>
-    	 <td><a href="../player/{{player.idplayer}}" >
-             {% load static %}
-         <img src="{% static player.mainrace %}icon_small.png "  alt="" >
-         {{player.name}}</a></td>
+    	 <td> {{player.mainrace|icon:"race"}}
+         <a href="../player/{{player.idplayer}}" >
+             {% load static starcraftHistory_extras %}
+
+         {{player.name|cut:"#"}}</a></td>
       	<td>{{player.rating}}</td>
       	<td>{{player.rating|add:basemmr}}</td>
       	<td>{{player.LP}}</td>
