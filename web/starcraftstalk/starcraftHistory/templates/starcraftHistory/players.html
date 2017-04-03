@@ -21,15 +21,16 @@
    {% for player in players %}
 	   <tr>
 	     <th scope="row">{{forloop.counter}}</th>
-    	 <td><a href="../player/{{player.idplayer}}" >{{player.name}}</a></td>
+    	 <td><a href="{%url 'index'%}player/{{player.idplayer}}/" >{{player.name}}</a></td>
     	 <td>{{player.smurf__pseudo}}</td>
       	<td>{{player.rating}}</td>
       	<td>{{player.mainrace|icon:"race"}}</td>
       	<td>{{player.wins}}</td>
       	<td>{{player.loses}}</td>
 
-      	<td><a href="{%url 'index'%}league/{{player.league}}">
-          <img src="{% static player.league__sigle %}icon.png "  alt="{{player.league__sigle}}" ></td>
+      	<td><a href="{%url 'index'%}league/{{player.league}}/">
+          {{player.league__sigle|icon:"league"}}
+          </td>
         </a>
         <td>{{player.rank}}</td>
       	<td>{{player.LP}}</td>
