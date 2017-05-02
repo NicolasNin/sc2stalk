@@ -9,6 +9,7 @@ class apiRequest():
 		self.server=server
 		self.access_token=access_token[server]
 		self.apikey=api_key
+		self.current_season=32
 	def checkNameConsistencyBnet(self,url):
 		return url
 	def getJsonData(self,url):
@@ -46,7 +47,7 @@ class apiRequest():
 		return self.getJsonData(url)
 	def getLadderId(self,lvl=5):
 		""" lvl: 5 is master, 6 is GM"""
-		url="""https://"""+self.server+""".api.battle.net/data/sc2/league/31/201/0/"""+str(lvl)+"""?access_token="""+self.access_token
+		url="""https://"""+self.server+""".api.battle.net/data/sc2/league/"""+self.current_season+""""/201/0/"""+str(lvl)+"""?access_token="""+self.access_token
 		print(url)
 		return self.getJsonData(url)
 	def getInfoCurrent(self):
