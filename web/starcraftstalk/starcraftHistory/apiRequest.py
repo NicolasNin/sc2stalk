@@ -9,7 +9,7 @@ class apiRequest():
 		self.server=server
 		self.access_token=access_token[server]
 		self.apikey=api_key
-		self.current_season=32
+		self.current_season="32"
 	def checkNameConsistencyBnet(self,url):
 		return url
 	def getJsonData(self,url):
