@@ -32,7 +32,7 @@ def updateLeagues():
 
 			if ladderid not in liste_existing_ladderid :
 				L=League(ladderid=int(ladderid),season=int(season),level=6,
-				sigle="GM")
+				sigle="GM",server="eu")
 				L.save()
 		except  KeyError:
 			print("GM not up yet")
@@ -42,7 +42,7 @@ def updateLeagues():
 			for l in leaguesM1["division"]:
 				if l["ladder_id"] not in liste_existing_ladderid:
 					League(ladderid=int(l["ladder_id"]),season=int(season),level=5
-					,sigle="M").save()
+					,sigle="M",server="eu").save()
 			val.value=str(int(time()))
 			val.save()
 		except  KeyError:
@@ -138,7 +138,8 @@ def updateCycle():
 	db_players = {}
 	for player in player_in_db:
 		db_players[player.idblizz] = player
-	liste_ladderid = League.objects.all()
+	currentseason=Global.objects.filter(name="currentseason")[0].value
+	liste_ladderid = League.objects.filter(season=currentseason)
 
 	player_from_api = gettingLadderPlayers(
 		liste_ladderid)  # a dict on which we loop to update
