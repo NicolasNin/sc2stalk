@@ -25,20 +25,28 @@ def updateLeagues():
 		api=apiRequest()
 		#GM
 		l=api.getLadderId(6)
-		season=l["key"]["season_id"]
-		ladderid=l["tier"][0]["division"][0]["ladder_id"]
-		if ladderid not in liste_existing_ladderid:
-			L=League(ladderid=int(ladderid),season=int(season),level=6,
-			sigle="GM")
-			L.save()
+		notup=False
+		try:
+			season=l["key"]["season_id"]
+			ladderid=l["tier"][0]["division"][0]["ladder_id"]
+
+			if ladderid not in liste_existing_ladderid :
+				L=League(ladderid=int(ladderid),season=int(season),level=6,
+				sigle="GM")
+				L.save()
+		except  KeyError:
+			print("GM not up yet")
 		#Master1
-		leaguesM1=api.getLadderId(5)["tier"][0]
-		for l in leaguesM1["division"]:
-			if l["ladder_id"] not in liste_existing_ladderid:
-				League(ladderid=int(l["ladder_id"]),season=int(season),level=5
-				,sigle="M").save()
-		val.value=str(int(time()))
-		val.save()
+		try:
+			leaguesM1=api.getLadderId(5)["tier"][0]
+			for l in leaguesM1["division"]:
+				if l["ladder_id"] not in liste_existing_ladderid:
+					League(ladderid=int(l["ladder_id"]),season=int(season),level=5
+					,sigle="M").save()
+			val.value=str(int(time()))
+			val.save()
+		except  KeyError:
+			print("MASTER not up yet")
 def gettingLadderPlayers(liste_ladderid):
 	""" from a liste of ladder_id we return a dict  of player from
 	 the    sc2api with keys the ladderid"""

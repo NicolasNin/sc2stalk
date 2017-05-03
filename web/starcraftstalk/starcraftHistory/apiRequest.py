@@ -10,6 +10,9 @@ class apiRequest():
 		self.access_token=access_token[server]
 		self.apikey=api_key
 		self.current_season="32"
+	def getCurrentSeason(self):
+		url='https://'+self.server+".api.battle.net/data/sc2/season/current?access_token="+self.access_token
+		return self.getJsonData(url)
 	def checkNameConsistencyBnet(self,url):
 		return url
 	def getJsonData(self,url):
