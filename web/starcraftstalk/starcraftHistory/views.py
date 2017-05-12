@@ -128,7 +128,7 @@ def playerbypath(request,path):
 	(games_dict,stat,lastmatch)=getalldict(games)
 	realm=int(path.split("/")[3])
 	legacyid=int(path.split("/")[2])
-	raceplayers=Players.objects.filter(realm=realm,legacy_id=legacyid).select_related("league")
+	raceplayers=Players.objects.filter(realm=realm,legacy_id=legacyid,season=32).select_related("league")
 	racep=[]
 	statrace=[]
 	raceandstat=[]
