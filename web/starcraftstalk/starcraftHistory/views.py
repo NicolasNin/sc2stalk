@@ -136,7 +136,6 @@ def playerbypath(request,path):
 		racep.append(p)
 		statrace.append(stat[p.mainrace])
 		raceandstat.append((p,stat[p.mainrace]))
-	print(raceandstat)
 	##hack after name change raceplayer is empty cause path is :=
 
 	context={"games":games_dict,"name":racep[0].name,
@@ -266,7 +265,7 @@ def wcs(request):
 	leagueid=39 #inhard cause im lazy
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	playerwcs=Players.objects.filter(
-	league_id=leagueid,smurf__wcsregion="eu",season=32,
+	smurf__wcsregion="eu",season=32,
 		rating__gte=6300).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
@@ -279,7 +278,7 @@ def wcs(request):
 	startdimanche=datetime.datetime(2017,5,14,19,0)
 	gamesbetween=Games.objects.filter(
 		date__gte=startjeudi.timestamp(),
-		date__lte=startvendredi.timestamp(),current_league=leagueid)
+		date__lte=startvendredi.timestamp())
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
