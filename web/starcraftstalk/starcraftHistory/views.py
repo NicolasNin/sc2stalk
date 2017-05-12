@@ -164,7 +164,7 @@ def graphmmr(request):
 	deb=time.time()
 	leagueid=39 #inhard cause im lazy
 	playerwcs=Players.objects.filter(smurf__wcsregion="eu",
-	rating__gte=6300).order_by("-rating").values("rating",
+	rating__gte=6300,season=32).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 
