@@ -311,7 +311,7 @@ def wcs(request):
 	#count the game between promotion
 
 	recentwcsgames=Games.objects.filter(
-	date__gte=int(startjeudi.timestamp()),
+	date__gte=max(time.time()-DELTATIME,int(startjeudi.timestamp())),
 	player__in=listegoodplayerid).select_related(
 	"player").order_by(
 	"-date").values(
@@ -329,9 +329,7 @@ def wcs(request):
 
 	timetowait=str(datetime.datetime(2017,5,14,21,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
-	gamestodisplay=recentwcsgames.filter(date__gte=int(time.time()-DELTATIME))
-	print(timetowait)
-	context={"players":playerwcs,"basemmr":-basemmr,"games":gamestodisplay,"wait":timetowait}
+	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,"wait":timetowait}
 	return renderrandomtitle(request, 'starcraftHistory/wcs2.html',context)
 
 
