@@ -111,10 +111,7 @@ def highmmr(request):
 	games=games.annotate(
 	sum=F("current_mmr")+F("guessopgameid__current_mmr")).filter(
 	sum__gte=12000	).order_by("-date")
-#	,current_mmr__gte=6000)
-	#games=games.order_by("-current_mmr")
-	#games=games.extra(
-	#select={"summmr":'current_mmr+guessopgameid__current_mmr'})
+
 	(games_dict,stat,lastmatch)=getalldict(games,False)
 	context={"games":games_dict,"name":" last 24h"}
 	return renderrandomtitle(request, 'starcraftHistory/highmmr.html',context)
@@ -194,10 +191,7 @@ def graphmmr(request):
 			num+=1
 	datestart=int(time.time())-3600*12
 
-#	games=Games.objects.filter(
-	#date__gte=datestart,
-	#player__in=listegoodplayerid).order_by("path","date").values(
-	#"player__name","current_mmr","date"	)
+
 	g2=[]
 	for playerid in listegoodplayerid:
 		player=Players.objects.get(pk=playerid)
@@ -235,10 +229,6 @@ def player(request,sc2id):
 	return playerbypath(request,path)
 ############################
 
-def update(request):
-	#updateCycle(repeat=60, repeat_until=None)
-
-	return HttpResponse("updating database")
 
 def players(request):
 	player_in_db=Players.objects.filter(season=32).order_by("-rating").values("rating",
@@ -319,7 +309,7 @@ def wcs(request):
 		else:
 			p["name_human"]=p["name"]
 	#recent games of thoses players last 12h
-	DELTATIME=3600*12
+	DELTATIME=3600*6
 	#count the game between promotion
 
 	recentwcsgames=Games.objects.filter(
@@ -328,12 +318,17 @@ def wcs(request):
 	"player").order_by(
 	"-date").values(
 	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
-	"player__name","current_mmr","guessmmrchange","guessopid__name"
+	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
+	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player"
 	)
 	for g in recentwcsgames:
-			g["date_human"]=datetime.datetime.fromtimestamp(
-			g["date"]).strftime('%d %b %H:%M')
-
+		g["date_human"]=datetime.datetime.fromtimestamp(
+		g["date"]).strftime('%d %b %H:%M')
+		if g["guessopid__smurf__pseudo"]!= None:
+			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
+		if g["guessopid__name"]==None:
+			print(g["guessopgameid__path"])
+			g["guessopid__name"]=g["guessopgameid__path"]
 
 	timetowait=str(datetime.datetime(2017,5,14,21,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
@@ -362,3 +357,6 @@ def about(request):
 	return render(request, 'starcraftHistory/about.html')
 def contact(request):
 	return render(request, 'starcraftHistory/contact.html')
+def update(request):
+	#updateCycle(repeat=60, repeat_until=None)
+	return HttpResponse("updating database")
