@@ -5,6 +5,7 @@ syncDbwithMH(Players.objects.get(pk=1198),True)
 syncDbwithMH(Players.objects.get(pk=1213),True)
 syncDbwithMH(Players.objects.get(pk=1288),True)
 syncDbwithMH(Players.objects.get(pk=1452),True)
+syncDbwithMH(Players.objects.get(pk=63),True)
 #guru
 attributeAllgameToPlayer(1025)
 

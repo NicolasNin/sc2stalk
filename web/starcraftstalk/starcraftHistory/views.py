@@ -327,7 +327,6 @@ def wcs(request):
 		if g["guessopid__smurf__pseudo"]!= None:
 			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
 		if g["guessopid__name"]==None:
-			print(g["guessopgameid__path"])
 			g["guessopid__name"]=g["guessopgameid__path"]
 
 	timetowait=str(datetime.datetime(2017,5,14,21,59)-
