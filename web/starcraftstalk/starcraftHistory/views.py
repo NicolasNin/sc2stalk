@@ -273,23 +273,23 @@ def pro(request):
 def wcs(request):
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
-	leagueid=14 #inhard cause im lazy
+	leagueid=39 #inhard cause im lazy
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	playerwcs=Players.objects.filter(
-	league_id=leagueid,smurf__wcsregion="eu",
+	league_id=leagueid,smurf__wcsregion="eu",season=32,
 		rating__gte=6300).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 	num=1
 	basemmr=0
 	listegoodplayerid=[]
-	startjeudi=datetime.datetime(2017,3,30,19,0)
-	startvendredi=datetime.datetime(2017,3,31,19,0)
-	startsamedi=datetime.datetime(2017,4,1,19,0)
-	startdimanche=datetime.datetime(2017,4,2,19,0)
+	startjeudi=datetime.datetime(2017,5,11,19,0)
+	startvendredi=datetime.datetime(2017,5,12,19,0)
+	startsamedi=datetime.datetime(2017,5,13,19,0)
+	startdimanche=datetime.datetime(2017,5,14,19,0)
 	gamesbetween=Games.objects.filter(
-		date__gte=startsamedi.timestamp(),
-		date__lte=startdimanche.timestamp(),current_league=14)
+		date__gte=startjeudi.timestamp(),
+		date__lte=startvendredi.timestamp(),current_league=leagueid)
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
@@ -333,11 +333,9 @@ def wcs(request):
 	for g in recentwcsgames:
 			g["date_human"]=datetime.datetime.fromtimestamp(
 			g["date"]).strftime('%d %b %H:%M')
-	startjeudi=datetime.datetime(2017,3,30,19,0)
-	startsamedi=datetime.datetime(2017,3,31,19,0)
-	startsamedi=datetime.datetime(2017,4,1,19,0)
 
-	timetowait=str(datetime.datetime(2017,4,2,21,59)-
+
+	timetowait=str(datetime.datetime(2017,5,14,21,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
 	print(timetowait)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,"wait":timetowait}

@@ -6,6 +6,9 @@ from django.templatetags.static import (
 
 register = template.Library()
 
+@register.filter(name='split')
+def split(value,arg):
+    return value.split(arg)[0]
 @register.filter(name='cut')
 def cut(value, arg):
     """Removes all values of arg from the given string"""
