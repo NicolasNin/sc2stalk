@@ -79,7 +79,7 @@ class Players(models.Model):
     battletag = models.CharField(db_column='Battletag', max_length=45, blank=True, null=True)  # Field name made lowercase.
     smurf = models.ForeignKey('Progamer', models.DO_NOTHING, db_column='smurf', blank=True, null=True)
     offrace = models.IntegerField(blank=True, null=True)
-
+    season=models.IntegerField(blank=True, null=True)
     #league = models.IntegerField(blank=True, null=True)
     league = models.ForeignKey('League',blank=True, null=True)
 

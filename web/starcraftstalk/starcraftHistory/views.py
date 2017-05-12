@@ -241,7 +241,7 @@ def update(request):
 	return HttpResponse("updating database")
 
 def players(request):
-	player_in_db=Players.objects.all().order_by("-rating").values("rating",
+	player_in_db=Players.objects.filter(season=32).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played")
 	for p in player_in_db:

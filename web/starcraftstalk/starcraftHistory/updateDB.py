@@ -103,7 +103,7 @@ def beautifulPlayer(player):
 	p["current_win_streak"] = player["current_win_streak"]
 	p["current_rank"] = player["current_rank"]
 	return p
-def updatePlayer(pobj, p, lid,lastMHupdate):
+def updatePlayer(pobj, p, lid,lastMHupdate,season):
 	"""update the Player object pobj with the data from api"""
 	pobj.name = p["name"]
 	pobj.server = "eu"
@@ -126,6 +126,12 @@ def updatePlayer(pobj, p, lid,lastMHupdate):
 	pobj.league = lid
 	pobj.lastmhupdate=lastMHupdate
 	pobj.rank=p["current_rank"]
+	pobj.season=season
+	#we check if there exist a preivous player with same race and path for smurf
+	if Players.objects.filter(battletag=p["battletag"],mainrace=p["mainrace"]).exists():
+		pold=Players.objects.filter(battletag=p["battletag"],mainrace=p["mainrace"])[0]
+		if pold.smurf!=None:
+			pobj.smurf=pold.smurf
 	pobj.save()
 @background(schedule=10)
 def updateCycle():
@@ -152,9 +158,9 @@ def updateCycle():
 				#big loop start here
 				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid)
 				newgames.extend(newgamesp)
-				updatePlayer(pdb, p, lid,lastMHupdate)
+				updatePlayer(pdb, p, lid,lastMHupdate,currentseason)
 			else:
-				updatePlayer(Players(),p,lid,0)
+				updatePlayer(Players(),p,lid,0,currentseason)
 	print(newgames)
 	found=findOpListObject(newgames,save=False)
 	checkReciprocal(found,save=True)
