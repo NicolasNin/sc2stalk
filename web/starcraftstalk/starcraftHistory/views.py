@@ -195,7 +195,7 @@ def graphmmr(request):
 		player=Players.objects.get(pk=playerid)
 		g2.append({"date":datestart,"player__name":player.name,
 		"current_mmr":getMMRatDate(player,datestart)})
-		g2.extend(Games.objects.filter(player=player,date__gte=datestart).values(
+		g2.extend(Games.objects.filter(player=player,date__gte=datestart).order_by("date").values(
 			"player__name","current_mmr","date","guessopid__name",
 			"guessopid__mainrace","guessmmrchange"))
 		g2.append({"date":int(time.time()),"player__name":player.name,
