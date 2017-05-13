@@ -1,0 +1,130 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
+
+<div class="row">
+<div class="col-lg-6">
+  <h3> 10 Games with most point lost today games</h3>
+
+   <table class="table">
+     <thead>
+       <tr>
+         <th title="UTC time, add 2h for CEST"> Date</th>
+         <th>Player 1</th>
+         <th>MMR</th>
+         <th>+/-</th>
+         <th>Player 2</th>
+         <th>MMR</th>
+         <th>+/-</th>
+       </tr>
+     </thead>
+
+       <tbody>
+
+        {% for g in games %}
+
+         <tr >
+           <td>{{g.date_human}}</td>
+           <td><a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
+            <td>{{g.current_mmr}}</td>
+            <td>{{g.guessmmrchange}}</td>
+            <td><a href="{%url 'index'%}player/{{g.guessopgameid__player}}/">{{g.guessopid__name}}</a></td>
+            <td> {{g.guessopgameid__current_mmr}}</td>
+            <td> {{g.guessopgameid__guessmmrchange}}</td>
+
+         </tr>
+
+
+
+        {% endfor %}
+
+
+       </tbody>
+   </table>
+
+</div>
+<div class="col-lg-6">
+  <h3> 10 Games with most point won today </h3>
+
+   <table class="table">
+     <thead>
+       <tr>
+         <th title="UTC time, add 2h for CEST"> Date</th>
+         <th>Player 1</th>
+         <th>MMR</th>
+         <th>+/- </th>
+         <th>Player 2</th>
+         <th>MMR</th>
+         <th>+/-</th>
+       </tr>
+     </thead>
+
+       <tbody>
+
+        {% for g in best %}
+
+         <tr >
+           <td>{{g.date_human}}</td>
+           <td><a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
+            <td>{{g.current_mmr}}</td>
+            <td>{{g.guessmmrchange}}</td>
+            <td><a href="{%url 'index'%}player/{{g.guessopgameid__player}}/">{{g.guessopid__name}}</a></td>
+            <td> {{g.guessopgameid__current_mmr}}</td>
+            <td> {{g.guessopgameid__guessmmrchange}}</td>
+
+         </tr>
+
+
+
+        {% endfor %}
+
+
+       </tbody>
+   </table>
+
+</div>
+</div>
+%%%%%%
+<div class="row">
+<div class="col-lg-6">
+  <h3> 10 Games with the less points won today </h3>
+
+   <table class="table">
+     <thead>
+       <tr>
+         <th title="UTC time, add 2h for CEST"> Date</th>
+         <th>Player 1</th>
+         <th>MMR</th>
+         <th>+/-</th>
+         <th>Player 2</th>
+         <th>MMR</th>
+         <th>+/-</th>
+       </tr>
+     </thead>
+
+       <tbody>
+
+        {% for g in dangerous %}
+
+         <tr >
+           <td>{{g.date_human}}</td>
+           <td><a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
+            <td>{{g.current_mmr}}</td>
+            <td>{{g.guessmmrchange}}</td>
+            <td><a href="{%url 'index'%}player/{{g.guessopgameid__player}}/">{{g.guessopid__name}}</a></td>
+            <td> {{g.guessopgameid__current_mmr}}</td>
+            <td> {{g.guessopgameid__guessmmrchange}}</td>
+
+         </tr>
+
+
+
+        {% endfor %}
+
+
+       </tbody>
+   </table>
+
+</div>
+
+</div>
+{% endblock content %}
