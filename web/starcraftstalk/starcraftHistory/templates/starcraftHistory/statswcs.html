@@ -1,9 +1,14 @@
 {% extends 'starcraftHistory/base.html' %}
 {% block content %}
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+
 
 <div class="row">
 <div class="col-lg-6">
-  <h3> 10 Games with most point lost today games</h3>
+  <h4> 10 Games with the most points lost today games</h4>
 
    <table class="table">
      <thead>
@@ -43,7 +48,7 @@
 
 </div>
 <div class="col-lg-6">
-  <h3> 10 Games with most point won today </h3>
+  <h4> 10 Games with most point won today </h4>
 
    <table class="table">
      <thead>
@@ -86,7 +91,7 @@
 %%%%%%
 <div class="row">
 <div class="col-lg-6">
-  <h3> 10 Games with the less points won today </h3>
+  <h4> 10 Games with the less points won today </h4>
 
    <table class="table">
      <thead>
@@ -125,6 +130,84 @@
    </table>
 
 </div>
+</div>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/heatmap.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
 
+<div class="row">
+  <div class="col-lg-12">
+
+<div id="container"></div>
+<script>
+var chart=Highcharts.chart('container',{
+
+        chart: {
+            type: 'heatmap',
+            marginTop: 40,
+            marginBottom: 40
+        },
+
+
+        title: {
+            text: 'Sales per employee per weekday'
+        },
+
+        xAxis: {
+
+            categories: [ {% for n in names%}   '{{n}}', {%endfor%} ]
+        },
+        yAxis: {
+
+            categories: [ {% for n in names%}   '{{n}}' ,{%endfor%} ],
+            title: null
+        },
+
+        colorAxis: {
+          stops: [
+           [0, '#3060cf'],
+           [0.5, '#fffbbc'],
+           [0.9, '#c4463a']
+       ],
+        },
+
+        legend: {
+            align: 'right',
+            layout: 'vertical',
+            margin: 0,
+            verticalAlign: 'bottom',
+            y: 25,
+            symbolHeight: 320
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.series.xAxis.categories[this.point.x] +
+                '</b> won <br><b>' +
+                    this.point.value + '</b> points vs <br><b>' + this.series.yAxis.categories[this.point.y] + '</b>';
+            }
+        },
+
+        series: [{
+            name: 'Sales per employee',
+            borderWidth: 1,
+            data:
+            [{%for d in data%}
+              {{d}},
+            {%endfor%}]
+            ,
+            dataLabels: {
+                enabled: true,
+                color: 'black',
+                style: {
+                    textShadow: 'none'
+                }
+            }
+        }]
+
+    });
+
+</script>
+  </div>
 </div>
 {% endblock content %}

@@ -7,7 +7,7 @@ from background_task import background
 from django.http import HttpResponse
 from django.template import loader
 from django.db.models import F
-from django.db.models import Max,Min
+from django.db.models import Max,Min,Sum
 #from .apiRequest import apiRequest
 from .models import League
 from .updateDB import *
@@ -368,6 +368,7 @@ def statswcs(request):
 	num=1
 	basemmr=0
 	listegoodplayerid=[]
+	listename=[]
 	startjeudi=datetime.datetime(2017,5,11,19,0)
 	startvendredi=datetime.datetime(2017,5,12,19,0)
 	startsamedi=datetime.datetime(2017,5,13,19,0)
@@ -389,6 +390,7 @@ def statswcs(request):
 		if p["truename"]:
 			p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
 			listegoodplayerid.append(p["idplayer"])
+			listename.append(p["smurf__pseudo"])
 			p["num"]=num
 			if num<=lastQualif:
 				p["qualif"]="qualif"
@@ -408,7 +410,7 @@ def statswcs(request):
 	#count the game between promotion
 
 	recentwcsgames=Games.objects.filter(
-	date__gte=startjeudi.timestamp(),date__lte=startvendredi.timestamp(),
+	date__gte=startjeudi.timestamp(),date__lte=startsamedi.timestamp(),
 	player__in=listegoodplayerid).select_related(
 	"player").order_by(
 	"-date")
@@ -451,7 +453,21 @@ def statswcs(request):
 			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
 		if g["guessopid__name"]==None and g["guessopgameid__path"]!=None :
 			g["guessopid__name"]=g["guessopgameid__path"].split("/")[-1]
-
+	confrontation=[]
+	data=[]
+	for (i,idplayer) in enumerate(listegoodplayerid):
+		ligne=[]
+		for (j,idplayer2) in enumerate(listegoodplayerid):
+			s=recentwcsgames.filter(player=idplayer,
+			guessopid=idplayer2).aggregate(
+			Sum("guessmmrchange"))["guessmmrchange__sum"]
+			if s==None:
+				s=0
+			ligne.append(s)
+			data.append([i,j,s])
+		confrontation.append(ligne)
+	for (i,l) in enumerate(confrontation):
+		print(listename[i],l)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":worstgames,
-	"best":bestgames,"dangerous":dangerousgames}
+	"best":bestgames,"dangerous":dangerousgames,"names":listename,"data":data}
 	return renderrandomtitle(request, 'starcraftHistory/statswcs.html',context)
