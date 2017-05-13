@@ -277,8 +277,8 @@ def wcs(request):
 	startsamedi=datetime.datetime(2017,5,13,19,0)
 	startdimanche=datetime.datetime(2017,5,14,19,0)
 	gamesbetween=Games.objects.filter(
-		date__gte=startvendredi.timestamp(),
-		date__lte=startsamedi.timestamp())
+		date__gte=startsamedi.timestamp(),
+		date__lte=startdimanche.timestamp())
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
@@ -375,8 +375,8 @@ def statswcs(request):
 	startsamedi=datetime.datetime(2017,5,13,19,0)
 	startdimanche=datetime.datetime(2017,5,14,19,0)
 	gamesbetween=Games.objects.filter(
-		date__gte=startvendredi.timestamp(),
-		date__lte=startsamedi.timestamp())
+		date__gte=startsamedi.timestamp(),
+		date__lte=startdimanche.timestamp())
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
