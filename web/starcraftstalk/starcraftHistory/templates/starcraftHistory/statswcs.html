@@ -5,7 +5,12 @@
   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
   crossorigin="anonymous"></script>
 
+  <div class="row">
+    <div class="col-lg-12">
 
+  <div id="container"></div>
+  </div>
+  </div>
 <div class="row">
 <div class="col-lg-6">
   <h4> 10 Games with the most points lost today games</h4>
@@ -142,11 +147,9 @@
     margin: 1em auto;
 }
 </style>
-<div class="row">
-  <div class="col-lg-12">
 
-<div id="container"></div>
 <script>
+
 var chart=Highcharts.chart('container',{
 
         chart: {
@@ -195,16 +198,21 @@ var chart=Highcharts.chart('container',{
             formatter: function () {
                 return '<b>' + this.series.xAxis.categories[this.point.y] +
                 '</b> won <br><b>' +
-                    this.point.value + '</b> points vs <br><b>' + this.series.yAxis.categories[this.point.x] + '</b>';
+                    this.point.value + '</b> points vs <br><b>' + this.series.yAxis.categories[this.point.x] +
+                    '</b>'+ ' in '+ this.point.games+ " games";
             }
         },
 
         series: [{
-            name: 'Sales per employee',
+            name: 'points exchanged',
             borderWidth: 1,
             data:
-            [{%for d in data%}
-              {{d}},
+            [{%for d in data%}{
+              x:{{d.0}},
+              y:{{d.1}},
+              value:{{d.2.0}},
+              games:{{d.2.1}}
+            },
             {%endfor%}]
             ,
             dataLabels: {
@@ -219,6 +227,5 @@ var chart=Highcharts.chart('container',{
     });
 
 </script>
-  </div>
-</div>
+
 {% endblock content %}

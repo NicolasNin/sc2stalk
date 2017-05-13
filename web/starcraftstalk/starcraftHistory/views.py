@@ -458,13 +458,15 @@ def statswcs(request):
 	for (i,idplayer) in enumerate(listegoodplayerid):
 		ligne=[]
 		for (j,idplayer2) in enumerate(listegoodplayerid):
-			s=recentwcsgames.filter(player=idplayer,
-			guessopid=idplayer2).aggregate(
-			Sum("guessmmrchange"))["guessmmrchange__sum"]
+			g=recentwcsgames.filter(player=idplayer,
+			guessopid=idplayer2)
+			s=g.aggregate(Sum("guessmmrchange"))["guessmmrchange__sum"]
+			l=len(g)
 			if s==None:
 				s=0
 			ligne.append(s)
-			data.append([j,i,s])
+			data.append([j,i,(s,l)])
+
 		confrontation.append(ligne)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":worstgames,
 	"best":bestgames,"dangerous":dangerousgames,"names":listename,"data":data}
