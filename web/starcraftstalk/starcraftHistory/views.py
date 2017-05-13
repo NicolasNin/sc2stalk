@@ -7,7 +7,7 @@ from background_task import background
 from django.http import HttpResponse
 from django.template import loader
 from django.db.models import F
-from django.db.models import Max,Min,Sum
+from django.db.models import Max,Min,Sum,Count
 #from .apiRequest import apiRequest
 from .models import League
 from .updateDB import *
@@ -318,7 +318,8 @@ def wcs(request):
 	"-date").values(
 	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
 	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
-	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player"
+	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player",
+	"guessopid__mainrace"
 	)
 	for g in recentwcsgames:
 		g["date_human"]=datetime.datetime.fromtimestamp(
@@ -466,8 +467,11 @@ def statswcs(request):
 				s=0
 			ligne.append(s)
 			data.append([j,i,(s,l)])
-
 		confrontation.append(ligne)
+	otherid=recentwcsgames.values("guessopid").order_by("guessopid").annotate(
+	n=Count("guessopid")).order_by("-n")
+	for g in otherid:
+		print(g)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":worstgames,
 	"best":bestgames,"dangerous":dangerousgames,"names":listename,"data":data}
 	return renderrandomtitle(request, 'starcraftHistory/statswcs.html',context)
