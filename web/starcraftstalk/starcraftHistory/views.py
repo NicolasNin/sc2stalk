@@ -464,10 +464,8 @@ def statswcs(request):
 			if s==None:
 				s=0
 			ligne.append(s)
-			data.append([i,j,s])
+			data.append([j,i,s])
 		confrontation.append(ligne)
-	for (i,l) in enumerate(confrontation):
-		print(listename[i],l)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":worstgames,
 	"best":bestgames,"dangerous":dangerousgames,"names":listename,"data":data}
 	return renderrandomtitle(request, 'starcraftHistory/statswcs.html',context)
