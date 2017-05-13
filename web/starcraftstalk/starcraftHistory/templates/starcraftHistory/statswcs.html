@@ -243,7 +243,8 @@ var chart=Highcharts.chart('container',{
             chart: {
                 type: 'heatmap',
                 marginTop: 40,
-                marginBottom: 70
+                marginBottom: 70,
+
             },
 
 
@@ -264,6 +265,8 @@ var chart=Highcharts.chart('container',{
             },
 
             colorAxis: {
+              min:-100,
+              max:100,
               stops: [
                [0, '#c4463a'],
                [0.5, '#ffffff'],
