@@ -454,10 +454,8 @@ def statswcs(request):
 			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
 		if g["guessopid__name"]==None and g["guessopgameid__path"]!=None :
 			g["guessopid__name"]=g["guessopgameid__path"].split("/")[-1]
-	confrontation=[]
 	data=[]
 	for (i,idplayer) in enumerate(listegoodplayerid):
-		ligne=[]
 		for (j,idplayer2) in enumerate(listegoodplayerid):
 			g=recentwcsgames.filter(player=idplayer,
 			guessopid=idplayer2)
@@ -465,13 +463,38 @@ def statswcs(request):
 			l=len(g)
 			if s==None:
 				s=0
-			ligne.append(s)
 			data.append([j,i,(s,l)])
-		confrontation.append(ligne)
-	otherid=recentwcsgames.values("guessopid").order_by("guessopid").annotate(
-	n=Count("guessopid")).order_by("-n")
+	otherid=recentwcsgames.exclude(guessopid__in=listegoodplayerid ).values("guessopid").order_by("guessopid").annotate(
+	n=Count("guessopid")).filter(n__gte=10).order_by("-n")
+	listotherid=[]
+	nameother=[]
 	for g in otherid:
-		print(g)
+		listotherid.append(g["guessopid"])
+		p=Players.objects.get(pk=g["guessopid"])
+		if p.smurf!=None:
+			name=p.smurf.pseudo+"("+p.name+")"
+		else:
+			name=p.name
+		nameother.append(name)
+
+
+	othergames=recentwcsgames.filter(guessopid__in=listotherid)
+	dataother=[]
+	for (i,idplayer) in enumerate(listegoodplayerid):
+		ligne=[]
+		for (j,idother) in enumerate(listotherid):
+
+			g=othergames.filter(player=idplayer,
+			guessopid=idother)
+			s=g.aggregate(Sum("guessmmrchange"))["guessmmrchange__sum"]
+			if s==None:
+				s=0
+			ligne.append(s)
+			l=len(g)
+			dataother.append([i,j,(-s,l)])
+
+
 	context={"players":playerwcs,"basemmr":-basemmr,"games":worstgames,
-	"best":bestgames,"dangerous":dangerousgames,"names":listename,"data":data}
+	"best":bestgames,"dangerous":dangerousgames,"names":listename,"data":data,
+	"dataother":dataother,"nameother":nameother}
 	return renderrandomtitle(request, 'starcraftHistory/statswcs.html',context)

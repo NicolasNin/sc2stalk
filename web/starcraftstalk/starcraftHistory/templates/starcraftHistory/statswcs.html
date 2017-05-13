@@ -11,6 +11,12 @@
   <div id="container"></div>
   </div>
   </div>
+  <div class="row">
+    <div class="col-lg-12">
+
+  <div id="container2"></div>
+  </div>
+  </div>
 <div class="row">
 <div class="col-lg-6">
   <h4> 10 Games with the most points lost today games</h4>
@@ -146,6 +152,11 @@
     height: 500px;
     margin: 1em auto;
 }
+#container2 {
+    min-width: 300px;
+    max-width: 1000px;
+    margin: 1em auto;
+}
 </style>
 
 <script>
@@ -225,6 +236,83 @@ var chart=Highcharts.chart('container',{
         }]
 
     });
+
+
+    var chart=Highcharts.chart('container2',{
+
+            chart: {
+                type: 'heatmap',
+                marginTop: 40,
+                marginBottom: 70
+            },
+
+
+            title: {
+                text: 'Points exchanged with others players (or smurf)'
+            },
+
+            xAxis: {
+
+                categories: [ {% for n in names%}   '{{n}}', {%endfor%} ]
+            },
+            yAxis: {
+
+                categories: [ {% for n in nameother%}   '{{n}}' ,{%endfor%} ],
+                title: null,
+                reversed: true
+
+            },
+
+            colorAxis: {
+              stops: [
+               [0, '#c4463a'],
+               [0.5, '#ffffff'],
+               [1, '#3060cf']
+           ],
+            },
+
+
+
+            legend: {
+                align: 'right',
+                layout: 'vertical',
+                margin: 0,
+                verticalAlign: 'top',
+                y: 25,
+                symbolHeight: 320
+            },
+
+            tooltip: {
+                formatter: function () {
+                    return '<b>' + this.series.yAxis.categories[this.point.y] +
+                    '</b> won <br><b>' +
+                        this.point.value + '</b> points vs <br><b>' + this.series.xAxis.categories[this.point.x] +
+                        '</b>'+ ' in '+ this.point.games+ " games";
+                }
+            },
+
+            series: [{
+                name: 'points exchanged',
+                borderWidth: 1,
+                data:
+                [{%for d in dataother%}{
+                  x:{{d.0}},
+                  y:{{d.1}},
+                  value:{{d.2.0}},
+                  games:{{d.2.1}}
+                },
+                {%endfor%}]
+                ,
+                dataLabels: {
+                    enabled: true,
+                    color: 'black',
+                    style: {
+                        textShadow: 'none'
+                    }
+                }
+            }]
+
+        });
 
 </script>
 
