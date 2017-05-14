@@ -10,7 +10,7 @@ function hideTooFar() {
 
 {% for i in listemmr%}
 {%if i >= mmrtop or i <= mmrbottom%}
-chart.series[{{forloop.counter0}}].hide();
+chart.series[{{forloop.counter}}].hide();
 {% endif%}
 {% endfor %}
 }
@@ -40,6 +40,7 @@ var chart=Highcharts.chart('container', {
     },
     yAxis: {
         title: {
+          min:6300,
             text: 'MMR'
         },
       //  min: {{min}}
@@ -50,11 +51,16 @@ var chart=Highcharts.chart('container', {
     },
 
     plotOptions: {
+
         spline: {
             marker: {
                 enabled: true
             }
         }
+        ,
+        series: {
+             threshold: {{min}}
+         },
     },
 
     series:[
@@ -63,6 +69,17 @@ var chart=Highcharts.chart('container', {
 
       {
         name:"{{name.grouper}}",
+        type:{%if name.grouper == "mmr8" %}
+        "areaspline",
+        color:'rgb(193, 66, 66 )',
+        fillOpacity: 0.1
+
+        {%elif name.grouper == "mmr9"%}
+        "areaspline",
+        color:'rgb(255, 255, 255 )',
+        fillOpacity: 0.1
+        {%else%} "spline"{% endif %},
+
         data:[
           {% for g in name.list %}
             {

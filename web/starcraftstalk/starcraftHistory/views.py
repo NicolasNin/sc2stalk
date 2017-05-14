@@ -191,18 +191,52 @@ def graphmmr(request):
 
 
 	g2=[]
+	listmmrstart=[]
+	curent_pos={}
 	for playerid in listegoodplayerid:
 		player=Players.objects.get(pk=playerid)
+		mmrstart=getMMRatDate(player,datestart)
+		listmmrstart.append((int(mmrstart),playerid))
+
 		g2.append({"date":datestart,"player__name":player.name,
-		"current_mmr":getMMRatDate(player,datestart)})
+		"current_mmr":mmrstart})
 		g2.extend(Games.objects.filter(player=player,date__gte=datestart).order_by("date").values(
 			"player__name","current_mmr","date","guessopid__name",
 			"guessopid__mainrace","guessmmrchange"))
 		g2.append({"date":int(time.time()),"player__name":player.name,
 		"current_mmr":player.rating})
-	context={"games":g2,"min":6300,"max":7000,"name":"test","mmr8":mmr8,
+		listmmrstart.sort(reverse=True)
+	print(listmmrstart)
+	recentgames=Games.objects.filter(player__in=listegoodplayerid,
+	date__gte=datestart).order_by("date")
+	m8=[]
+	m9=[]
+	m8.append({"current_mmr":listmmrstart[7][0],"date":datestart,"player__name":"mmr8"})
+	m9.append({"current_mmr":listmmrstart[8][0],"date":datestart,"player__name":"mmr9"})
+	current8=listmmrstart[7]
+	current9=listmmrstart[8]
+	minmmr=listmmrstart[-1][0]
+	for g in recentgames:
+		newmmr=int(g.current_mmr)
+		oldmmr=int(g.current_mmr)-g.guessmmrchange
+		listmmrstart.remove((oldmmr,g.player.idplayer))
+		listmmrstart.append((newmmr,g.player.idplayer))
+		listmmrstart.sort(reverse=True)
+		if listmmrstart[-1][0]<minmmr:
+			minmmr=listmmrstart[-1][0]
+		if listmmrstart[7]!=current8:
+			current8=listmmrstart[7]
+			m8.append( {"current_mmr":listmmrstart[7][0],"date":g.date,"player__name":"mmr8"})
+		if listmmrstart[8]!=current9:
+			current9=listmmrstart[8]
+			m9.append({"current_mmr":listmmrstart[8][0],"date":g.date,"player__name":"mmr9"} )
+
+	m8.append({"current_mmr":listmmrstart[7][0],"date":time.time(),"player__name":"mmr8"})
+	m8.extend(g2)
+	#m9.append({"current_mmr":listmmrstart[8][0],"date":time.time(),"player__name":"mmr9"})
+	#g2.extend(m9)
+	context={"games":m8,"min":minmmr,"max":7000,"name":"test","mmr8":mmr8,
 	"listemmr":listemmr,"mmrtop":mmr8+100,"mmrbottom":mmr8-200}
-	print(time.time()-deb)
 	return renderrandomtitle(request, 'starcraftHistory/graphtest3.html',context)
 
 def getMMRatDate(player,date):
@@ -291,9 +325,11 @@ def wcs(request):
 
 		######################
 		if p["truename"]:
+			print(gamesbetween.filter(player_id=p["idplayer"]))
 			p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
 			listegoodplayerid.append(p["idplayer"])
 			p["num"]=num
+			print(p["name"],p["numgames"])
 			if num<=lastQualif:
 				p["qualif"]="qualif"
 			else:
