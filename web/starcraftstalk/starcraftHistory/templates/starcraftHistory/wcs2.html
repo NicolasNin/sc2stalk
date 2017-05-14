@@ -76,7 +76,7 @@ Some notes on this ranking, we have removed
 
        	   <tr >
              <td>{{g.date_human}}</td>
-           	 <td><a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
+           	 <td>{{g.player__mainrace|icon:"race"}}<a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
              	<td>{{g.current_mmr}}</td>
              	<td>{{g.guessmmrchange}}</td>
               <td>{{g.guessopid__mainrace|icon:"race"}}<a href="{%url 'index'%}player/{{g.guessopgameid__player}}/">{{g.guessopid__name}}</a></td>
