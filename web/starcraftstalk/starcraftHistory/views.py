@@ -450,7 +450,7 @@ def statswcs(request):
 	#count the game between promotion
 
 	recentwcsgames=Games.objects.filter(
-	date__gte=startjeudi.timestamp(),date__lte=startsamedi.timestamp(),
+	date__gte=startjeudi.timestamp(),date__lte=startdimanche.timestamp(),
 	player__in=listegoodplayerid).select_related(
 	"player").order_by(
 	"-date")
