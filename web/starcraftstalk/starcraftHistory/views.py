@@ -358,7 +358,7 @@ def wcs(request):
 	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
 	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
 	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player",
-	"guessopid__mainrace"
+	"guessopid__mainrace","player__mainrace"
 	)
 	for g in recentwcsgames:
 		g["date_human"]=datetime.datetime.fromtimestamp(
