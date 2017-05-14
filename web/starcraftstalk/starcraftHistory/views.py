@@ -164,7 +164,7 @@ def graphmmr(request):
 	deb=time.time()
 	leagueid=39 #inhard cause im lazy
 	playerwcs=Players.objects.filter(smurf__wcsregion="eu",
-	rating__gte=6300,season=32).order_by("-rating").values("rating",
+	rating__gte=6400,season=32).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 
@@ -206,7 +206,6 @@ def graphmmr(request):
 		g2.append({"date":int(time.time()),"player__name":player.name,
 		"current_mmr":player.rating})
 		listmmrstart.sort(reverse=True)
-	print(listmmrstart)
 	recentgames=Games.objects.filter(player__in=listegoodplayerid,
 	date__gte=datestart).order_by("date")
 	m8=[]
@@ -219,7 +218,11 @@ def graphmmr(request):
 	for g in recentgames:
 		newmmr=int(g.current_mmr)
 		oldmmr=int(g.current_mmr)-g.guessmmrchange
-		listmmrstart.remove((oldmmr,g.player.idplayer))
+		try:
+			listmmrstart.remove((oldmmr,g.player.idplayer))
+		except ValueError:
+			print(listmmrstart)
+			print((oldmmr,g.player.idplayer))
 		listmmrstart.append((newmmr,g.player.idplayer))
 		listmmrstart.sort(reverse=True)
 		if listmmrstart[-1][0]<minmmr:
