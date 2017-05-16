@@ -21,10 +21,10 @@ def index(request):
 	return renderrandomtitle(request, 'starcraftHistory/index.html',{})
 ###########
 
-def getalldict(games,orderbydate=True):
+def getalldict(games,orderbydate=True,max=100):
 	if orderbydate:
 		games=games.order_by("-date")
-	games_dict=games.values("date",
+	games_dict=games[:max].values("date",
 		"path","map","type","decision","current_mmr","guessmmrchange"
 		,"player__mainrace",
 		"current_win",
@@ -341,7 +341,7 @@ def wcs(request,server):
 			p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
 			listegoodplayerid.append(p["idplayer"])
 			p["num"]=num
-			
+
 			if num<=lastQualif:
 				p["qualif"]="qualif"
 			else:
