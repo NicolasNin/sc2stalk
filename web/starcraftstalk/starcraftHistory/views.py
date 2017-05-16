@@ -303,10 +303,17 @@ def wcs(request,server):
 		html="starcraftHistory/wcsus.html"
 		timetoadd=-3600*4
 		thresh=6000
+		deltaEDT=datetime.timedelta(hours=4)
+		jeudi=datetime.datetime(2017,5,18,21,0)+deltaEDT
+
 	else:
 		html="starcraftHistory/wcs2.html"
 		timetoadd=0
 		thresh=6300
+		jeudi=datetime.datetime(2017,5,11,19,0)
+	oneday=datetime.timedelta(days=1)
+	windows=[jeudi,jeudi+oneday,jeudi+2*oneday,jeudi+3*oneday,
+	jeudi+3*oneday+datetime.timedelta(hours=2,minutes=59)]
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
@@ -408,11 +415,11 @@ def contact(request):
 def update(request):
 	#updateCycle(repeat=60, repeat_until=None)
 	return HttpResponse("updating database")
-def statswcs(request):
+def statswcs(request,server):
 	leagueid=39 #inhard cause im lazy
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	playerwcs=Players.objects.filter(
-	smurf__wcsregion="eu",season=32,
+	smurf__wcsregion=server,season=32,server=server,
 		rating__gte=6300).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
@@ -460,7 +467,7 @@ def statswcs(request):
 	DELTATIME=3600*6
 	#count the game between promotion
 
-	recentwcsgames=Games.objects.filter(
+	recentwcsgames=Games.objects.filter(server=server,
 	date__gte=startjeudi.timestamp(),date__lte=startdimanche.timestamp(),
 	player__in=listegoodplayerid).select_related(
 	"player").order_by(
