@@ -122,9 +122,9 @@ def last100(request):
 	(games_dict,stat,lastmatch)=getalldict(games)
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
-def playerbypath(request,path):
+def playerbypath(request,server,path):
 
-	games=Games.objects.filter(path=path)
+	games=Games.objects.filter(path=path,server=server)
 	(games_dict,stat,lastmatch)=getalldict(games)
 	realm=int(path.split("/")[3])
 	legacyid=int(path.split("/")[2])
@@ -253,15 +253,15 @@ def getMMRatDate(player,date):
 		if g!=None:
 			return g.current_mmr
 	return player.rating
-def player2(request,legacy,realm,name):
+def player2(request,server,legacy,realm,name):
 	#gamesdb=Players.objects.get(pk=sc2id)
 	path="/profile/"+legacy+"/"+realm+"/"+name
-	return playerbypath(request,path)
+	return playerbypath(request,server,path)
 
 
-def player(request,sc2id):
+def player(request,server,sc2id):
 	path=Players.objects.get(pk=sc2id).path
-	return playerbypath(request,path)
+	return playerbypath(request,server,path)
 ############################
 
 
@@ -279,7 +279,7 @@ def players(request,server):
 		else:
 			p["name_human"]=p["name"]
 
-	context={"players":player_in_db}
+	context={"players":player_in_db,"server":server}
 	return render(request, 'starcraftHistory/players.html', context)
 
 def pro(request):

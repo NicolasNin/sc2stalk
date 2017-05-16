@@ -21,7 +21,7 @@
    {% for player in players %}
 	   <tr>
 	     <th scope="row">{{forloop.counter}}</th>
-    	 <td><a href="{%url 'index'%}player/{{player.idplayer}}/" >{{player.name}}</a></td>
+    	 <td><a href="{%url 'index'%}{{server}}/player/{{player.idplayer}}" >{{player.name}}</a></td>
     	 <td>{{player.smurf__pseudo}}</td>
       	<td>{{player.rating}}</td>
       	<td>{{player.mainrace|icon:"race"}}</td>
