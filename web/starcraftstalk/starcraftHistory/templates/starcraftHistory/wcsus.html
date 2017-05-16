@@ -1,0 +1,95 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
+
+
+<div class="row">
+  <div class="col-lg-4">
+    <h3> Current WCS NA ranking </h3>
+    End in <b>{{wait}}</b>
+    <table class="table-sm">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>MMR</th>
+      <th title="Distance to 8th"><center>Δ</center></th>
+      <th title="number of games in the saturday-sunday windows">#Games</th>
+      <th title="last played"><center>lp</center></th>
+    </tr>
+  </thead>
+
+  <tbody>
+{% load starcraftHistory_extras %}
+   {% for player in players %}
+
+	   <tr class="disp{{player.truename}} {{player.qualif}}">
+	     <th scope="row">{{player.num}}</th>
+    	 <td> {{player.mainrace|icon:"race"}}
+         <a href="../player/{{player.idplayer}}" >
+             {% load static starcraftHistory_extras %}
+
+         {{player.name|split:"#"}}</a></td>
+      	<td>{{player.rating}}</td>
+      	<td>{{player.rating|add:basemmr}}</td>
+      	<td><center>{{player.numgames}}</center></td>
+        <td>{{player.LP}}</td>
+    </tr>
+
+
+
+   {% endfor %}
+
+
+  </tbody>
+</table>
+Some notes on this ranking, we have removed
+  <ul>
+  <li> Non NA players </li>
+  <li> Players not using their names (ie barcodes)</li>
+  <li> MMR  <6300 are arbitrally not displayed </li>
+
+
+  </div>
+
+  <div class="col-lg-8">
+    <h3> Recent games</h3>
+
+     <table class="table">
+       <thead>
+         <tr>
+           <th title="EDT time, add 6h for CEST"> Date (EDT)</th>
+           <th>Player 1</th>
+           <th>MMR</th>
+           <th>MMR change</th>
+           <th>Player 2</th>
+           <th>MMR</th>
+           <th>MMR change</th>
+         </tr>
+       </thead>
+
+         <tbody>
+
+          {% for g in games %}
+
+       	   <tr >
+             <td>{{g.date_human}}</td>
+           	 <td>{{g.player__mainrace|icon:"race"}}<a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
+             	<td>{{g.current_mmr}}</td>
+             	<td>{{g.guessmmrchange}}</td>
+              <td>{{g.guessopid__mainrace|icon:"race"}}<a href="{%url 'index'%}player/{{g.guessopgameid__player}}/">{{g.guessopid__name}}</a></td>
+             	<td> {{g.guessopgameid__current_mmr}}</td>
+             	<td> {{g.guessopgameid__guessmmrchange}}</td>
+
+           </tr>
+
+
+
+          {% endfor %}
+
+
+         </tbody>
+     </table>
+
+  </div>
+</div>
+{% endblock content %}

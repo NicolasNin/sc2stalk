@@ -35,24 +35,35 @@
         </div>
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Home</a></li>/
-            <li><a href="{%url 'players'%}">Players</a></li>
+            <li class="active"><a href="/">Home</a></li>
 
+            <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" >
+              PLayers <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="{%url 'players' server="eu" %}"> EU Players</a></li>
+              <li><a href="{%url 'players' server="us"%}"> US Players</a></li>
+            </ul>
+          </li>
 
-            <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="{%url 'recent'%}">
+            <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" >
               Recent Games <span class="caret"></span></a>
         <ul class="dropdown-menu">
-          <li><a href="{%url 'recent'%}">Last 30 minutes</a></li>
+          <li><a href="{%url 'recent' server="eu"%}"> EU - Last 30 minutes</a></li>
+          <li><a href="{%url 'recent' server="us"%}"> US - Last 30 minutes</a></li>
           <li><a href="{%url 'highmmr'%}">High MMR games last 90mn</a></li>
           <li><a href="{%url 'last100'%}">Last 100 games added</a></li>
         </ul>
       </li>
-      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="{%url 'wcs'%}">
-        Wcs Challenger EU <span class="caret"></span></a>
+      <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="{%url 'wcs' server="eu"%}">
+        Wcs Challenger <span class="caret"></span></a>
   <ul class="dropdown-menu">
-    <li><a href="{%url 'wcs'%}">Ranking</a></li>
-    <li><a href="{%url 'graphmmr'%}">Graphes </a></li>
-    <li><a href="{%url 'statswcs'%}">Some stats </a></li>
+    <li><a href="{%url 'wcs' server="us"%}"> US - Ranking</a></li>
+    <li><a href="{%url 'graphmmr' server="us"%}">US - Graph of MMR </a></li>
+    <li><a href="{%url 'statswcs' server="us"%}">US - Some useless stats </a></li>
+    <li role="separator" class="divider"></li>
+    <li><a href="{%url 'wcs' server="eu"%}"> EU - Ranking (finished)</a></li>
+    <li><a href="{%url 'graphmmr' server="eu"%}">EU - Graph of MMR </a></li>
+    <li><a href="{%url 'statswcs' server="eu"%}">EU -Some useless stats </a></li>
   </ul>
 </li>
       <li><a href="/about">Un bout</a></li>

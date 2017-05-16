@@ -99,8 +99,8 @@ def renderrandomtitle(request,page,context):
 	context["title"]=randomTitle()
 	return render(request,page,context)
 
-def recent(request):
-	games=Games.objects.filter(date__gte=int(time.time()-1800))
+def recent(request,server):
+	games=Games.objects.filter(server=server,date__gte=int(time.time()-1800))
 	(games_dict,stat,lastmatch)=getalldict(games)
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
@@ -160,10 +160,10 @@ def graph(request,playerid):
 	context={"games":games,"min":minmmr,"max":maxmmr,"name":player.name}
 	return render(request, 'starcraftHistory/graphtest2.html', context)
 
-def graphmmr(request):
+def graphmmr(request,server):
 	deb=time.time()
 	leagueid=39 #inhard cause im lazy
-	playerwcs=Players.objects.filter(smurf__wcsregion="eu",
+	playerwcs=Players.objects.filter(server=server,smurf__wcsregion="eu",
 	rating__gte=6400,season=32).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
@@ -200,13 +200,13 @@ def graphmmr(request):
 
 		g2.append({"date":datestart,"player__name":player.name,
 		"current_mmr":mmrstart})
-		g2.extend(Games.objects.filter(player=player,date__gte=datestart).order_by("date").values(
+		g2.extend(Games.objects.filter(server=server,player=player,date__gte=datestart).order_by("date").values(
 			"player__name","current_mmr","date","guessopid__name",
 			"guessopid__mainrace","guessmmrchange"))
 		g2.append({"date":int(time.time()),"player__name":player.name,
 		"current_mmr":player.rating})
 		listmmrstart.sort(reverse=True)
-	recentgames=Games.objects.filter(player__in=listegoodplayerid,
+	recentgames=Games.objects.filter(server=server,player__in=listegoodplayerid,
 	date__gte=datestart).order_by("date")
 	m8=[]
 	m9=[]
@@ -265,8 +265,10 @@ def player(request,sc2id):
 ############################
 
 
-def players(request):
-	player_in_db=Players.objects.filter(season=32).order_by("-rating").values("rating",
+def players(request,server):
+
+	player_in_db=Players.objects.filter(season=32,
+	server=server).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played")
 	for p in player_in_db:
@@ -296,24 +298,31 @@ def pro(request):
 	return renderrandomtitle(request, 'starcraftHistory/pro.html',context)
 
 
-def wcs(request):
+def wcs(request,server):
+	if server=="us":
+		html="starcraftHistory/wcsus.html"
+		timetoadd=-3600*4
+	else:
+		html="starcraftHistory/wcs2.html"
+		timetoadd=0
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
-	leagueid=39 #inhard cause im lazy
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	playerwcs=Players.objects.filter(
-	smurf__wcsregion="eu",season=32,
+	smurf__wcsregion=server,season=32,server=server,
 		rating__gte=6300).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 	num=1
 	basemmr=0
 	listegoodplayerid=[]
+	##DATE OF
 	startjeudi=datetime.datetime(2017,5,11,19,0)
 	startvendredi=datetime.datetime(2017,5,12,19,0)
 	startsamedi=datetime.datetime(2017,5,13,19,0)
 	startdimanche=datetime.datetime(2017,5,14,19,0)
-	gamesbetween=Games.objects.filter(
+	#
+	gamesbetween=Games.objects.filter(server=server,
 		date__gte=startsamedi.timestamp(),
 		date__lte=startdimanche.timestamp())
 	for p in playerwcs:
@@ -350,7 +359,7 @@ def wcs(request):
 	DELTATIME=3600*6
 	#count the game between promotion
 
-	recentwcsgames=Games.objects.filter(
+	recentwcsgames=Games.objects.filter(server=server,
 	date__gte=max(time.time()-DELTATIME,int(startjeudi.timestamp())),
 	player__in=listegoodplayerid).select_related(
 	"player").order_by(
@@ -362,7 +371,7 @@ def wcs(request):
 	)
 	for g in recentwcsgames:
 		g["date_human"]=datetime.datetime.fromtimestamp(
-		g["date"]).strftime('%d %b %H:%M')
+		g["date"]+timetoadd).strftime('%d %b %H:%M')
 		if g["guessopid__smurf__pseudo"]!= None:
 			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
 		if g["guessopid__name"]==None:
@@ -371,7 +380,7 @@ def wcs(request):
 	timetowait=str(datetime.datetime(2017,5,14,21,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
 	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,"wait":timetowait}
-	return renderrandomtitle(request, 'starcraftHistory/wcs2.html',context)
+	return renderrandomtitle(request, html,context)
 
 
 def league(request,league):
@@ -388,7 +397,7 @@ def league(request,league):
 			p["name_human"]=p["name"]
 
 	context={"players":player_in_db}
-	return renderrandomtitle(request, 'starcraftHistory/players.html',context)
+	return renderrandomtitle(request, html,context)
 
 def about(request):
 	return render(request, 'starcraftHistory/about.html')

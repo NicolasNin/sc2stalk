@@ -6,23 +6,22 @@ from django.db import IntegrityError
 from background_task import background
 from django.db import transaction
 from time import time
-def updateLeagues():
+def updateLeagues(server):
 	if Global.objects.filter(name="lastupdateleagues").exists():
 		val=Global.objects.filter(name="lastupdateleagues")[0]
 		lastup=int(val.value)
-
 	else:
 		val=Global(name="lastupdateleagues",value=str(int(time())))
 		lastup=int(time())-3610
 		val.save()
 	#first we retrieve the already existing leagues
 	if time()>lastup+3600:
-		updateOldPath(up=True)
-		existingLeagues=League.objects.all()
+		updateOldPath(up=True,server=server)
+		existingLeagues=League.objects.filter(server=server)
 		liste_existing_ladderid=[]
 		for exl in existingLeagues:
 			liste_existing_ladderid.append(exl.ladderid)
-		api=apiRequest()
+		api=apiRequest(server=server)
 		#GM
 		l=api.getLadderId(6)
 		notup=False
@@ -32,7 +31,7 @@ def updateLeagues():
 
 			if ladderid not in liste_existing_ladderid :
 				L=League(ladderid=int(ladderid),season=int(season),level=6,
-				sigle="GM",server="eu")
+				sigle="GM",server=server)
 				L.save()
 		except  KeyError:
 			print("GM not up yet")
@@ -42,15 +41,15 @@ def updateLeagues():
 			for l in leaguesM1["division"]:
 				if l["ladder_id"] not in liste_existing_ladderid:
 					League(ladderid=int(l["ladder_id"]),season=int(season),level=5
-					,sigle="M",server="eu").save()
+					,sigle="M",server=server).save()
 			val.value=str(int(time()))
 			val.save()
 		except  KeyError:
 			print("MASTER not up yet")
-def gettingLadderPlayers(liste_ladderid):
+def gettingLadderPlayers(liste_ladderid,server):
 	""" from a liste of ladder_id we return a dict  of player from
 	 the    sc2api with keys the ladderid"""
-	api = apiRequest()
+	api = apiRequest(server=server)
 	api_players = {}
 	print("Getting the ladder:", end=" ")
 	for lid in liste_ladderid:
@@ -103,10 +102,10 @@ def beautifulPlayer(player):
 	p["current_win_streak"] = player["current_win_streak"]
 	p["current_rank"] = player["current_rank"]
 	return p
-def updatePlayer(pobj, p, lid,lastMHupdate,season):
+def updatePlayer(pobj, p, lid,lastMHupdate,season,server):
 	"""update the Player object pobj with the data from api"""
 	pobj.name = p["name"]
-	pobj.server = "eu"
+	pobj.server = server
 	pobj.rating = p["rating"]
 	pobj.wins = p["wins"]
 	pobj.loses = p["losses"]
@@ -134,21 +133,26 @@ def updatePlayer(pobj, p, lid,lastMHupdate,season):
 			pobj.smurf=pold.smurf
 	pobj.save()
 @background(schedule=10)
-def updateCycle():
+def updateAll():
+	print("UPDATING NA")
+	updateServerCycle("us")
+	print("UPDATING EU")
+	updateServerCycle("eu")
+def updateServerCycle(server="eu"):
 	""" we get the ladders date from all the league, then
 	 update each player when needed"""
 	print("RUN AN UPDATE")
 	print("-----------------------------------------------------")
-	updateLeagues()
-	player_in_db = Players.objects.all()
+	updateLeagues(server=server)
+	player_in_db = Players.objects.filter(server=server)
 	db_players = {}
 	for player in player_in_db:
 		db_players[player.idblizz] = player
 	currentseason=Global.objects.filter(name="currentseason")[0].value
-	liste_ladderid = League.objects.filter(season=currentseason)
+	liste_ladderid = League.objects.filter(season=currentseason,server=server)
 
 	player_from_api = gettingLadderPlayers(
-		liste_ladderid)  # a dict on which we loop to update
+		liste_ladderid,server=server)  # a dict on which we loop to update
 	newgames=[]
 	for lid in liste_ladderid:
 		for player in player_from_api[lid]:
@@ -156,11 +160,11 @@ def updateCycle():
 			if str(p["id_blizz"]) in db_players:
 				pdb = db_players[str(p["id_blizz"])]
 				#big loop start here
-				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid)
+				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid,server)
 				newgames.extend(newgamesp)
-				updatePlayer(pdb, p, lid,lastMHupdate,currentseason)
+				updatePlayer(pdb, p, lid,lastMHupdate,currentseason,server)
 			else:
-				updatePlayer(Players(),p,lid,0,currentseason)
+				updatePlayer(Players(),p,lid,0,currentseason,server)
 	print(newgames)
 	found=findOpListObject(newgames,save=False)
 	checkReciprocal(found,save=True)
@@ -171,7 +175,7 @@ def syncDbwithMH(player):
 	never look at, if there is new game  """
 
 	return 0
-def addNewGamePlayer(pdb,p,lid):
+def addNewGamePlayer(pdb,p,lid,server):
 	""" pdb is an object player, p is a dict from the api
 		thus pdb is old state, while p i new
 	"""
@@ -185,24 +189,24 @@ def addNewGamePlayer(pdb,p,lid):
 	deltacount = p["race_count"] - pdb.race_count
 	(msg, b) = lookForDiscrepancy(deltaMMR, deltawins,
 											  deltalosses, deltaties, deltacount, deltaLP)
-	maxdate=Players.objects.filter(path=p["path"]).aggregate(Max('lastmhupdate'))["lastmhupdate__max"]
+	maxdate=Players.objects.filter(path=p["path"],server=server).aggregate(Max('lastmhupdate'))["lastmhupdate__max"]
 	if b==True and msg!="nothing":
 		print("-----------------------------")
 		lmhu=0
 		if maxdate!=None:
 			lmhu=maxdate
-		(newinMH,maxdate)=getNewMatchHistory(p["path"],pdb.alternate_path,lmhu)
+		(newinMH,maxdate)=getNewMatchHistory(p["path"],pdb.alternate_path,lmhu,server)
 		if newinMH!="error":
 			#we add the notsolo
 			for g in newinMH["notSOLO"]:
 				returngame=addGamesinDB(p,g["map"],g["type"],g["decision"],
-					g["speed"],g["date"],deltaMMR,msg,lid,player_id,True)
+					g["speed"],g["date"],deltaMMR,msg,lid,player_id,True,server)
 				list_newgamesid.append(returngame)
 
 			#we add the solo match or update the one in db
-			nomapsgame=Games.objects.filter(path=p["path"],map="")
+			nomapsgame=Games.objects.filter(server=server,path=p["path"],map="")
 			otherlist=compareDbandHistory(nomapsgame,newinMH["SOLO"],p,pdb,msg,lid,
-					deltaMMR,deltawins,deltalosses,deltaties)
+					deltaMMR,deltawins,deltalosses,deltaties,server)
 
 			list_newgamesid.extend(otherlist)
 		else:#pas de match history on ajoute l'unique game sans map
@@ -210,11 +214,11 @@ def addNewGamePlayer(pdb,p,lid):
 			if msg=="ranked" or msg=="many":
 				msg=str(deltacount)
 			returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),"FASTER",p["last_played"],
-				deltaMMR,msg,lid,player_id)
+				deltaMMR,msg,lid,player_id,server)
 			list_newgamesid.append(returngame)
 	return (maxdate,list_newgamesid)
 
-def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses,deltaties):
+def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses,deltaties,server):
 	""" match_db is the games list without maps, we try to reconstruct the match
 		history (ranked unranked ) by comparing with actual data from MH
 	"""
@@ -228,19 +232,19 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 		if firstMH==p["last_played"] or firstMH==p["last_played"]-1:
 
 			returngame=addGamesinDB(p,m["map"],m["type"],m["decision"],
-						m["speed"],m["date"],deltaMMR,msg,lid,pdb.idplayer)
+						m["speed"],m["date"],deltaMMR,msg,lid,pdb.idplayer,False,server)
 			list_newgamesid.append(returngame)
 			shiftMH=1
 		else:
 			print("last played not in match history",p["path"],p["last_played"])
 			returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
-				"FASTER",p["last_played"],				deltaMMR,msg,lid,pdb.idplayer)
+				"FASTER",p["last_played"],deltaMMR,msg,lid,pdb.idplayer,False,server)
 			list_newgamesid.append(returngame)
 			shiftMH=0
 	else:
 		print("last played not in match history",p["path"],p["last_played"])
 		returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),
-			"FASTER",p["last_played"],deltaMMR,msg,lid,pdb.idplayer)
+			"FASTER",p["last_played"],deltaMMR,msg,lid,pdb.idplayer,False,server)
 		list_newgamesid.append(returngame)
 		shiftMH=0
 
@@ -261,17 +265,18 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 		else:
 			# we dont know who played that we might know after looking at LP and dc
 			returngame=addGamesinDB(p,m["map"],m["type"],m["decision"],m["speed"],m["date"],
-				deltaMMR,"Unknown",lid,pdb.idplayer,True)
+				deltaMMR,"Unknown",lid,pdb.idplayer,True,server)
 			list_newgamesid.append(returngame)
 	return list_newgamesid
 
-def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player_id,unknown=False):
+def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player_id,
+unknown=False,server="eu"):
 	print(p["path"],date,unknown,lid,deltaMMR,decision)
 	sc2map=sc2map[0:44]
 	try:
 		with transaction.atomic():
 			if unknown:#in those game we dont know the player but we know the map (from MH)
-				g=Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,ranked=ranked,
+				g=Games(server=server,map=sc2map,type=sc2type,speed=speed,date=date,ranked=ranked,
 				  path=p["path"],decision=decision,current_league=lid)
 
 				g.save()
@@ -279,7 +284,7 @@ def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player
 				return g
 			else:
 				#In those games we know the player, map might be empty (from MH and/or LP)
-				g=Games(server="eu",map=sc2map,type=sc2type,speed=speed,date=date,current_mmr=p["rating"],
+				g=Games(server=server,map=sc2map,type=sc2type,speed=speed,date=date,current_mmr=p["rating"],
 				  current_rank=p["current_rank"],current_league=lid,current_win=p["wins"],current_losses=p["losses"],
 				  current_ties=p["ties"],current_points=p["points"],player_id=player_id,ranked=ranked,
 				  path=p["path"],current_win_streak=p["current_win_streak"],guessmmrchange=deltaMMR,
@@ -297,9 +302,9 @@ def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player
 			print("############END LISTE GAME IN DB FOR PATH##############")
 			return 0
 
-def getNewMatchHistory(path,alternate_path,lastMHupdate):
+def getNewMatchHistory(path,alternate_path,lastMHupdate,server):
 	""" return match in match history since last matchHistory lookup"""
-	api=apiRequest()
+	api=apiRequest(server)
 	matchHistory=api.getMatchHistoryByPath(path)
 	if type(matchHistory)!=dict and alternate_path!=None:
 		print("trying alternate path with old endpoint")
@@ -378,9 +383,9 @@ def lookForDiscrepancy(dmmr, dwin, dloss, dties, dcount, dlp):
 	print("wtf")
 	return ("wtf", False)
 ##
-def updateOldPath(up=False):
-	api=apiRequest()
-	for league in League.objects.all():
+def updateOldPath(up=False,server="eu"):
+	api=apiRequest(server)
+	for league in League.objects.filter(server=server):
 		lid=league.ladderid
 		print("getting old endpoint",lid)
 		l=api.getOldLadder(lid)
@@ -389,7 +394,7 @@ def updateOldPath(up=False):
 				path=p["character"]["profilePath"]
 				realm=p["character"]["realm"]
 				legacy_id=p["character"]["id"]
-				for pobj in Players.objects.filter(legacy_id=legacy_id,realm=realm):
+				for pobj in Players.objects.filter(server=server,legacy_id=legacy_id,realm=realm):
 					if up:
 						pobj.alternate_path=path
 						pobj.save()
