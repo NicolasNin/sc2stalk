@@ -337,11 +337,11 @@ def wcs(request,server):
 
 		######################
 		if p["truename"]:
-			print(gamesbetween.filter(player_id=p["idplayer"]))
+
 			p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
 			listegoodplayerid.append(p["idplayer"])
 			p["num"]=num
-			print(p["name"],p["numgames"])
+			
 			if num<=lastQualif:
 				p["qualif"]="qualif"
 			else:
@@ -546,3 +546,5 @@ def statswcs(request):
 	"best":bestgames,"dangerous":dangerousgames,"names":listename,"data":data,
 	"dataother":dataother,"nameother":nameother}
 	return renderrandomtitle(request, 'starcraftHistory/statswcs.html',context)
+def wcsold(request):
+	return wcs(request,server="eu")
