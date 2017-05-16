@@ -302,15 +302,17 @@ def wcs(request,server):
 	if server=="us":
 		html="starcraftHistory/wcsus.html"
 		timetoadd=-3600*4
+		thresh=6000
 	else:
 		html="starcraftHistory/wcs2.html"
 		timetoadd=0
+		thresh=6300
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	playerwcs=Players.objects.filter(
 	smurf__wcsregion=server,season=32,server=server,
-		rating__gte=6300).order_by("-rating").values("rating",
+		rating__gte=thresh).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 	num=1
