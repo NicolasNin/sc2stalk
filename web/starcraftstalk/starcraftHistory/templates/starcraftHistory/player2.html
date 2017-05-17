@@ -47,7 +47,6 @@
 </div>
 
 <hr />
-
  {% for g in games %}
 <div class="row  {{g.decision}} {{g.type}} games">
     <div class="col-lg-2"> <b>#{{forloop.counter}}</b> {{g.date_human}}
@@ -59,12 +58,12 @@
     <div class="col-lg-2 ">
       {{ g.current_league__sigle|icon:"league"}}
       {{ g.player__mainrace|icon:"race"}}
-          <a href="{{g.path}}">{{g.path_human}}</a>
+          <a href="{%url 'index'  %}{{server}}{{g.path}}">{{g.path_human}}</a>
        </div>
        <div class="col-lg-2 ">
          {{ g.guessopgameid__current_league__sigle|icon:"league"}}
          {{g.guessopid__mainrace|icon:"race"}}
-      <a href="{{g.oppath}}">{{g.nameop}}</a>
+      <a href="{%url 'index'  %}{{server}}{{g.oppath}}">{{g.nameop}}</a>
 
     </div>
     <div class="col-lg-1"> {{g.opmmr}}({{g.opdmmr}})</div>
