@@ -32,6 +32,7 @@ def wcs(request,server):
 
 	else:
 		html="starcraftHistory/wcs2.html"
+		timetoadd=2*3600
 		thresh=6300
 	(start,end)=getPromotionWindows(server)
 	""" we get the top GM player who are from the good wcs region
@@ -45,8 +46,7 @@ def wcs(request,server):
 	num=1
 	basemmr=0
 	listegoodplayerid=[]
-	gamesbetween=Games.objects.filter(server=server,
-		date__gte=start,date__lte=end)
+	gamesbetween=Games.objects.filter(server=server,date__range=(start,end))
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
