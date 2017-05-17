@@ -5,7 +5,7 @@ import pytz
 
 def getPromotionWindows(server):
 	""" return the start and end of promotion windows for today
-	in UTC"""
+	in UTC as a timestamp"""
 
 	if server=="us":
 		tz= pytz.timezone('America/New_York')
@@ -22,26 +22,18 @@ def getPromotionWindows(server):
 	else:
 		end=tz.localize(datetime.datetime(now_local.year,now_local.month,now_local.day,21)).astimezone(pytz.utc)
 		start=(end-datetime.timedelta(days=1))
-	return (start,end)
+	return (start.timestamp(),end.timestamp())
 
 def wcs(request,server):
 	if server=="us":
+		timetoadd=-4*3600
 		html="starcraftHistory/wcsus.html"
-		timetoadd=-3600*4
 		thresh=6000
-		deltaEDT=datetime.timedelta(hours=4)
-		jeudi=datetime.datetime(2017,5,18,21,0)+deltaEDT
-		min6 = datetime.timezone(datetime.timedelta(hours=-6))
-		now=datetime.datetime.now(tz=min6)
 
 	else:
 		html="starcraftHistory/wcs2.html"
-		timetoadd=0
 		thresh=6300
-		jeudi=datetime.datetime(2017,5,11,19,0)
-	oneday=datetime.timedelta(days=1)
-	windows=[jeudi,jeudi+oneday,jeudi+2*oneday,jeudi+3*oneday,
-	jeudi+3*oneday+datetime.timedelta(hours=2,minutes=59)]
+	(start,end)=getPromotionWindows(server)
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
@@ -53,15 +45,8 @@ def wcs(request,server):
 	num=1
 	basemmr=0
 	listegoodplayerid=[]
-	##DATE OF
-	startjeudi=datetime.datetime(2017,5,11,19,0)
-	startvendredi=datetime.datetime(2017,5,12,19,0)
-	startsamedi=datetime.datetime(2017,5,13,19,0)
-	startdimanche=datetime.datetime(2017,5,14,19,0)
-	#
 	gamesbetween=Games.objects.filter(server=server,
-		date__gte=startsamedi.timestamp(),
-		date__lte=startdimanche.timestamp())
+		date__gte=start,date__lte=end)
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
 		name2=p["name"].lower().split("#")[0]
@@ -97,7 +82,7 @@ def wcs(request,server):
 	#count the game between promotion
 
 	recentwcsgames=Games.objects.filter(server=server,
-	date__gte=max(time.time()-DELTATIME,int(startjeudi.timestamp())),
+	date__gte=time.time()-DELTATIME,
 	player__in=listegoodplayerid).select_related(
 	"player").order_by(
 	"-date").values(
