@@ -99,10 +99,112 @@ def wcs(request,server):
 		if g["guessopid__name"]==None:
 			g["guessopid__name"]=g["guessopgameid__path"]
 
-	timetowait=str(datetime.datetime(2017,5,14,21,59)-
+	timetowait=str(datetime.datetime(2017,5,22,3,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
-	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,"wait":timetowait}
+	timetopromotion=str(datetime.timedelta(seconds=end-timetoadd-int(time.time())))
+	print(timetopromotion)
+	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,
+	"wait":timetowait,"promotime":timetopromotion}
 	return renderrandomtitle(request, html,context)
+
+def graphmmr(request,server):
+
+	deb=time.time()
+	leagueid=39 #inhard cause im lazy
+	playerwcs=Players.objects.filter(server=server,smurf__wcsregion=server,
+	rating__gte=6000,season=32).order_by("-rating").values("rating",
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
+	"league__sigle","last_played","idplayer")
+
+	listegoodplayerid=[]
+	listemmr=[]
+	mmr8=0
+	num=1
+	for p in playerwcs:
+		####HACK we should add a flag wcs to player in db
+		name2=p["name"].lower().split("#")[0]
+		if name2[0:6]=="liquid":
+			name2=name2[6:]
+		p["truename"]= name2==p["smurf__pseudo"].lower()
+		if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
+			p["truename"]=True
+		######################
+		if p["truename"]:
+			listegoodplayerid.append(p["idplayer"])
+			listemmr.append(p["rating"])
+			if num==8:
+				mmr8=p["rating"]
+			num+=1
+	datestart=int(time.time())-3600*12
+
+
+	g2=[]
+	listmmrstart=[]
+	curent_pos={}
+	for playerid in listegoodplayerid:
+		player=Players.objects.get(pk=playerid)
+		mmrstart=getMMRatDate(player,datestart)
+		listmmrstart.append((int(mmrstart),playerid))
+
+		g2.append({"date":datestart,"player__name":player.name,
+		"current_mmr":mmrstart})
+		g2.extend(Games.objects.filter(server=server,player=player,date__gte=datestart).order_by("date").values(
+			"player__name","current_mmr","date","guessopid__name",
+			"guessopid__mainrace","guessmmrchange"))
+		g2.append({"date":int(time.time()),"player__name":player.name,
+		"current_mmr":player.rating})
+		listmmrstart.sort(reverse=True)
+	recentgames=Games.objects.filter(server=server,player__in=listegoodplayerid,
+	date__gte=datestart).order_by("date")
+	m8=[]
+	m9=[]
+	try:
+		m8.append({"current_mmr":listmmrstart[7][0],"date":datestart,"player__name":"mmr8"})
+		m9.append({"current_mmr":listmmrstart[8][0],"date":datestart,"player__name":"mmr9"})
+		current8=listmmrstart[7]
+		current9=listmmrstart[8]
+		minmmr=listmmrstart[-1][0]
+		for g in recentgames:
+			newmmr=int(g.current_mmr)
+			oldmmr=int(g.current_mmr)-g.guessmmrchange
+			try:
+				listmmrstart.remove((oldmmr,g.player.idplayer))
+			except ValueError:
+				print(listmmrstart)
+				print((oldmmr,g.player.idplayer))
+			listmmrstart.append((newmmr,g.player.idplayer))
+			listmmrstart.sort(reverse=True)
+			if listmmrstart[-1][0]<minmmr:
+				minmmr=listmmrstart[-1][0]
+			if listmmrstart[7]!=current8:
+				current8=listmmrstart[7]
+				m8.append( {"current_mmr":listmmrstart[7][0],"date":g.date,"player__name":"mmr8"})
+			if listmmrstart[8]!=current9:
+				current9=listmmrstart[8]
+				m9.append({"current_mmr":listmmrstart[8][0],"date":g.date,"player__name":"mmr9"} )
+
+		m8.append({"current_mmr":listmmrstart[7][0],"date":time.time(),"player__name":"mmr8"})
+		m8.extend(g2)
+	except IndexError:
+		print("indexerror")
+
+	#m9.append({"current_mmr":listmmrstart[8][0],"date":time.time(),"player__name":"mmr9"})
+	#g2.extend(m9)
+	context={"games":m8,"min":minmmr,"max":7000,"name":"test","mmr8":mmr8,
+	"listemmr":listemmr,"mmrtop":mmr8+100,"mmrbottom":mmr8-200}
+	return renderrandomtitle(request, 'starcraftHistory/graphtest3.html',context)
+
+def getMMRatDate(player,date):
+	g=Games.objects.filter(date__lte=date,player=player,
+	current_mmr__isnull=False).order_by("-date").first()
+	if g!=None:
+		return g.current_mmr
+	else:
+		g=Games.objects.filter(date__gte=date,player=player,
+		current_mmr__isnull=False).order_by("date").first()
+		if g!=None:
+			return g.current_mmr
+	return player.rating
 
 def wcsold(request):
 	return wcs(request,server="eu")
