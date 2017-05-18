@@ -21,4 +21,7 @@ urlpatterns = [
     url(r'^graph/(?P<playerid>[0-9]+)/$', views.graph, name='graph'),
     url(r'^(?P<server>.*)/comparemmr/$', views.graphmmr, name='graphmmr'),
     url(r'^(?P<server>.*)/statswcs/$', views.statswcs, name='statswcs'),
+    url(r'^testrecentlive/$', views.recentlive, name='rlive'),
+    url(r'^testrecentlive/lm/$', views.lastmatchsince, name='since'),
+
 ]

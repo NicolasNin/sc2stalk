@@ -7,11 +7,11 @@ from background_task import background
 from django.db import transaction
 from time import time
 def updateLeagues(server):
-	if Global.objects.filter(name="lastupdateleagues").exists():
-		val=Global.objects.filter(name="lastupdateleagues")[0]
+	if Global.objects.filter(name="lastupdateleagues"+server).exists():
+		val=Global.objects.filter(name="lastupdateleagues"+server)[0]
 		lastup=int(val.value)
 	else:
-		val=Global(name="lastupdateleagues",value=str(int(time())))
+		val=Global(name="lastupdateleagues"+server,value=str(int(time())))
 		lastup=int(time())-3610
 		val.save()
 	#first we retrieve the already existing leagues
