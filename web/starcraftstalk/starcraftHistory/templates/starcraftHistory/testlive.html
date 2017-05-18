@@ -25,7 +25,7 @@
      {% for g in games %}
 
       <tr >
-        <td>{{g.date}}</td>
+        <td>{{g.date_human}}</td>
         <td>{{g.player__mainrace|icon:"race"}}<a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
          <td>{{g.current_mmr}}</td>
          <td>{{g.guessmmrchange}}</td>
@@ -84,7 +84,7 @@ function success(data) {
 
 function addOneGame(g){
   console.log(g)
-  date=g["date"]
+  date=g["date_human"]
   name1=g["player__name"]
   mmr1=g["current_mmr"]
   dmmr1=g["guessmmrchange"]
