@@ -11,11 +11,15 @@ def RepresentsInt(s):
     except ValueError:
         return False
 
-def gamesDict(date):
+def gamesDict(date,reverse=True):
+    if reverse:
+        order="-date"
+    else:
+        order="date"
     return  Games.objects.filter(
-        	pk__gt=date,date__isnull=False).select_related(
+        	date__gt=date,date__isnull=False).select_related(
         	"player").order_by(
-        	"-date").values(
+        	order).values(
         	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
         	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
         	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player",
@@ -36,28 +40,20 @@ def addHumanDate(games2,timetoadd=0):
             g["guessopid__name"]=g["guessopgameid__path"]
 
     return games
-def last20games():
 
-    return  Games.objects.all().select_related(
-        	"player").order_by(
-        	"-date").values(
-        	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
-        	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
-        	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player",
-        	"guessopid__mainrace","player__mainrace","pk"
-        	)
 def recentlive(request):
     maxpk=Games.objects.latest("pk").pk
-    games=gamesDict(maxpk-10)
+    maxdate=Games.objects.latest("date").date
+    games=gamesDict(maxdate-3600)
     games=addHumanDate(games)
-    context={"time":time.time(),"games":games,"server":"","maxpk":maxpk-5}
+    context={"time":time.time(),"games":games,"server":"","maxpk":maxpk,"maxdate":maxdate}
     return render(request,'starcraftHistory/testlive.html',context)
 def lastmatchsince(request):
     print("azeazeze")
     print(request.GET)
     if RepresentsInt(request.GET["date"]):
         date=int(request.GET["date"])
-        games=gamesDict(date)
+        games=gamesDict(date,False)
         games=addHumanDate(games)
         games={"games":list(games)}
         print(games)

@@ -1,15 +1,22 @@
 {% extends 'starcraftHistory/base.html' %}
 {% block content %}
+<style>
+.head{background-color: #f2f2f2}
+.new{background-color: rgba(253, 206, 53, 0.1);border: 1px solid black;}
+</style>
 <script
   src="https://code.jquery.com/jquery-3.2.1.min.js"
   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
   crossorigin="anonymous"></script>
-
+<div class="row">
+<div class="col-lg-4">
+</div>
+<div class="col-lg-8">
 <button type="button" class="btn btn-primary" onclick="update()">Update</button>
-
 <table class="table">
   <thead>
-    <tr>
+    <tr class="head">
+      <th title="EDT time, add 6h for CEST"> pk</th>
       <th title="EDT time, add 6h for CEST"> Date (EDT)</th>
       <th>Player 1</th>
       <th>MMR</th>
@@ -24,7 +31,8 @@
       {% load starcraftHistory_extras %}
      {% for g in games %}
 
-      <tr >
+      <tr class="new">
+        <td>{{g.pk}}</td>
         <td>{{g.date_human}}</td>
         <td>{{g.player__mainrace|icon:"race"}}<a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
          <td>{{g.current_mmr}}</td>
@@ -42,17 +50,18 @@
 
     </tbody>
 </table>
-
+</div>
+</div>
 <script>
 /*$.getJSON("lm/",data,success );*/
 var maxpk={{maxpk}};
-var maxdate=1494984310;
+var maxdate={{maxdate}};
 function update(){
   console.log("update");
 $.ajax({
     url: 'lm',
     type: 'GET',
-    data: {"date":maxpk},
+    data: {"date":maxdate,"maxpk":maxpk},
     contentType: 'application/json; charset=utf-8',
     dataType: 'json',
     async: true,
@@ -65,44 +74,44 @@ function success(data) {
   console.log("succes")
   games=data["games"];
   var g;
+  var num=0
+  if (games.length!=0)
+  {
+    console.log("change color")
+    $(".new").removeClass("new");}
   for (g in games){
     addOneGame(games[g]);
-    if (games[g]["date"]>maxdate)
-    {
-      maxdate=games[g]["date"];
-    }
-    if (games[g]["pk"]>maxpk)
-    {
-      maxpk=games[g]["pk"];
-    }
-
-
+    if (games[g]["pk"]>maxpk)   {     maxpk=games[g]["pk"];}
+    if (games[g]["date"]>maxdate)   {     maxdate=games[g]["date"];}
     console.log(maxdate,maxpk);
-
+    num++;
   };
+
 };
 
 function addOneGame(g){
-  console.log(g)
-  date=g["date_human"]
-  name1=g["player__name"]
-  mmr1=g["current_mmr"]
-  dmmr1=g["guessmmrchange"]
-  name2=g["guessopid__name"]
-  mmr2=g["guessopgameid__current_mmr"]
-  dmmr2=g["guessopgameid__guessmmrchange"]
+  console.log(g);
+  pk=g["pk"];
+  date=g["date_human"];
+  name1=g["player__name"];
+  mmr1=g["current_mmr"];
+  dmmr1=g["guessmmrchange"];
+  name2=g["guessopid__name"];
+  mmr2=g["guessopgameid__current_mmr"];
+  dmmr2=g["guessopgameid__guessmmrchange"];
 
- line='<tr><td>'+date+'</td>'
- line=line+'<td>'+name1+'</td>'
- line=line+'<td>'+mmr1+'</td>'
- line=line+'<td>'+dmmr1+'</td>'
+ line='<tr class="new"><td>'+pk+'</td>';
+ line=line+'<td>'+date+'</td>';
+ line=line+'<td>'+name1+'</td>';
+ line=line+'<td>'+mmr1+'</td>';
+ line=line+'<td>'+dmmr1+'</td>';
 
- line=line+'<td>'+name2+'</td>'
- line=line+'<td>'+mmr2+'</td>'
- line=line+'<td>'+dmmr2+'</td></tr>'
- console.log(line)
- $(line).hide().prependTo("#gameliste").fadeIn(500)
-};
+ line=line+'<td>'+name2+'</td>';
+ line=line+'<td>'+mmr2+'</td>';
+ line=line+'<td>'+dmmr2+'</td></tr>';
+ console.log(line);
+ $(line).hide().prependTo("#gameliste").fadeIn(500);
+}
 
 
 </script>

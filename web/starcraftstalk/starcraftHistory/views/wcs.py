@@ -101,8 +101,8 @@ def wcs(request,server):
 
 	timetowait=str(datetime.datetime(2017,5,22,3,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
-	timetopromotion=str(datetime.timedelta(seconds=end-timetoadd-int(time.time())))
-	print(timetopromotion)
+	timetopromotion=str(datetime.timedelta(seconds=end-int(time.time())))
+	print(timetopromotion,end)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,
 	"wait":timetowait,"promotime":timetopromotion}
 	return renderrandomtitle(request, html,context)
