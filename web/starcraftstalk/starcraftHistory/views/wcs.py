@@ -198,7 +198,7 @@ def graphmmr(request,server):
 
 	#m9.append({"current_mmr":listmmrstart[8][0],"date":time.time(),"player__name":"mmr9"})
 	#g2.extend(m9)
-	context={"games":m8,"min":minmmr,"max":7000,"name":"test","mmr8":mmr8,
+	context={"games":m8,"min":max(minmmr,mmr8-200),"max":7000,"name":"test","mmr8":mmr8,
 	"listemmr":listemmr,"mmrtop":mmr8+100,"mmrbottom":mmr8-200,"server":server}
 	return renderrandomtitle(request, 'starcraftHistory/graphtest3.html',context)
 
