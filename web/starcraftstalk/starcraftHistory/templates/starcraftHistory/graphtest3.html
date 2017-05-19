@@ -3,8 +3,17 @@
 <script src="https://code.highcharts.com/highcharts.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 
+<div class="row">
+  <div class="col-lg-12">
+<center><a href="../wcs"> back to ranking </a></center>
+</div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
 
 <div id="container" style="min-width: 310px; height: 800px; margin: 0 auto"></div>
+</div>
+</div>
 <script>
 function hideTooFar() {
 
@@ -13,7 +22,9 @@ function hideTooFar() {
 chart.series[{{forloop.counter}}].hide();
 {% endif%}
 {% endfor %}
+
 }
+
 </script>
 
 <script>
@@ -40,7 +51,6 @@ var chart=Highcharts.chart('container', {
     },
     yAxis: {
         title: {
-          min:6300,
             text: 'MMR'
         },
       //  min: {{min}}
@@ -94,5 +104,24 @@ var chart=Highcharts.chart('container', {
     ]
 })
 hideTooFar()
+
+console.log(chart.series[0])
+/*chart.update(userOptions:{
+  plotOptions: {
+
+      spline: {
+          marker: {
+              enabled: true
+          }
+      }
+      ,
+      series: {
+           threshold: {{min}}
+       },
+  }
+
+})*/
+console.log(chart.userOptions.plotOptions.series.threshold)
+//chart.series[0].update({threshold:6200})
 </script>
 {% endblock content %}
