@@ -3,6 +3,9 @@
 <style>
 .head{background-color: #f2f2f2}
 .new{background-color: rgba(253, 206, 53, 0.1);border: 1px solid black;}
+.hova {
+    background-color: rgba(193, 238, 251, 0.34);
+}
 </style>
 <script
   src="https://code.jquery.com/jquery-3.2.1.min.js"
@@ -31,7 +34,7 @@
       {% load starcraftHistory_extras %}
      {% for g in games %}
 
-      <tr class="new">
+      <tr class="new  p{{g.player}}" >
         <td>{{g.pk}}</td>
         <td>{{g.date_human}}</td>
         <td>{{g.player__mainrace|icon:"race"}}<a href="{%url 'index'%}player/{{g.player}}/">{{g.player__name}}</a></td>
@@ -53,6 +56,22 @@
 </div>
 </div>
 <script>
+// hover
+
+
+function highlighthover(classe){
+$("."+classe).mouseover(function(e){
+
+    $(".hova").removeClass("hova");
+    $("."+classe).addClass("hova");
+  return false;
+}).mouseout(function(e) {
+    $("."+classe).removeClass("hova");
+});
+}
+{%for pid in playersid%}
+highlighthover("p{{pid}}");
+{%endfor%}
 /*$.getJSON("lm/",data,success );*/
 var maxpk={{maxpk}};
 var maxdate={{maxdate}};

@@ -1,8 +1,8 @@
 from .views import renderrandomtitle
-from ..models import Players,Games
+from ..models import Players,Games,Global
 import datetime,time
 import pytz
-
+import json
 def getPromotionWindows(server):
 	""" return the start and end of promotion windows for today
 	in UTC as a timestamp"""
@@ -78,6 +78,9 @@ def wcs(request,server):
 			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
 		else:
 			p["name_human"]=p["name"]
+	#store this list
+	v=Global.objects.filter(name="listewcsusplayer").update(value=json.dumps(listegoodplayerid))
+	
 	#recent games of thoses players last 12h
 	DELTATIME=3600*6
 	#count the game between promotion
