@@ -80,7 +80,7 @@ def wcs(request,server):
 			p["name_human"]=p["name"]
 	#store this list
 	v=Global.objects.filter(name="listewcsusplayer").update(value=json.dumps(listegoodplayerid))
-	
+
 	#recent games of thoses players last 12h
 	DELTATIME=3600*6
 	#count the game between promotion
@@ -108,7 +108,7 @@ def wcs(request,server):
 	timetopromotion=str(datetime.timedelta(seconds=end-int(time.time())))
 	print(timetopromotion,end,end-int(time.time()),server)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,
-	"wait":timetowait,"promotime":timetopromotion}
+	"wait":timetowait,"promotime":timetopromotion,"server":server}
 	return renderrandomtitle(request, html,context)
 
 def graphmmr(request,server):
@@ -195,7 +195,7 @@ def graphmmr(request,server):
 	#m9.append({"current_mmr":listmmrstart[8][0],"date":time.time(),"player__name":"mmr9"})
 	#g2.extend(m9)
 	context={"games":m8,"min":minmmr,"max":7000,"name":"test","mmr8":mmr8,
-	"listemmr":listemmr,"mmrtop":mmr8+100,"mmrbottom":mmr8-200}
+	"listemmr":listemmr,"mmrtop":mmr8+100,"mmrbottom":mmr8-200,"server":server}
 	return renderrandomtitle(request, 'starcraftHistory/graphtest3.html',context)
 
 def getMMRatDate(player,date):
