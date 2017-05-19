@@ -174,6 +174,10 @@ def graphmmr(request,server):
 			try:
 				listmmrstart.remove((oldmmr,g.player.idplayer))
 			except ValueError:
+				for (mmr,pid) in listmmrstart:
+					if pid==g.player.idplayer:
+						listmmrstart.remove((mmr,pid))
+
 				print(listmmrstart)
 				print((oldmmr,g.player.idplayer))
 			listmmrstart.append((newmmr,g.player.idplayer))
