@@ -13,7 +13,7 @@ def getPromotionWindows(server):
 		tz= pytz.timezone('Europe/Paris')
 	#we are cest time on the server
 	cest= pytz.timezone('Europe/Paris')
-	now=cest.localize(datetime.datetime.now())
+	now=pytz.utc.localize(datetime.datetime.now())
 	now_local=now.astimezone(tz)
 	#promotion is between 21h each day
 	if now_local.hour>=21:
@@ -35,6 +35,7 @@ def wcs(request,server):
 		timetoadd=2*3600
 		thresh=6300
 	(start,end)=getPromotionWindows(server)
+	print(start,end,end-time.time())
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
@@ -102,7 +103,7 @@ def wcs(request,server):
 	timetowait=str(datetime.datetime(2017,5,22,3,59)-
 	datetime.datetime.fromtimestamp(int(time.time())))
 	timetopromotion=str(datetime.timedelta(seconds=end-int(time.time())))
-	print(timetopromotion,end)
+	print(timetopromotion,end,end-int(time.time()),server)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,
 	"wait":timetowait,"promotime":timetopromotion}
 	return renderrandomtitle(request, html,context)
