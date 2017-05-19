@@ -102,7 +102,7 @@ def renderrandomtitle(request,page,context):
 def recent(request,server):
 	games=Games.objects.filter(server=server,date__gte=int(time.time()-1800))
 	(games_dict,stat,lastmatch)=getalldict(games)
-	context={"games":games_dict,"name":" last 30min"}
+	context={"games":games_dict,"name":" last 30min","server":server}
 	return render(request, 'starcraftHistory/player.html', context)
 def highmmr(request):
 	games=Games.objects.filter(
