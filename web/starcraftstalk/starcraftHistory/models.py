@@ -92,6 +92,8 @@ class Players(models.Model):
     zwins=models.IntegerField(blank=True, null=True)
     rankedwins=models.IntegerField(blank=True, null=True)
     rankedlosses=models.IntegerField(blank=True, null=True)
+    wcs=  models.NullBooleanField(null=True)
+
 
 
 
@@ -142,3 +144,14 @@ class Clans(models.Model):
     class Meta:
         managed = True
         db_table = 'Clans'
+
+class Cartes(models.Model):
+    idcarte = models.AutoField(db_column='idcarte', primary_key=True)  # Field name made lowercase.
+    name = models.CharField(db_column='name', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    namekr = models.CharField(db_column='namekr', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    image= models.CharField(db_column='value', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    def __str__(self):
+        return str(self.name)
+    class Meta:
+        managed = False
+        db_table = 'Carte'
