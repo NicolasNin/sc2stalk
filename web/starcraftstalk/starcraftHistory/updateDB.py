@@ -138,6 +138,11 @@ def updateAll():
 	updateServerCycle("us")
 	print("UPDATING EU")
 	updateServerCycle("eu")
+#	print("UPDATING KR")
+#	updateServerCycle("kr")
+	print(" Cycle update finished")
+	print("")
+
 def updateServerCycle(server="eu"):
 	""" we get the ladders date from all the league, then
 	 update each player when needed"""
@@ -168,7 +173,6 @@ def updateServerCycle(server="eu"):
 	print(newgames)
 	found=findOpListObject(newgames,save=False)
 	checkReciprocal(found,save=True)
-	print("update finished")
 
 def syncDbwithMH(player):
 	"""we update the games without maps and add newgames if MH was
@@ -214,7 +218,7 @@ def addNewGamePlayer(pdb,p,lid,server):
 			if msg=="ranked" or msg=="many":
 				msg=str(deltacount)
 			returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),"FASTER",p["last_played"],
-				deltaMMR,msg,lid,player_id,server)
+				deltaMMR,msg,lid,player_id,False,server)
 			list_newgamesid.append(returngame)
 	return (maxdate,list_newgamesid)
 
@@ -251,13 +255,13 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 	for (date,m) in mh[shiftMH:]:
 		if match_db.filter(date=date).exists():
 			mdb=match_db.filter(date=date)[0]
-			mdb.map=m["map"]
+			mdb.map=m["map"].encode('latin-1').decode('utf-8')
 			mdb.decision=m["decision"]
 			mdb.save()
 			print("update of map ",p["path"],date,mdb.idgames)
 		elif match_db.filter(date=date+1).exists():
 			mdb=match_db.filter(date=date+1)[0]
-			mdb.map=m["map"]
+			mdb.map=m["map"].encode('latin-1').decode('utf-8')
 			mdb.decision=m["decision"]
 			mdb.date=date
 			mdb.save()
@@ -272,7 +276,7 @@ def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses
 def addGamesinDB(p,sc2map,sc2type,decision,speed,date,deltaMMR,ranked,lid,player_id,
 unknown=False,server="eu"):
 	print(p["path"],date,unknown,lid,deltaMMR,decision)
-	sc2map=sc2map[0:44]
+	sc2map=sc2map[0:44].encode("latin-1").decode("utf-8")
 	try:
 		with transaction.atomic():
 			if unknown:#in those game we dont know the player but we know the map (from MH)

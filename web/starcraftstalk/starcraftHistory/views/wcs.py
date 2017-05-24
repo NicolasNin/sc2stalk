@@ -3,6 +3,13 @@ from ..models import Players,Games,Global
 import datetime,time
 import pytz
 import json
+def getTimeDelta(ts):
+	dif=int(time.time())-ts
+	print(dif)
+	if dif>86400:
+		return	str(datetime.timedelta(seconds=dif)).split("day")[0] +" days"
+	else:
+		return	str(datetime.timedelta(seconds=dif))
 def getPromotionWindows(server):
 	""" return the start and end of promotion windows for today
 	in UTC as a timestamp"""
@@ -23,57 +30,79 @@ def getPromotionWindows(server):
 		end=tz.localize(datetime.datetime(now_local.year,now_local.month,now_local.day,21)).astimezone(pytz.utc)
 		start=(end-datetime.timedelta(days=1))
 	return (start.timestamp(),end.timestamp())
+def getListePlayerWcs2(server="eu",thresh=6300):
+	if server=="us":
+		thresh=6000
+	playerwcs=Players.objects.filter(wcs=1,
+	smurf__wcsregion=server,season=32,server=server,
+		rating__gte=thresh).order_by("-rating").values("rating",
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
+	"league__sigle","last_played","idplayer")
+	return playerwcs
 
+def getNumberGamesAt(date,playerid):
+	""" we look for the first game with win loss ties date BEFORE the date"""
+	g=Games.objects.filter(player=playerid,date__lte=date).order_by("-date").first()
+	if g!=None:
+		return (g.current_win,g.current_losses,g.current_ties)
+	else:
+		g=Games.objects.filter(player=playerid,date__gte=date).order_by("date").first()
+		dloss=0
+		dwin=0
+		dtie=0
+		if g.decison=="WIN":
+			dwin+=1
+		if g.decison=="LOSS":
+			dloss+=1
+		if g.decison=="TIE":
+			dtie+=1
+		if g!=None:
+			return (g.current_win-dwin,g.current_losses-dloss,g.current_ties-dtie)
+	return(0,0,0)
 def wcs(request,server):
 	if server=="us":
 		timetoadd=-4*3600
 		html="starcraftHistory/wcsus.html"
 		thresh=6000
-
+		lastday=datetime.datetime(2017,6,4,23,59)
 	else:
-		html="starcraftHistory/wcs2.html"
+		html="starcraftHistory/wcseu.html"
 		timetoadd=2*3600
 		thresh=6300
+		lastday=datetime.datetime(2017,5,28,23,59)
+
 	(start,end)=getPromotionWindows(server)
-	print(start,end,end-time.time())
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
+	"""
 	playerwcs=Players.objects.filter(
 	smurf__wcsregion=server,season=32,server=server,
 		rating__gte=thresh).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
+	"""
+	playerwcs=getListePlayerWcs2(server,thresh)
+	if len(playerwcs)>=7:
+		basemmr=int(playerwcs[7]['rating'])
+	else:
+		basemmr=0
+
 	num=1
-	basemmr=0
 	listegoodplayerid=[]
-	gamesbetween=Games.objects.filter(server=server,date__range=(start,end))
+	gamesbetween=Games.objects.filter(server=server,date__range=(start,end),player__wcs=1)
 	for p in playerwcs:
-		####HACK we should add a flag wcs to player in db
-		name2=p["name"].lower().split("#")[0]
-		if name2[0:6]=="liquid":
-			name2=name2[6:]
-
-		p["truename"]= name2==p["smurf__pseudo"].lower()
-		if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
-			p["truename"]=True
-
-		######################
-		if p["truename"]:
-
-			p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
-			listegoodplayerid.append(p["idplayer"])
-			p["num"]=num
-
-			if num<=lastQualif:
-				p["qualif"]="qualif"
-			else:
-				p["qualif"]="notqualif"
-			if num==lastQualif:
-				basemmr=p["rating"]
-			num+=1
-		p["LP"]=str(datetime.timedelta(
-		seconds=int(time.time())-p["last_played"]))[0:7]
+		p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
+		(win,loss,ties)=getNumberGamesAt(start,p["idplayer"])
+		print(p["numgames"],p["wins"]-win,p["loses"]-loss)
+		listegoodplayerid.append(p["idplayer"])
+		p["num"]=num
+		if num<=lastQualif:
+			p["qualif"]="qualif"
+		else:
+			p["qualif"]="notqualif"
+		num+=1
+		p["LP"]=getTimeDelta(p["last_played"])
 		if p["smurf__pseudo"]!=None:
 			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
 		else:
@@ -93,17 +122,16 @@ def wcs(request,server):
 	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
 	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
 	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player",
-	"guessopid__mainrace","player__mainrace"
-	)
+	"guessopid__mainrace","player__mainrace")
 	for g in recentwcsgames:
 		g["date_human"]=datetime.datetime.fromtimestamp(
 		g["date"]+timetoadd).strftime('%d %b %H:%M')
 		if g["guessopid__smurf__pseudo"]!= None:
 			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
-		if g["guessopid__name"]==None:
-			g["guessopid__name"]=g["guessopgameid__path"]
+		if g["guessopid__name"]==None and g["guessopgameid__path"]!=None :
+			g["guessopid__name"]=g["guessopgameid__path"].split('/')[-1]
 
-	timetowait=str(datetime.datetime(2017,5,22,3,59)-
+	timetowait=str(lastday-
 	datetime.datetime.fromtimestamp(int(time.time())))
 	timetopromotion=str(datetime.timedelta(seconds=end-int(time.time())))
 	print(timetopromotion,end,end-int(time.time()),server)
