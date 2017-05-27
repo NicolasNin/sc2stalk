@@ -1,5 +1,6 @@
 from .views import renderrandomtitle
 from ..models import Players,Games,Global
+from django.db.models import Max,Min,Sum,Count
 import datetime,time
 import pytz
 import json
@@ -380,7 +381,6 @@ def wcsdata(request,server):
 
 
 def statswcs(request,server):
-	leagueid=39 #inhard cause im lazy
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	playerwcs=Players.objects.filter(wcs=1,
 	smurf__wcsregion=server,season=32,server=server,
@@ -391,12 +391,12 @@ def statswcs(request,server):
 	basemmr=0
 	listegoodplayerid=[]
 	listename=[]
-	startjeudi=datetime.datetime(2017,5,11,19,0)
+	startjeudi=datetime.datetime(2017,5,25,19,0)
 	startvendredi=datetime.datetime(2017,5,12,19,0)
 	startsamedi=datetime.datetime(2017,5,13,19,0)
-	startdimanche=datetime.datetime(2017,5,14,19,0)
+	startdimanche=datetime.datetime(2017,5,28,19,0)
 	gamesbetween=Games.objects.filter(
-		date__gte=startsamedi.timestamp(),
+		date__gte=startjeudi.timestamp(),
 		date__lte=startdimanche.timestamp())
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
