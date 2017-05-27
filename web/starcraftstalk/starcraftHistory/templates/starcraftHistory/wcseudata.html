@@ -1,0 +1,160 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
+<style>
+.head{background-color: #f2f2f2}
+.new{background-color: rgba(253, 206, 53, 0.1);border: 1px solid black;}
+.hova {
+    background-color: rgba(193, 238, 251, 0.34);
+}
+.border{border: 1px solid #dddddd;}
+</style>
+
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous">
+  </script>
+
+<div class="row">
+  <div class="col-lg-12">
+    <center><h2>WCS Challenger EU #3: Valencia   </h2></center>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
+    <center>Challenger ends in {{wait}} | <a href="http://www.teamliquid.net/forum/sc2-tournaments/523154-wcs-challenger-2017-3-valencia-na-and-eu">
+    TL thread </a>|<a href="ttps://www.eslgaming.com/article/get-ready-wcs-challenger-j-nk-ping-3522">
+    esl rules </a> |
+  <a href="https://twitter.com/esportstarcraft"> Official twitter </a></center>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-7">
+    <h3> Current WCS EU ranking  </h3>
+    <p>Current promotion windows ends in <b>{{promotime}}</b>
+    <br>Challenger ends in <b>{{wait}}</b></p>
+    <div class="timer"></div>
+    <table class="table">
+  <thead >
+    <tr >
+      <th>#</th>
+      <th>Name</th>
+      <th>MMR</th>
+      <th title="Distance to 8th"><center>Δ</center></th>
+        <th title="Win-Loss-Total(MMR)">Day1</th>
+        <th title="Win-Loss-Total(MMR)">Day2</th>
+        <th title="Win-Loss-Total(MMR)">Day3</th>
+
+      <th title="last played"><center>lp</center></th>
+    </tr>
+  </thead>
+
+  <tbody>
+{% load starcraftHistory_extras %}
+   {% for player in players %}
+
+	   <tr class="disp{{player.truename}} {{player.qualif}} p{{player.idplayer}}">
+	     <th scope="row">{{player.num}}</th>
+    	 <td> {{player.mainrace|icon:"race"}}
+         <a href="{%url 'index'%}{{server}}/player/{{player.idplayer}}/">
+             {% load static starcraftHistory_extras %}
+
+         {{player.name|split:"#"}}</a></td>
+      	<td>{{player.rating}}</td>
+      	<td><center>{{player.rating|add:basemmr}}</center></td>
+
+      	<td class"=border"><center>{{player.win1}}-{{player.loss1}}:<b>
+        {{player.total1}}</b>({{player.mmr1}})</center></td>
+      	<td class"=border"><center>{{player.win2}}-{{player.loss2}}:<b>
+        {{player.total2}}</b>({{player.mmr2}})</center></td>
+      	<td class"=border"><center>{{player.win3}}-{{player.loss3}}:<b>
+        {{player.total3}}</b>({{player.mmr3}})</center></td>
+
+
+        <td>{{player.LP}}</td>
+    </tr>
+
+
+
+   {% endfor %}
+
+
+  </tbody>
+</table>
+Some notes on this ranking, we have removed
+  <ul>
+  <li><div id="problem">(*)Shadown is a close call at 14 games at day 2</div> </li>
+  <li> Non EU players  </li>
+  <li> Players not using their names (ie barcodes)</li>
+  <li> MMR  <6300 are arbitrally not displayed  </li>
+  <li> There is 3 time windows in which players have to play 15 games:
+    between Thursday 21:00 CEST and friday, then friday-saturday and saturday-sunday
+    (see <a href="https://www.eslgaming.com/article/get-ready-wcs-challenger-j-nk-ping-3522">
+    esl rules </a> ).
+  <li> If a player is missing (or shouldn't be here) dont hesitate to contact
+    <a href="https://twitter.com/nicolas42">me</a>  (its harder to know who is eligible
+    on NA than EU)
+    </li>
+
+
+  </div>
+
+  <div class="col-lg-5">
+    <h3> Recent games</h3>
+
+     <table class="table">
+       <thead class="head">
+         <tr>
+           <th title="CEST time, remove 2h for UTC"> Date (CEST)</th>
+           <th>Player 1</th>
+           <th>MMR</th>
+           <th>ΔMMR </th>
+           <th>Player 2</th>
+           <th>MMR</th>
+           <th>ΔMMR </th>
+         </tr>
+       </thead>
+
+         <tbody>
+
+          {% for g in games %}
+
+       	   <tr class="p{{g.player}}" >
+             <td>{{g.date_human}}</td>
+           	 <td>{{g.player__mainrace|icon:"race"}}<a href="{%url 'index'%}{{server}}/player/{{g.player}}/">{{g.player__name}}</a></td>
+             	<td>{{g.current_mmr}}</td>
+             	<td>{{g.guessmmrchange}}</td>
+              <td>{{g.guessopid__mainrace|icon:"race"}}<a href="{%url 'index'%}{{server}}/player/{{g.guessopgameid__player}}/">{{g.guessopid__name}}</a></td>
+             	<td> {{g.guessopgameid__current_mmr}}</td>
+             	<td> {{g.guessopgameid__guessmmrchange}}</td>
+
+           </tr>
+
+
+
+          {% endfor %}
+
+
+         </tbody>
+     </table>
+
+  </div>
+</div>
+<script>
+function highlighthover(classe){
+
+$("."+classe).mouseover(function(e){
+    $(".hova").removeClass("hova");
+    $("."+classe).addClass("hova");
+  return false;
+}).mouseout(function(e) {
+    $("."+classe).removeClass("hova");
+});
+}
+{%for p in players%}
+highlighthover("p{{p.idplayer}}");
+{%endfor%}
+</script>
+
+{% endblock content %}

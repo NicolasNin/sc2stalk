@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^(?P<server>.*)/players/$', views.players, name='players'),
     url(r'^pro/$', views.pro, name='pro'),
     url(r'^(?P<server>.*)/wcs/$', views.wcs, name='wcs'),
+    url(r'^(?P<server>.*)/wcs2/$', views.wcsdata, name='wcsdata'),
     url(r'^wcs/$', views.wcsold, name='wcsold'),
     url(r'^league/(?P<league>[0-9]+)/$', views.league, name='league'),
     url(r'^highmmr/$', views.highmmr, name='highmmr'),
