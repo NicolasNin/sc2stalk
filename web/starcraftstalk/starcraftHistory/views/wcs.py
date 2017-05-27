@@ -114,7 +114,8 @@ def wcs(request,server):
 
 	num=1
 	listegoodplayerid=[]
-	gamesbetween=Games.objects.filter(server=server,date__range=(start,end),player__wcs=1,type="SOLO")
+	gamesbetween=Games.objects.filter(server=server,date__range=(start,end),
+	player__wcs=1,type="SOLO").exclude(ranked="unrank")
 	for p in playerwcs:
 		if p["idplayer"]==1945:
 			p["name"]='ShadoWn*'
