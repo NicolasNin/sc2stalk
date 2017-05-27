@@ -84,7 +84,7 @@ def wcs(request,server):
 		thresh=6300
 		startdate=datetime.datetime(2017,5,25,21)
 		getDates(startdate,"eu")
-		lastday=datetime.datetime(2017,6,4,23,59)
+		lastday=datetime.datetime(2017,5,4,28,59)
 
 
 	(start,end)=getPromotionWindows(server)
