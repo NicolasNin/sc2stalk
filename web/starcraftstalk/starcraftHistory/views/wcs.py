@@ -86,9 +86,9 @@ def wcs(request,server):
 		getDates(startdate,"eu")
 		lastday=datetime.datetime(2017,5,28,23,59)
 
-	start=datetime.datetime(2017,5,26,19).timestamp()
-	end=datetime.datetime(2017,5,27,19).timestamp()
-#	(start,end)=getPromotionWindows(server)
+#	start=datetime.datetime(2017,5,26,19).timestamp()
+	#end=datetime.datetime(2017,5,27,19).timestamp()
+	(start,end)=getPromotionWindows(server)
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
