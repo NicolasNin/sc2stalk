@@ -53,7 +53,7 @@
 	   <tr class="disp{{player.truename}} {{player.qualif}} p{{player.idplayer}}">
 	     <th scope="row">{{player.num}}</th>
     	 <td> {{player.mainrace|icon:"race"}}
-         <a href="../player/{{player.idplayer}}" >
+         <a href="{%url 'index'%}{{server}}/player/{{player.idplayer}}/">
              {% load static starcraftHistory_extras %}
 
          {{player.name|split:"#"}}</a></td>
@@ -93,7 +93,7 @@ Some notes on this ranking, we have removed
      <table class="table">
        <thead class="head">
          <tr>
-           <th title="EDT time, add 6h for CEST"> Date (EDT)</th>
+           <th title="CEST time, remove 2h for UTC"> Date (CEST)</th>
            <th>Player 1</th>
            <th>MMR</th>
            <th>ΔMMR </th>
