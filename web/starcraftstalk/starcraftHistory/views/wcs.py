@@ -59,6 +59,19 @@ def getNumberGamesAt(date,playerid):
 		if g!=None:
 			return (g.current_win-dwin,g.current_losses-dloss,g.current_ties-dtie)
 	return(0,0,0)
+def getDates(start,server):
+	date=[]
+	if server=="us":
+		tz= pytz.timezone('America/New_York')
+	else:
+		tz= pytz.timezone('Europe/Paris')
+	start=tz.localize(start)
+	date.append(start.timestamp())
+	date.append(start.timestamp()+86400)
+	date.append(start.timestamp()+86400)
+	date.append(start.timestamp()+86400)
+	date.append(start.timestamp()+10800)
+	return date
 def wcs(request,server):
 	if server=="us":
 		timetoadd=-4*3600
@@ -69,7 +82,10 @@ def wcs(request,server):
 		html="starcraftHistory/wcseu.html"
 		timetoadd=2*3600
 		thresh=6300
-		lastday=datetime.datetime(2017,5,28,23,59)
+		startdate=datetime.datetime(2017,5,25,21)
+		getDates(startdate,"eu")
+		lastday=datetime.datetime(2017,6,4,23,59)
+
 
 	(start,end)=getPromotionWindows(server)
 	""" we get the top GM player who are from the good wcs region
@@ -90,7 +106,7 @@ def wcs(request,server):
 
 	num=1
 	listegoodplayerid=[]
-	gamesbetween=Games.objects.filter(server=server,date__range=(start,end),player__wcs=1)
+	gamesbetween=Games.objects.filter(server=server,date__range=(start,end),player__wcs=1,type="SOLO")
 	for p in playerwcs:
 		p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
 		(win,loss,ties)=getNumberGamesAt(start,p["idplayer"])
@@ -140,11 +156,14 @@ def wcs(request,server):
 	return renderrandomtitle(request, html,context)
 
 def graphmmr(request,server):
-
+	if server=="us":
+		thresh=6000
+	else:
+		thresh=6300
 	deb=time.time()
 	leagueid=39 #inhard cause im lazy
 	playerwcs=Players.objects.filter(server=server,smurf__wcsregion=server,
-	rating__gte=6000,season=32).order_by("-rating").values("rating",
+	rating__gte=thresh,season=32,wcs=1).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 
