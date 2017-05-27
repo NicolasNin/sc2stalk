@@ -86,8 +86,9 @@ def wcs(request,server):
 		getDates(startdate,"eu")
 		lastday=datetime.datetime(2017,5,28,23,59)
 
-
-	(start,end)=getPromotionWindows(server)
+	start=datetime.datetime(2017,5,26,19).timestamp()
+	end=datetime.datetime(2017,5,27,19).timestamp()
+#	(start,end)=getPromotionWindows(server)
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
@@ -108,6 +109,8 @@ def wcs(request,server):
 	listegoodplayerid=[]
 	gamesbetween=Games.objects.filter(server=server,date__range=(start,end),player__wcs=1,type="SOLO")
 	for p in playerwcs:
+		if p["idplayer"]==1945:
+			p["name"]='ShadoWn*'
 		p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
 		(win,loss,ties)=getNumberGamesAt(start,p["idplayer"])
 		print(p["numgames"],p["wins"]-win,p["loses"]-loss)
@@ -263,3 +266,149 @@ def getMMRatDate(player,date):
 
 def wcsold(request):
 	return wcs(request,server="eu")
+
+
+#def statswcs2(request,server):
+#	if server="eu":
+
+
+def statswcs(request,server):
+	leagueid=39 #inhard cause im lazy
+	lastQualif=8#might be 16 or other in 2017 its 8 on eu
+	playerwcs=Players.objects.filter(wcs=1,
+	smurf__wcsregion=server,season=32,server=server,
+		rating__gte=6300).order_by("-rating").values("rating",
+	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
+	"league__sigle","last_played","idplayer")
+	num=1
+	basemmr=0
+	listegoodplayerid=[]
+	listename=[]
+	startjeudi=datetime.datetime(2017,5,11,19,0)
+	startvendredi=datetime.datetime(2017,5,12,19,0)
+	startsamedi=datetime.datetime(2017,5,13,19,0)
+	startdimanche=datetime.datetime(2017,5,14,19,0)
+	gamesbetween=Games.objects.filter(
+		date__gte=startsamedi.timestamp(),
+		date__lte=startdimanche.timestamp())
+	for p in playerwcs:
+		####HACK we should add a flag wcs to player in db
+		name2=p["name"].lower().split("#")[0]
+		if name2[0:6]=="liquid":
+			name2=name2[6:]
+
+		p["truename"]= name2==p["smurf__pseudo"].lower()
+		if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
+			p["truename"]=True
+
+		######################
+		if p["truename"]:
+			p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
+			listegoodplayerid.append(p["idplayer"])
+			listename.append(p["smurf__pseudo"])
+			p["num"]=num
+			if num<=lastQualif:
+				p["qualif"]="qualif"
+			else:
+				p["qualif"]="notqualif"
+			if num==lastQualif:
+				basemmr=p["rating"]
+			num+=1
+		p["LP"]=str(datetime.timedelta(
+		seconds=int(time.time())-p["last_played"]))[0:7]
+		if p["smurf__pseudo"]!=None:
+			p["name_human"]=p["smurf__pseudo"]+"("+p["name"] +")"
+		else:
+			p["name_human"]=p["name"]
+	#recent games of thoses players last 12h
+	DELTATIME=3600*6
+	#count the game between promotion
+
+	recentwcsgames=Games.objects.filter(server=server,
+	date__gte=startjeudi.timestamp(),date__lte=startdimanche.timestamp(),
+	player__in=listegoodplayerid).select_related(
+	"player").order_by(
+	"-date")
+
+	worstgames=recentwcsgames.order_by("guessmmrchange").values(
+	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
+	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
+	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player"
+	)[:10]
+	bestgames=recentwcsgames.order_by("-guessmmrchange").values(
+	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
+	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
+	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player"
+	)[:10]
+	dangerousgames=recentwcsgames.filter(guessmmrchange__gte=0).order_by(
+	"guessmmrchange").values(
+	"date","guessopgameid__current_mmr","guessopgameid__guessmmrchange",
+	"player__name","current_mmr","guessmmrchange","guessopid__name","player",
+	"guessopgameid__path","guessopid__smurf__pseudo","guessopgameid__player"
+	)[:10]
+
+	for g in worstgames:
+		g["date_human"]=datetime.datetime.fromtimestamp(
+		g["date"]).strftime('%d %b %H:%M')
+		if g["guessopid__smurf__pseudo"]!= None:
+			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
+		if g["guessopid__name"]==None:
+			g["guessopid__name"]=g["guessopgameid__path"]
+	for g in bestgames:
+		g["date_human"]=datetime.datetime.fromtimestamp(
+		g["date"]).strftime('%d %b %H:%M')
+		if g["guessopid__smurf__pseudo"]!= None:
+			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
+		if g["guessopid__name"]==None:
+			g["guessopid__name"]=g["guessopgameid__path"]
+	for g in dangerousgames:
+		g["date_human"]=datetime.datetime.fromtimestamp(
+		g["date"]).strftime('%d %b %H:%M')
+		if g["guessopid__smurf__pseudo"]!= None:
+			g["guessopid__name"]=g["guessopid__smurf__pseudo"]
+		if g["guessopid__name"]==None and g["guessopgameid__path"]!=None :
+			g["guessopid__name"]=g["guessopgameid__path"].split("/")[-1]
+	data=[]
+	for (i,idplayer) in enumerate(listegoodplayerid):
+		for (j,idplayer2) in enumerate(listegoodplayerid):
+			g=recentwcsgames.filter(player=idplayer,
+			guessopid=idplayer2)
+			s=g.aggregate(Sum("guessmmrchange"))["guessmmrchange__sum"]
+			l=len(g)
+			if s==None:
+				s=0
+			data.append([j,i,(s,l)])
+	otherid=recentwcsgames.exclude(guessopid__in=listegoodplayerid ).values("guessopid").order_by("guessopid").annotate(
+	n=Count("guessopid")).filter(n__gte=10).order_by("-n")
+	listotherid=[]
+	nameother=[]
+	for g in otherid:
+		listotherid.append(g["guessopid"])
+		p=Players.objects.get(pk=g["guessopid"])
+		if p.smurf!=None:
+			name=p.smurf.pseudo+"("+p.name+")"
+		else:
+			name=p.name
+		nameother.append(name)
+
+
+	othergames=recentwcsgames.filter(guessopid__in=listotherid)
+	dataother=[]
+	for (i,idplayer) in enumerate(listegoodplayerid):
+		ligne=[]
+		for (j,idother) in enumerate(listotherid):
+
+			g=othergames.filter(player=idplayer,
+			guessopid=idother)
+			s=g.aggregate(Sum("guessmmrchange"))["guessmmrchange__sum"]
+			if s==None:
+				s=0
+			ligne.append(s)
+			l=len(g)
+			dataother.append([i,j,(-s,l)])
+
+
+	context={"players":playerwcs,"basemmr":-basemmr,"games":worstgames,
+	"best":bestgames,"dangerous":dangerousgames,"names":listename,"data":data,
+	"dataother":dataother,"nameother":nameother}
+	return renderrandomtitle(request, 'starcraftHistory/statswcs.html',context)
