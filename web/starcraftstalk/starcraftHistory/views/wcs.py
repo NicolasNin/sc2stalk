@@ -112,7 +112,7 @@ def wcs(request,server):
 
 	num=1
 	listegoodplayerid=[]
-	gamesbetween=Games.objects.filter(server=server,date__range=(start,end+3*3600),
+	gamesbetween=Games.objects.filter(server=server,date__range=(start-86400,end),
 	player__wcs=1,type="SOLO").exclude(ranked="unrank")
 	for p in playerwcs:
 		if p["idplayer"]==1945:
