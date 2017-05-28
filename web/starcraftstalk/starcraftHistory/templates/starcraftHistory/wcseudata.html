@@ -30,7 +30,7 @@
 </div>
 
 <div class="row">
-  <div class="col-lg-7">
+  <div class="col-lg-8">
     <h3> Current WCS EU ranking  </h3>
     <p>Current promotion windows ends in <b>{{promotime}}</b>
     <br>Challenger ends in <b>{{wait}}</b></p>
@@ -45,6 +45,7 @@
         <th title="Win-Loss-Total(MMR)">Day1</th>
         <th title="Win-Loss-Total(MMR)">Day2</th>
         <th title="Win-Loss-Total(MMR)">Day3</th>
+        <th title="Win-Loss-Total(MMR)">Total</th>
 
       <th title="last played"><center>lp</center></th>
     </tr>
@@ -70,6 +71,8 @@
         {{player.total2}}</b>({{player.mmr2}})</center></td>
       	<td class"=border"><center>{{player.win3}}-{{player.loss3}}:<b>
         {{player.total3}}</b>({{player.mmr3}})</center></td>
+      	<td class"=border"><center>{{player.totalwin}}-{{player.totalloss}}:<b>
+        {{player.total}}</b>({{player.totalmmr}})</center></td>
 
 
         <td>{{player.LP}}</td>
@@ -100,7 +103,7 @@ Some notes on this ranking, we have removed
 
   </div>
 
-  <div class="col-lg-5">
+  <div class="col-lg-4">
     <h3> Recent games</h3>
 
      <table class="table">

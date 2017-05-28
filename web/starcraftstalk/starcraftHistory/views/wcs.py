@@ -326,7 +326,8 @@ def wcsdata(request,server):
 		n.append(getNumberGamesAt(dates[0],p["idplayer"]))
 		n.append(getNumberGamesAt(dates[1],p["idplayer"]))
 		n.append(getNumberGamesAt(dates[2],p["idplayer"]))
-		n.append(getNumberGamesAt(dates[3],p["idplayer"]))
+		#n.append(getNumberGamesAt(dates[3],p["idplayer"]))
+		n.append(getNumberGamesAt(dates[4],p["idplayer"]))
 		for i in range(3):
 			p["mmr"+str(i+1)]=int(n[i+1][3])-int(n[i][3])
 			p["win"+str(i+1)]=n[i+1][0]-n[i][0]
@@ -336,6 +337,7 @@ def wcsdata(request,server):
 		p["totalwin"]=p["win1"]+p["win2"]+p["win3"]
 		p["totalloss"]=p["loss1"]+p["loss2"]+p["loss3"]
 		p["total"]=p["total1"]+p["total2"]+p["total3"]
+		p["totalmmr"]=p["mmr1"]+p["mmr2"]+p["mmr3"]
 		if p["idplayer"]==1945:
 			p["name"]='ShadoWn*'
 		p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
