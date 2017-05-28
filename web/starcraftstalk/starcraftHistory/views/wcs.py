@@ -6,7 +6,6 @@ import pytz
 import json
 def getTimeDelta(ts):
 	dif=int(time.time())-ts
-	print(dif)
 	if dif>86400:
 		return	str(datetime.timedelta(seconds=dif)).split("day")[0] +" days"
 	else:
@@ -80,7 +79,6 @@ def getDates(start,server):
 	date.append(start.timestamp()++3*86400+10800)
 	return date
 def wcs(request,server):
-	deb=time.time()
 	if server=="us":
 		timetoadd=-4*3600
 		html="starcraftHistory/wcsus.html"
@@ -160,11 +158,18 @@ def wcs(request,server):
 
 	timetowait=str(lastday-
 	datetime.datetime.fromtimestamp(int(time.time())))
+
+	timetostream=lastday-datetime.datetime.fromtimestamp(7200+int(time.time()))
+
+	if (timetostream<datetime.timedelta(seconds=0)):
+		timetostream="LIVE"
+	else:
+		timetostream="in "+str(timetostream)
 	timetopromotion=str(datetime.timedelta(seconds=end-int(time.time())))
 	print(timetopromotion,end,end-int(time.time()),server)
 	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,
-	"wait":timetowait,"promotime":timetopromotion,"server":server}
-	print(time.time()-deb)
+	"wait":timetowait,"promotime":timetopromotion,"server":server,
+	"stream":timetostream}
 	return renderrandomtitle(request, html,context)
 
 def graphmmr(request,server):
