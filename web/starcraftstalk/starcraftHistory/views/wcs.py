@@ -80,10 +80,11 @@ def getDates(start,server):
 	return date
 def wcs(request,server):
 	if server=="us":
+		tz= pytz.timezone('America/New_York')
 		timetoadd=-4*3600
 		html="starcraftHistory/wcsus.html"
 		thresh=6000
-		lastday=datetime.datetime(2017,6,4,23,59)
+		lastday=datetime.datetime(2017,6,4,23,59)+datetime.timedelta(hours=4)
 	else:
 		html="starcraftHistory/wcseu.html"
 		timetoadd=2*3600
