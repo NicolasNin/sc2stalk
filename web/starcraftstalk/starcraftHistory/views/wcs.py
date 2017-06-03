@@ -290,8 +290,9 @@ def wcsdata(request,server):
 	deb=time.time()
 	if server=="us":
 		timetoadd=-4*3600
-		html="starcraftHistory/wcsus.html"
+		html="starcraftHistory/wcseudata.html"
 		thresh=6000
+		startdate=datetime.datetime(2017,6,2,1)
 		lastday=datetime.datetime(2017,6,4,23,59)
 	else:
 		html="starcraftHistory/wcseudata.html"
