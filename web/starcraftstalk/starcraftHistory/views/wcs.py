@@ -44,6 +44,7 @@ def getListePlayerWcs2(server="eu",thresh=6300):
 def getNumberGamesAt(date,playerid):
 	""" we look for the first game with win loss ties date BEFORE the date"""
 	g=Games.objects.filter(player=playerid,date__lte=date).order_by("-date").first()
+
 	if g!=None:
 		return (g.current_win,g.current_losses,g.current_ties,g.current_mmr)
 	else:
@@ -291,8 +292,9 @@ def wcsdata(request,server):
 	if server=="us":
 		timetoadd=-4*3600
 		html="starcraftHistory/wcseudata.html"
-		thresh=6000
-		startdate=datetime.datetime(2017,6,2,1)
+		thresh=5500
+		startdate=datetime.datetime(2017,6,1,21)
+		dates=getDates(startdate,"us")
 		lastday=datetime.datetime(2017,6,4,23,59)
 	else:
 		html="starcraftHistory/wcseudata.html"
@@ -302,8 +304,9 @@ def wcsdata(request,server):
 		dates=getDates(startdate,"eu")
 		lastday=datetime.datetime(2017,5,28,23,59)
 
-
 	(start,end)=getPromotionWindows(server)
+	print((dates[1]-time.time())/60)
+
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
