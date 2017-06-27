@@ -67,7 +67,7 @@ def gettingLadderPlayers(liste_ladderid,server):
 def beautifulPlayer(player):
 	"""player is a dict of bnet api from ladder["team"],return a
 	 dict with keys such as rating wins etc from the dict of blizzard"""
-	 try:
+	try:
 		p = {}
 		p["id_blizz"] = player["id"]
 		p["rating"] = player["rating"]
