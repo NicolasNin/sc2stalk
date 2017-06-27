@@ -102,7 +102,7 @@ def beautifulPlayer(player):
 		p["last_played"] = player["last_played_time_stamp"]
 		p["current_win_streak"] = player["current_win_streak"]
 		p["current_rank"] = player["current_rank"]
-	except KeyError, e:
+	except KeyError as e:
 		print(e,player)
 		return p
 	return p
