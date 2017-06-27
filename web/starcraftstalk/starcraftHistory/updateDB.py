@@ -104,7 +104,7 @@ def beautifulPlayer(player):
 		p["current_rank"] = player["current_rank"]
 	except KeyError as e:
 		print(e,player)
-		return p
+		return "error"
 	return p
 def updatePlayer(pobj, p, lid,lastMHupdate,season,server):
 	"""update the Player object pobj with the data from api"""
@@ -166,14 +166,15 @@ def updateServerCycle(server="eu"):
 	for lid in liste_ladderid:
 		for player in player_from_api[lid]:
 			p = beautifulPlayer(player)
-			if str(p["id_blizz"]) in db_players:
-				pdb = db_players[str(p["id_blizz"])]
-				#big loop start here
-				(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid,server)
-				newgames.extend(newgamesp)
-				updatePlayer(pdb, p, lid,lastMHupdate,currentseason,server)
-			else:
-				updatePlayer(Players(),p,lid,0,currentseason,server)
+			if p!="error":
+				if str(p["id_blizz"]) in db_players:
+					pdb = db_players[str(p["id_blizz"])]
+					#big loop start here
+					(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid,server)
+					newgames.extend(newgamesp)
+					updatePlayer(pdb, p, lid,lastMHupdate,currentseason,server)
+				else:
+					updatePlayer(Players(),p,lid,0,currentseason,server)
 	print(newgames)
 	found=findOpListObject(newgames,save=False)
 	checkReciprocal(found,save=True)
