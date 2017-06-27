@@ -67,40 +67,44 @@ def gettingLadderPlayers(liste_ladderid,server):
 def beautifulPlayer(player):
 	"""player is a dict of bnet api from ladder["team"],return a
 	 dict with keys such as rating wins etc from the dict of blizzard"""
-	p = {}
-	p["id_blizz"] = player["id"]
-	p["rating"] = player["rating"]
-	p["points"] = player["points"]  # do not use
-	p["wins"] = player["wins"]
-	p["losses"] = player["losses"]
-	p["ties"] = player["ties"]
-	p["current_rank"] = player["current_rank"]
-	p["join_time"] = player["join_time_stamp"]  # do not use
-	p["name"] = player["member"][0]["legacy_link"]["name"]  # name with #
-	p["path"] = player["member"][0]["legacy_link"]["path"]
-	p["realm"] = player["member"][0]["legacy_link"]["realm"]
-	p["battletag"] = player["member"][0]["character_link"]["battle_tag"]
-	p["legacy_id"] = player["member"][0]["legacy_link"]["id"]
-	p["raceplayed"] = player["member"][0][
-		"played_race_count"][0]["race"]["en_US"]
-	p["race_count"] = player["member"][0]["played_race_count"][0]["count"]
-	if "clan_link" in player["member"][0].keys():
-		p["clan_id"] = player["member"][0]["clan_link"]["id"]
-		p["clan_tag"] = player["member"][0]["clan_link"]["clan_tag"]
-		p["clan_name"] = player["member"][0]["clan_link"]["clan_name"]
-	else:
-		p["clan_id"] = -1
-		p["clan_tag"] = ""
-	p["mainrace"] = "R"
-	if p["raceplayed"] == "Zerg":
-		p["mainrace"] = "Z"
-	if p["raceplayed"] == "Terran":
-		p["mainrace"] = "T"
-	if p["raceplayed"] == "Protoss":
-		p["mainrace"] = "P"
-	p["last_played"] = player["last_played_time_stamp"]
-	p["current_win_streak"] = player["current_win_streak"]
-	p["current_rank"] = player["current_rank"]
+ 	try:
+		p = {}
+		p["id_blizz"] = player["id"]
+		p["rating"] = player["rating"]
+		p["points"] = player["points"]  # do not use
+		p["wins"] = player["wins"]
+		p["losses"] = player["losses"]
+		p["ties"] = player["ties"]
+		p["current_rank"] = player["current_rank"]
+		p["join_time"] = player["join_time_stamp"]  # do not use
+		p["name"] = player["member"][0]["legacy_link"]["name"]  # name with #
+		p["path"] = player["member"][0]["legacy_link"]["path"]
+		p["realm"] = player["member"][0]["legacy_link"]["realm"]
+		p["battletag"] = player["member"][0]["character_link"]["battle_tag"]
+		p["legacy_id"] = player["member"][0]["legacy_link"]["id"]
+		p["raceplayed"] = player["member"][0][
+			"played_race_count"][0]["race"]["en_US"]
+		p["race_count"] = player["member"][0]["played_race_count"][0]["count"]
+		if "clan_link" in player["member"][0].keys():
+			p["clan_id"] = player["member"][0]["clan_link"]["id"]
+			p["clan_tag"] = player["member"][0]["clan_link"]["clan_tag"]
+			p["clan_name"] = player["member"][0]["clan_link"]["clan_name"]
+		else:
+			p["clan_id"] = -1
+			p["clan_tag"] = ""
+		p["mainrace"] = "R"
+		if p["raceplayed"] == "Zerg":
+			p["mainrace"] = "Z"
+		if p["raceplayed"] == "Terran":
+			p["mainrace"] = "T"
+		if p["raceplayed"] == "Protoss":
+			p["mainrace"] = "P"
+		p["last_played"] = player["last_played_time_stamp"]
+		p["current_win_streak"] = player["current_win_streak"]
+		p["current_rank"] = player["current_rank"]
+	except KeyError, e:
+		print(e,player)
+		return p
 	return p
 def updatePlayer(pobj, p, lid,lastMHupdate,season,server):
 	"""update the Player object pobj with the data from api"""
