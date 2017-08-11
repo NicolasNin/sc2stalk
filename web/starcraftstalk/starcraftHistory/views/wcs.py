@@ -34,7 +34,7 @@ def getListePlayerWcs2(server="eu",thresh=6300):
 	if server=="us":
 		thresh=6000
 	playerwcs=Players.objects.filter(wcs=1,
-	smurf__wcsregion=server,season=32,server=server,
+	smurf__wcsregion=server,season=33,server=server,
 		rating__gte=thresh).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
@@ -90,9 +90,9 @@ def wcs(request,server):
 		html="starcraftHistory/wcseu.html"
 		timetoadd=2*3600
 		thresh=6300
-		startdate=datetime.datetime(2017,5,25,21)
+		startdate=datetime.datetime(2017,8,10,21)
 		getDates(startdate,"eu")
-		lastday=datetime.datetime(2017,5,28,21,59)
+		lastday=datetime.datetime(2017,8,13,21,59)
 
 
 	(start,end)=getPromotionWindows(server)
@@ -101,7 +101,7 @@ def wcs(request,server):
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
 	"""
 	playerwcs=Players.objects.filter(
-	smurf__wcsregion=server,season=32,server=server,
+	smurf__wcsregion=server,season=33,server=server,
 		rating__gte=thresh).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
