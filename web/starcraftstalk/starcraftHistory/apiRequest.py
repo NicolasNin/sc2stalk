@@ -9,7 +9,7 @@ class apiRequest():
 		self.server=server
 		self.access_token=access_token[server]
 		self.apikey=api_key
-		self.current_season="32"
+		self.current_season="33"
 	def getCurrentSeason(self):
 		url='https://'+self.server+".api.battle.net/data/sc2/season/current?access_token="+self.access_token
 		return self.getJsonData(url)
