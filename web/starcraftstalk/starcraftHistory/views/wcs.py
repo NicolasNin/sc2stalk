@@ -48,6 +48,8 @@ def getNumberGamesAt(date,playerid):
 	if g!=None:
 		return (g.current_win,g.current_losses,g.current_ties,g.current_mmr)
 	else:
+		if g.decision==None:
+			print("azeazezaeaz")
 		g=Games.objects.filter(player=playerid,date__gte=date).order_by("date").first()
 		dloss=0
 		dwin=0
