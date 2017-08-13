@@ -67,7 +67,7 @@ def getNumberGamesAt(date,playerid):
 				else:
 					return (g.current_win-dwin,g.current_losses-dloss,g.current_ties-dtie,
 					g.current_mmr)
-	return(0,0,0)
+	return(0,0,0,0)
 def getDates(start,server):
 	date=[]
 	if server=="us":
