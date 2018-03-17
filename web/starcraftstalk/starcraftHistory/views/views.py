@@ -123,12 +123,12 @@ def last100(request):
 	context={"games":games_dict,"name":" last 30min"}
 	return render(request, 'starcraftHistory/player.html', context)
 def playerbypath(request,server,path):
-
+	current_seasonDB=Global.objects.filter(name="currentseason")[0].value
 	games=Games.objects.filter(path=path,server=server)
 	(games_dict,stat,lastmatch)=getalldict(games)
 	realm=int(path.split("/")[3])
 	legacyid=int(path.split("/")[2])
-	raceplayers=Players.objects.filter(realm=realm,legacy_id=legacyid,season=33).select_related("league")
+	raceplayers=Players.objects.filter(realm=realm,legacy_id=legacyid,season=int(current_seasonDB)).select_related("league")
 	racep=[]
 	statrace=[]
 	raceandstat=[]
@@ -173,8 +173,8 @@ def player(request,server,sc2id):
 
 
 def players(request,server):
-
-	player_in_db=Players.objects.filter(season=33,
+	current_seasonDB=Global.objects.filter(name="currentseason")[0].value
+	player_in_db=Players.objects.filter(season=int(current_seasonDB),
 	server=server).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played")
@@ -227,5 +227,6 @@ def about(request):
 def contact(request):
 	return render(request, 'starcraftHistory/contact.html')
 def update(request):
-	#updateCycle(repeat=60, repeat_until=None)
-	return HttpResponse("updating database")
+	print("test here")
+	#updateAll(repeat=60, repeat_until=None)
+	return HttpResponse("updating database!")

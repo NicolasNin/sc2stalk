@@ -25,14 +25,16 @@ class Games(models.Model):
      null=True,related_name="games_as_op")  # Field name made lowercase.
 
     #guessopgameid = models.IntegerField(db_column='GuessOpGameId', blank=True, null=True)  # Field name made lowercase.
-    guessopgameid = models.ForeignKey('self',db_column='GuessOpGameId', blank=True, null=True)  # Field name made lowercase.
+    guessopgameid = models.ForeignKey('self',db_column='GuessOpGameId', blank=True, null=True,
+    on_delete=models.CASCADE)  # Field name made lowercase.
 
     current_mmr = models.CharField(db_column='Current_MMR', max_length=45, blank=True, null=True)  # Field name made lowercase.
     guessmmrchange = models.IntegerField(db_column='GuessMMRChange', blank=True, null=True)  # Field name made lowercase.
     current_rank = models.IntegerField(db_column='Current_Rank', blank=True, null=True)  # Field name made lowercase.
 
     #current_league = models.CharField(db_column='Current_league', max_length=45, blank=True, null=True)  # Field name made lowercase.
-    current_league = models.ForeignKey('League',db_column='Current_league', max_length=45, blank=True, null=True)  # Field name made lowercase.
+    current_league = models.ForeignKey('League',db_column='Current_league', max_length=45, blank=True, null=True,
+    on_delete=models.CASCADE)  # Field name made lowercase.
 
     current_win = models.IntegerField(db_column='Current_win', blank=True, null=True)  # Field name made lowercase.
     current_losses = models.IntegerField(db_column='Current_losses', blank=True, null=True)  # Field name made lowercase.
@@ -81,7 +83,7 @@ class Players(models.Model):
     offrace = models.IntegerField(blank=True, null=True)
     season=models.IntegerField(blank=True, null=True)
     #league = models.IntegerField(blank=True, null=True)
-    league = models.ForeignKey('League',blank=True, null=True)
+    league = models.ForeignKey('League',blank=True, null=True,on_delete=models.CASCADE)
 
     lastmhupdate = models.IntegerField(blank=True, null=True)
     alternate_path = models.CharField(max_length=45, blank=True, null=True)

@@ -6,7 +6,25 @@ from django.db import IntegrityError
 from background_task import background
 from django.db import transaction
 from time import time
-def updateLeagues(server):
+def updateAllSeason():
+	updateSeason("eu")
+	updateSeason("kr")
+	updateSeason("us")
+def updateSeason(server):
+	print("NEW SEASON",server)
+	api=apiRequest(server=server)
+	season_data=api.getCurrentSeason()
+	season_id=season_data["id"]
+	season_start=season_data["start_timestamp"]
+	season_end=season_data["end_timestamp"]
+	current_seasonDB=Global.objects.filter(name="currentseason")[0]
+	current_seasonDB.value=season_id
+	current_seasonDB.save()
+	current_season_endDB=Global.objects.filter(name="currentseason_end"+server)[0]
+	current_season_endDB.value=season_end
+	current_season_endDB.save()
+	return season_id
+def updateLeagues(server,force=False):
 	if Global.objects.filter(name="lastupdateleagues"+server).exists():
 		val=Global.objects.filter(name="lastupdateleagues"+server)[0]
 		lastup=int(val.value)
@@ -15,7 +33,8 @@ def updateLeagues(server):
 		lastup=int(time())-3610
 		val.save()
 	#first we retrieve the already existing leagues
-	if time()>lastup+3600:
+	if time()>lastup+3600 or force:
+		print("updating leagues",server)
 		updateOldPath(up=True,server=server)
 		existingLeagues=League.objects.filter(server=server)
 		liste_existing_ladderid=[]
@@ -138,26 +157,31 @@ def updatePlayer(pobj, p, lid,lastMHupdate,season,server):
 	pobj.save()
 @background(schedule=10)
 def updateAll():
-	print("UPDATING NA")
-	updateServerCycle("us")
-	print("UPDATING EU")
+	#updateServerCycle("us")
 	updateServerCycle("eu")
-#	print("UPDATING KR")
-#	updateServerCycle("kr")
+	#	updateServerCycle("kr")
 	print(" Cycle update finished")
 	print("")
 
 def updateServerCycle(server="eu"):
 	""" we get the ladders date from all the league, then
 	 update each player when needed"""
-	print("RUN AN UPDATE")
+	print("RUN AN UPDATE "+server)
 	print("-----------------------------------------------------")
-	updateLeagues(server=server)
+	forceupdateleague=False
+	currentseason=int(Global.objects.filter(name="currentseason")[0].value)
+	current_season_end=int(Global.objects.filter(name="currentseason_end"+server)[0].value)
+	## is this time for a new season?
+	if time()>=current_season_end:
+		current_season=updateAllSeason()
+		forceupdateleague=True
+	updateLeagues(server=server,force=forceupdateleague)
 	player_in_db = Players.objects.filter(server=server)
 	db_players = {}
 	for player in player_in_db:
 		db_players[player.idblizz] = player
-	currentseason=Global.objects.filter(name="currentseason")[0].value
+
+
 	liste_ladderid = League.objects.filter(season=currentseason,server=server)
 
 	player_from_api = gettingLadderPlayers(

@@ -320,8 +320,9 @@ def about(request):
 def contact(request):
 	return render(request, 'starcraftHistory/contact.html')
 def update(request):
-	#updateCycle(repeat=60, repeat_until=None)
-	return HttpResponse("updating database")
+	print("test here")
+	updateAll(repeat=60, repeat_until=None)
+	return HttpResponse("updating database!")
 def statswcs(request,server):
 	leagueid=39 #inhard cause im lazy
 	lastQualif=8#might be 16 or other in 2017 its 8 on eu
