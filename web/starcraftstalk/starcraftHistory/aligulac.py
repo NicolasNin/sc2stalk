@@ -47,6 +47,8 @@ def createPlayerInDb(aligulac_id):
         p=Progamer(pseudo=name,aligulac=aligulac_id,mainrace=race,nationality=country,wcsregion=wcs)
         p.save()
         return p
+    else:
+        print("creation failed")
 
 def addPlayerHighRating(limit=10,offset=0,ratingtresh=0.47):
     url="http://aligulac.com/api/v1/player/?current_rating__rating__gte="

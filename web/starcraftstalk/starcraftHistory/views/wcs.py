@@ -87,20 +87,20 @@ def wcs(request,server):
 		timetoadd=-4*3600
 		html="starcraftHistory/wcsus.html"
 		thresh=6000
-		lastday=datetime.datetime(2017,8,20,23,59)+datetime.timedelta(hours=4)
+		lastday=datetime.datetime(2018,4,1,23,59)+datetime.timedelta(hours=4)
 	else:
 		html="starcraftHistory/wcseu.html"
 		timetoadd=2*3600
 		thresh=6300
-		startdate=datetime.datetime(2017,8,10,21)
+		startdate=datetime.datetime(2018,3,20,21)
 		getDates(startdate,"eu")
-		lastday=datetime.datetime(2017,8,13,21,59)
+		lastday=datetime.datetime(2017,4,1,21,59)
 
 
 	(start,end)=getPromotionWindows(server)
 	""" we get the top GM player who are from the good wcs region
 	with a good name (ie their true name)"""
-	lastQualif=8#might be 16 or other in 2017 its 8 on eu
+	lastQualif=4#might be 16 or other in 2017 its 8 on eu
 	"""
 	playerwcs=Players.objects.filter(
 	smurf__wcsregion=server,season=33,server=server,
