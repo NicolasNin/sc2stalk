@@ -4,6 +4,23 @@ from django.db.models import Max,Min,Sum,Count
 import datetime,time
 import pytz
 import json
+
+##################################
+#DEFINE WCS PARAMETER
+
+#EU
+euconfig={
+"startdate":datetime.datetime(2018,3,20,21),
+"lastday":	datetime.datetime(2018,4,1,21,59),
+"lastQualif":4,
+"thresh":6300		}
+usconfig={
+"startdate":datetime.datetime(2018,3,20,21),
+"lastday":	datetime.datetime(2018,4,1,21,59),
+"lastQualif":4,
+"thresh":6000		}
+wcsRegion={"eu":"EU","us":"NA"}
+#############################
 def getTimeDelta(ts):
 	dif=int(time.time())-ts
 	if dif>86400:
@@ -31,10 +48,11 @@ def getPromotionWindows(server):
 		start=(end-datetime.timedelta(days=1))
 	return (start.timestamp(),end.timestamp())
 def getListePlayerWcs2(server="eu",thresh=6300):
+	currentseason=int(Global.objects.filter(name="currentseason")[0].value)
 	if server=="us":
-		thresh=6000
+		thresh=usconfig["thresh"]
 	playerwcs=Players.objects.filter(wcs=1,
-	smurf__wcsregion=server,season=33,server=server,
+	smurf__wcsregion=wcsRegion[server],season=currentseason,server=server,
 		rating__gte=thresh).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
@@ -91,16 +109,15 @@ def wcs(request,server):
 	else:
 		html="starcraftHistory/wcseu.html"
 		timetoadd=2*3600
-		thresh=6300
-		startdate=datetime.datetime(2018,3,20,21)
+		thresh=euconfig["thresh"]
+		startdate=euconfig["startdate"]
 		getDates(startdate,"eu")
-		lastday=datetime.datetime(2017,4,1,21,59)
-
+		lastday=euconfig["lastday"]
+	lastQualif=4
 
 	(start,end)=getPromotionWindows(server)
-	""" we get the top GM player who are from the good wcs region
-	with a good name (ie their true name)"""
-	lastQualif=4#might be 16 or other in 2017 its 8 on eu
+
+	#might be 16 or other in 2017 its 8 on eu
 	"""
 	playerwcs=Players.objects.filter(
 	smurf__wcsregion=server,season=33,server=server,

@@ -20,8 +20,10 @@ def getJsonData(url):
 
 url="http://aligulac.com/api/v1/player/10/?format=json&apikey=K3W7uVs2NCF67DRyg05d"
 #print(getJsonData(url))
-wcsRegion={"FR":"EU","FI":"EU","KR":"KR","US":"NA","CA":"NA","PL":"EU","NL":"EU","NO":"EU","MX":"NA","DE":"EU","IT":"EU","UA":"EU",
-"SE":"EU","SI":"EU","AT":"EU","RU":"EU","LT":"EU","UK":"EU","ES":"EU"}
+wcsRegion={"FR":"EU","FI":"EU","KR":"KR","US":"NA","CA":"NA","PL":"EU","NL":"EU",
+    "NO":"EU","MX":"MA","DE":"EU","IT":"EU","UA":"EU",
+    "SE":"EU","SI":"EU","AT":"EU","RU":"EU","LT":"EU","UK":"EU","ES":"EU","DK":"EU",
+    "SR":"EU","SK":"EU","HR":"EU","RO":"EU"}
 def getPlayerById(id):
     url="http://aligulac.com/api/v1/player/"+str(id)+"/?format=json&apikey="+key
     data=getJsonData(url)
