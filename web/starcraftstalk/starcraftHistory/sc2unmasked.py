@@ -26,28 +26,29 @@ def findSmurfHighMMR(server="eu",mmrthresh=6500):
         print("looking for ",race,name,server,pdb.legacy_id)
         url="http://sc2unmasked.com/API/Player?server="+str(server)+"&name="+str(name)+"&race="+str(race)
         data=getJsonData(url)
-        for p in data["players"]:
-            accid=p["acc_id"].split("/")
-            legacyid=accid[0]
-            realm=accid[1]
-            race=p["race"].upper()
-            aligulac=p["aligulac"]
-#            print(legacyid,pdb.legacy_id,type(realm),type(pdb.realm),race==pdb.mainrace,aligulac)
-            if legacyid==pdb.legacy_id and realm==str(pdb.realm) and race==pdb.mainrace and aligulac!=None:
-                print("player found in sc2unmasked")
-                pros=Progamer.objects.filter(aligulac=aligulac)
-                if len(pros)==1:
-                    print("smurf found")
-                    pro_db=pros[0]
-                    pdb.smurf=pro_db
-                    pdb.save()
-                    break
-                else:
-                    print("creating aligulac",aligulac)
-                    pro_db=createPlayerInDb(aligulac)
-                    pdb.smurf=pro_db
-                    pdb.save()
-                    break
+        if type(data)==dict:
+            for p in data["players"]:
+                accid=p["acc_id"].split("/")
+                legacyid=accid[0]
+                realm=accid[1]
+                race=p["race"].upper()
+                aligulac=p["aligulac"]
+    #            print(legacyid,pdb.legacy_id,type(realm),type(pdb.realm),race==pdb.mainrace,aligulac)
+                if legacyid==pdb.legacy_id and realm==str(pdb.realm) and race==pdb.mainrace and aligulac!=None:
+                    print("player found in sc2unmasked")
+                    pros=Progamer.objects.filter(aligulac=aligulac)
+                    if len(pros)==1:
+                        print("smurf found")
+                        pro_db=pros[0]
+                        pdb.smurf=pro_db
+                        pdb.save()
+                        break
+                    else:
+                        print("creating aligulac",aligulac)
+                        pro_db=createPlayerInDb(aligulac)
+                        pdb.smurf=pro_db
+                        pdb.save()
+                        break
 
 def getServer(server="eu"):
     url="http://sc2unmasked.com/API/Player?server="+str(server)
