@@ -136,9 +136,7 @@ def wcs(request,server):
 	gamesbetween=Games.objects.filter(server=server,date__range=(start,end),
 	player__wcs=1,type="SOLO").exclude(ranked="unrank")
 	for p in playerwcs:
-		if p["idplayer"]==1945:
-			p["name"]='ShadoWn*'
-		p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
+
 	#	(win,loss,ties,mmr)=getNumberGamesAt(start,p["idplayer"])
 	#	print(p["numgames"],p["wins"]-win,p["loses"]-loss)
 		listegoodplayerid.append(p["idplayer"])
@@ -330,8 +328,8 @@ def wcsdata(request,server):
 	"league__sigle","last_played","idplayer")
 	"""
 	playerwcs=getListePlayerWcs2(server,thresh)
-	if len(playerwcs)>=7:
-		basemmr=int(playerwcs[7]['rating'])
+	if len(playerwcs)>=lastQualif:
+		basemmr=int(playerwcs[lastQualif-1]['rating'])
 	else:
 		basemmr=0
 
