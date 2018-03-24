@@ -11,7 +11,7 @@ import json
 #EU
 euconfig={
 "startdate":datetime.datetime(2018,3,20,21),
-"lastday":	datetime.datetime(2018,4,1,21,59),
+"lastday":	datetime.datetime(2018,4,1,23,59),
 "lastQualif":4,
 "thresh":6300		}
 usconfig={
@@ -298,13 +298,6 @@ def getMMRatDate(player,date):
 		if g!=None:
 			return g.current_mmr
 	return player.rating
-
-def wcsold(request):
-	return wcs(request,server="eu")
-
-
-#def statswcs2(request,server):
-#	if server="eu":
 
 def wcsdata(request,server):
 	deb=time.time()
