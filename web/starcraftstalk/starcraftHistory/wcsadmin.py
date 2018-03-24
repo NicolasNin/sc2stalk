@@ -45,7 +45,7 @@ def updateWcsRegion(init=False):
     "SR":"EU","SK":"EU","HR":"EU","RO":"EU"}
     liste_pro=Progamer.objects.filter(wcsregion="Unknown")
     for pro in liste_pro:
-        pays=pro.nationality:
+        pays=pro.nationality
         if pays in wcsRegion:
             pro.wcsregion=wcsRegion[pays]
             pro.save()
