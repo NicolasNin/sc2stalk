@@ -126,8 +126,8 @@ def wcs(request,server):
 	"league__sigle","last_played","idplayer")
 	"""
 	playerwcs=getListePlayerWcs2(server,thresh)
-	if len(playerwcs)>=7:
-		basemmr=int(playerwcs[7]['rating'])
+	if len(playerwcs)>=lastQualif:
+		basemmr=int(playerwcs[lastQualif-1]['rating'])
 	else:
 		basemmr=0
 
@@ -139,6 +139,7 @@ def wcs(request,server):
 
 	#	(win,loss,ties,mmr)=getNumberGamesAt(start,p["idplayer"])
 	#	print(p["numgames"],p["wins"]-win,p["loses"]-loss)
+		p["numgames"]=len(gamesbetween.filter(player_id=p["idplayer"]))
 		listegoodplayerid.append(p["idplayer"])
 		p["num"]=num
 		if num<=lastQualif:
@@ -332,7 +333,7 @@ def wcsdata(request,server):
 		basemmr=int(playerwcs[lastQualif-1]['rating'])
 	else:
 		basemmr=0
-
+	print(basemmr)
 	num=1
 	listegoodplayerid=[]
 	gamesbetween=Games.objects.filter(server=server,date__range=(dates[0],dates[4]),player__wcs=1,type="SOLO")
