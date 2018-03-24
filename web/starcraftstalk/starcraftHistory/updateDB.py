@@ -157,8 +157,8 @@ def updatePlayer(pobj, p, lid,lastMHupdate,season,server):
 	pobj.save()
 @background(schedule=10)
 def updateAll():
-	#updateServerCycle("us")
 	updateServerCycle("eu")
+	updateServerCycle("us")
 	#	updateServerCycle("kr")
 	print(" Cycle update finished")
 	print("")

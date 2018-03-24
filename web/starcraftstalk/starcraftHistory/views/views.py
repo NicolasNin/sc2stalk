@@ -172,7 +172,7 @@ def player(request,server,sc2id):
 ############################
 
 
-def players(request,server,max=200):
+def players(request,server,max=500):
 	current_seasonDB=Global.objects.filter(name="currentseason")[0].value
 	player_in_db=Players.objects.filter(season=int(current_seasonDB),
 	server=server).order_by("-rating").values("rating",
