@@ -25,22 +25,25 @@ wcsRegion={"FR":"EU","FI":"EU","KR":"KR","US":"NA","CA":"NA","PL":"EU","NL":"EU"
 def getPlayerById(id):
     url="http://aligulac.com/api/v1/player/"+str(id)+"/?format=json&apikey="+key
     data=getJsonData(url)
-    civilname=data["name"]
-    name=data["lp_name"]
-    country=data["country"]
-    race=data["race"]
-    tag=data["tag"]
-    if name=="":
-        name=tag
-    if country in wcsRegion:
-        wcs=wcsRegion[country]
+    if type(data)==dict:
+        civilname=data["name"]
+        name=data["lp_name"]
+        country=data["country"]
+        race=data["race"]
+        tag=data["tag"]
+        if name=="":
+            name=tag
+        if country in wcsRegion:
+            wcs=wcsRegion[country]
+        else:
+            wcs="Unknown"
+        print(name,country,race,wcs)
+        return (tag,country,race,wcs)
     else:
-        wcs="Unknown"
-    print(name,country,race,wcs)
-    return (tag,country,race,wcs)
+        return ("error","error","error")
 def createPlayerInDb(aligulac_id):
     (name,country,race,wcs)=getPlayerById(aligulac_id)
-    if len(Progamer.objects.filter(aligulac=aligulac_id))==0:
+    if len(Progamer.objects.filter(aligulac=aligulac_id))==0 and name!="error":
         p=Progamer(pseudo=name,aligulac=aligulac_id,mainrace=race,nationality=country,wcsregion=wcs)
         p.save()
         return p

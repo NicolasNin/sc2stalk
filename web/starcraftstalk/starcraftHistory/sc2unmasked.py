@@ -18,7 +18,7 @@ def getJsonData(url):
         print ("error",url,e.reason)
         return ("error",e.reason)
 def findSmurfHighMMR(server="eu",mmrthresh=6500):
-    list_players=Players.objects.filter(server="eu",smurf=None,rating__gte=mmrthresh)
+    list_players=Players.objects.filter(server=server,smurf=None,rating__gte=mmrthresh)
     for pdb in list_players:
         race=pdb.mainrace
         name=pdb.name.split("#")[0]
