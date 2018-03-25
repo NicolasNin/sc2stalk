@@ -24,7 +24,7 @@ def index(request):
 def getalldict(games,orderbydate=True,max=200):
 	if orderbydate:
 		games=games.order_by("-date")
-	games_dict=games[:max].values("date",
+	games_dict=games[:max].values("date","server",
 		"path","map","type","decision","current_mmr","guessmmrchange"
 		,"player__mainrace",
 		"current_win",
@@ -113,7 +113,7 @@ def highmmr(request):
 	sum__gte=12000	).order_by("-date")
 
 	(games_dict,stat,lastmatch)=getalldict(games,False)
-	context={"games":games_dict,"name":" last 24h","server":server}
+	context={"games":games_dict,"name":" last 24h"}
 	return renderrandomtitle(request, 'starcraftHistory/highmmr.html',context)
 #	highmmr=Games.objects.filter()
 def last100(request):

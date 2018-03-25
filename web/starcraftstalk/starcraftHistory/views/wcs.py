@@ -35,10 +35,11 @@ def getPromotionWindows(server):
 		tz= pytz.timezone('America/New_York')
 	else:
 		tz= pytz.timezone('Europe/Paris')
-	#we are cest time on the server
-	cest= pytz.timezone('Europe/Paris')
+	#we are utc time on the server
+	#cest= pytz.timezone('Europe/Paris')
+	utc = pytz.utc
 	now=pytz.utc.localize(datetime.datetime.now())
-	now_local=now.astimezone(tz)
+	now_local=now.astimezone(utc)
 	#promotion is between 21h each day
 	if now_local.hour>=21:
 		start=tz.localize(datetime.datetime(now_local.year,now_local.month,now_local.day,21)).astimezone(pytz.utc)
