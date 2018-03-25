@@ -9,18 +9,32 @@ import json
 #DEFINE WCS PARAMETER
 
 #EU
+eutz=pytz.timezone('Europe/Paris')
+ustz=pytz.timezone('America/New_York')
 euconfig={
-"startdate":datetime.datetime(2018,3,20,21),
-"lastday":	datetime.datetime(2018,4,1,23,59),
+"startdate":eutz.localize(datetime.datetime(2018,3,20,21)),
+"lastday":	eutz.localize(datetime.datetime(2018,4,1,23,59)),
 "lastQualif":4,
 "thresh":6300		}
 usconfig={
-"startdate":datetime.datetime(2018,3,20,21),
-"lastday":	datetime.datetime(2018,4,1,21,59),
+"startdate":ustz.localize(datetime.datetime(2018,3,20,21)),
+"lastday":	ustz.localize(datetime.datetime(2018,4,1,23,59)),
 "lastQualif":4,
 "thresh":6000		}
 wcsRegion={"eu":"EU","us":"NA"}
 #############################
+def NowDateTimeRegion(region=""):
+	#ret
+	if region=="cest":
+		tz= pytz.timezone('Europe/Paris')
+	elif region=="pdt":
+		tz= pytz.timezone('America/New_York')
+	else:
+		tz=pytz.utc
+	utcnow=pytz.utc.localize(datetime.datetime.utcnow())
+	utcnow=utcnow-datetime.timedelta(microseconds=utcnow.microsecond)
+	return utcnow.astimezone(tz)
+
 def getTimeDelta(ts):
 	dif=int(time.time())-ts
 	if dif>86400:
@@ -89,11 +103,11 @@ def getNumberGamesAt(date,playerid):
 	return(0,0,0,0)
 def getDates(start,server):
 	date=[]
-	if server=="us":
-		tz= pytz.timezone('America/New_York')
-	else:
-		tz= pytz.timezone('Europe/Paris')
-	start=tz.localize(start)
+	#if server=="us":
+#		tz= pytz.timezone('America/New_York')
+#	else:
+#		tz= pytz.timezone('Europe/Paris')
+#	start=tz.localize(start)
 	date.append(start.timestamp())
 	date.append(start.timestamp()+86400)
 	date.append(start.timestamp()+2*86400)
@@ -106,15 +120,18 @@ def wcs(request,server):
 		timetoadd=-4*3600
 		html="starcraftHistory/wcsus.html"
 		thresh=6000
-		lastday=datetime.datetime(2018,4,1,23,59)+datetime.timedelta(hours=4)
+		lastday=usconfig["lastday"]
 	else:
 		html="starcraftHistory/wcseu.html"
-		timetoadd=2*3600
+		tz= pytz.timezone('Europe/Paris')
+		timetoadd=2*3600##SHITTY HAC
 		thresh=euconfig["thresh"]
 		startdate=euconfig["startdate"]
 		getDates(startdate,"eu")
 		lastday=euconfig["lastday"]
 	lastQualif=4
+
+	timetowait=str(lastday-NowDateTimeRegion())
 
 	(start,end)=getPromotionWindows(server)
 
@@ -177,11 +194,9 @@ def wcs(request,server):
 		if g["guessopid__name"]==None and g["guessopgameid__path"]!=None :
 			g["guessopid__name"]=g["guessopgameid__path"].split('/')[-1]
 
-	timetowait=str(lastday-
-	datetime.datetime.fromtimestamp(int(time.time())))
 
-	timetostream=lastday-datetime.datetime.fromtimestamp(7200+int(time.time()))
-
+#	timetostream=lastday-datetime.datetime.fromtimestamp(7200+int(time.time()))
+	timetostream=datetime.timedelta(seconds=10)
 	if (timetostream<datetime.timedelta(seconds=0)):
 		timetostream="LIVE"
 	else:
@@ -398,6 +413,7 @@ def wcsdata(request,server):
 
 	timetowait=str(lastday-
 	datetime.datetime.fromtimestamp(int(time.time())))
+
 	timetopromotion=str(datetime.timedelta(seconds=end-int(time.time())))
 	context={"players":playerwcs,"basemmr":-basemmr,"games":recentwcsgames,
 	"wait":timetowait,"promotime":timetopromotion,"server":server}
