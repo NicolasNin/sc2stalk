@@ -21,7 +21,7 @@ def index(request):
 	return renderrandomtitle(request, 'starcraftHistory/index.html',{})
 ###########
 
-def getalldict(games,orderbydate=True,max=100):
+def getalldict(games,orderbydate=True,max=200):
 	if orderbydate:
 		games=games.order_by("-date")
 	games_dict=games[:max].values("date",
