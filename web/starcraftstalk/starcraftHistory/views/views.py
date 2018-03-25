@@ -113,7 +113,7 @@ def highmmr(request):
 	sum__gte=12000	).order_by("-date")
 
 	(games_dict,stat,lastmatch)=getalldict(games,False)
-	context={"games":games_dict,"name":" last 24h"}
+	context={"games":games_dict,"name":" last 24h","server":server}
 	return renderrandomtitle(request, 'starcraftHistory/highmmr.html',context)
 #	highmmr=Games.objects.filter()
 def last100(request):
