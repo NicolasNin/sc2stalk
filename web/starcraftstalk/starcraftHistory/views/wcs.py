@@ -215,11 +215,11 @@ def graphmmr(request,server):
 		thresh=6300
 	deb=time.time()
 	current_seasonDB=Global.objects.filter(name="currentseason")[0].value
-	playerwcs=Players.objects.filter(server=server,smurf__wcsregion=server,
+	playerwcs=Players.objects.filter(server=server,smurf__wcsregion=wcsRegion[server],
 	rating__gte=thresh,season=current_seasonDB,wcs=1).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
-
+	lastQualif=4
 	listegoodplayerid=[]
 	listemmr=[]
 	mmr8=0
@@ -236,7 +236,7 @@ def graphmmr(request,server):
 		if p["truename"]:
 			listegoodplayerid.append(p["idplayer"])
 			listemmr.append(p["rating"])
-			if num==8:
+			if num==lastQualif:
 				mmr8=p["rating"]
 			num+=1
 	datestart=int(time.time())-3600*12
@@ -262,10 +262,10 @@ def graphmmr(request,server):
 	date__gte=datestart).order_by("date")
 	m8=[]
 	m9=[]
-	lastQualif=8
+
 	try:
-		m8.append({"current_mmr":listmmrstart[7][0],"date":datestart,"player__name":"mmr4"})
-		m9.append({"current_mmr":listmmrstart[8][0],"date":datestart,"player__name":"mmr5"})
+		m8.append({"current_mmr":listmmrstart[lastQualif-1][0],"date":datestart,"player__name":"mmr4"})
+		m9.append({"current_mmr":listmmrstart[lastQualif][0],"date":datestart,"player__name":"mmr5"})
 		current8=listmmrstart[lastQualif-1]
 		current9=listmmrstart[lastQualif]
 		minmmr=listmmrstart[-1][0]
@@ -294,8 +294,9 @@ def graphmmr(request,server):
 
 		m8.append({"current_mmr":listmmrstart[lastQualif-1][0],"date":time.time(),"player__name":"mmr4"})
 		m8.extend(g2)
-	except IndexError:
-		print("indexerror")
+	except IndexError as e:
+		print("indexerror",e)
+		print(listmmrstart,listegoodplayerid)
 
 	#m9.append({"current_mmr":listmmrstart[8][0],"date":time.time(),"player__name":"mmr9"})
 	#g2.extend(m9)
