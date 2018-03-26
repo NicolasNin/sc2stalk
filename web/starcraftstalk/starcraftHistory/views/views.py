@@ -102,7 +102,7 @@ def renderrandomtitle(request,page,context):
 def recent(request,server):
 	games=Games.objects.filter(server=server,date__gte=int(time.time()-1800))
 	(games_dict,stat,lastmatch)=getalldict(games)
-	context={"games":games_dict,"name":" last 30min","server":server}
+	context={"title":"recent","games":games_dict,"name":" last 30min","server":server}
 	return render(request, 'starcraftHistory/player.html', context)
 def highmmr(request):
 	games=Games.objects.filter(
@@ -113,7 +113,7 @@ def highmmr(request):
 	sum__gte=12000	).order_by("-date")
 
 	(games_dict,stat,lastmatch)=getalldict(games,False)
-	context={"games":games_dict,"name":" last 24h"}
+	context={"title":"Recent  high mmr games","games":games_dict,"name":" last 24h"}
 	return renderrandomtitle(request, 'starcraftHistory/highmmr.html',context)
 #	highmmr=Games.objects.filter()
 def last100(request):
@@ -137,8 +137,8 @@ def playerbypath(request,server,path):
 		statrace.append(stat[p.mainrace])
 		raceandstat.append((p,stat[p.mainrace]))
 	##hack after name change raceplayer is empty cause path is :=
-
-	context={"games":games_dict,"name":racep[0].name,
+	print(games_dict[0].keys())
+	context={"title":games_dict[0]["path_human"],"games":games_dict,"name":racep[0].name,
 	"displayname":displayNameAccount(path),"racep":racep,
 	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2)),"stat":statrace,
 	"rs":raceandstat,"lm":lastmatch,"server":server}
