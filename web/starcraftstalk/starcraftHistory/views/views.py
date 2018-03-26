@@ -137,8 +137,7 @@ def playerbypath(request,server,path):
 		statrace.append(stat[p.mainrace])
 		raceandstat.append((p,stat[p.mainrace]))
 	##hack after name change raceplayer is empty cause path is :=
-	print(games_dict[0].keys())
-	context={"title":games_dict[0]["path_human"],"games":games_dict,"name":racep[0].name,
+	context={"title":displayNameAccount(path),"games":games_dict,"name":racep[0].name,
 	"displayname":displayNameAccount(path),"racep":racep,
 	"bneturl":getBneturl(path),"offset":int(12/(len(racep)+2)),"stat":statrace,
 	"rs":raceandstat,"lm":lastmatch,"server":server}
