@@ -34,7 +34,7 @@ var chart=Highcharts.chart('container', {
         type: 'spline'
     },
     title: {
-        text: 'MMR fighthing for TOP 8 WCS '
+        text: 'MMR fighthing for TOP 4 WCS '
     },
     //subtitle: {
     //    text: 'Irregular time data in Highcharts JS'
@@ -79,12 +79,12 @@ var chart=Highcharts.chart('container', {
 
       {
         name:"{{name.grouper}}",
-        type:{%if name.grouper == "mmr8" %}
+        type:{%if name.grouper == "mmr4" %}
         "areaspline",
         color:'rgb(193, 66, 66 )',
         fillOpacity: 0.1
 
-        {%elif name.grouper == "mmr9"%}
+        {%elif name.grouper == "mmr5"%}
         "areaspline",
         color:'rgb(255, 255, 255 )',
         fillOpacity: 0.1

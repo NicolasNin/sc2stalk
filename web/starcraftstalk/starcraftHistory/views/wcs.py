@@ -104,10 +104,10 @@ def getNumberGamesAt(date,playerid):
 def getDates(start,server):
 	date=[]
 	#if server=="us":
-#		tz= pytz.timezone('America/New_York')
-#	else:
-#		tz= pytz.timezone('Europe/Paris')
-#	start=tz.localize(start)
+	#		tz= pytz.timezone('America/New_York')
+	#	else:
+	#		tz= pytz.timezone('Europe/Paris')
+	#	start=tz.localize(start)
 	date.append(start.timestamp())
 	date.append(start.timestamp()+86400)
 	date.append(start.timestamp()+2*86400)
@@ -171,7 +171,7 @@ def wcs(request,server):
 		else:
 			p["name_human"]=p["name"]
 	#store this list
-	v=Global.objects.filter(name="listewcsusplayer").update(value=json.dumps(listegoodplayerid))
+	v=Global.objects.filter(name="listewcs"+server+"player").update(value=json.dumps(listegoodplayerid))
 
 	#recent games of thoses players last 12h
 	DELTATIME=3600*6
@@ -195,7 +195,7 @@ def wcs(request,server):
 			g["guessopid__name"]=g["guessopgameid__path"].split('/')[-1]
 
 
-#	timetostream=lastday-datetime.datetime.fromtimestamp(7200+int(time.time()))
+	#	timetostream=lastday-datetime.datetime.fromtimestamp(7200+int(time.time()))
 	timetostream=datetime.timedelta(seconds=10)
 	if (timetostream<datetime.timedelta(seconds=0)):
 		timetostream="LIVE"
@@ -214,9 +214,9 @@ def graphmmr(request,server):
 	else:
 		thresh=6300
 	deb=time.time()
-	leagueid=39 #inhard cause im lazy
+	current_seasonDB=Global.objects.filter(name="currentseason")[0].value
 	playerwcs=Players.objects.filter(server=server,smurf__wcsregion=server,
-	rating__gte=thresh,season=32,wcs=1).order_by("-rating").values("rating",
+	rating__gte=thresh,season=current_seasonDB,wcs=1).order_by("-rating").values("rating",
 	"name","mainrace","wins","loses","league","smurf__pseudo","idplayer","rank",
 	"league__sigle","last_played","idplayer")
 
@@ -262,11 +262,12 @@ def graphmmr(request,server):
 	date__gte=datestart).order_by("date")
 	m8=[]
 	m9=[]
+	lastQualif=8
 	try:
-		m8.append({"current_mmr":listmmrstart[7][0],"date":datestart,"player__name":"mmr8"})
-		m9.append({"current_mmr":listmmrstart[8][0],"date":datestart,"player__name":"mmr9"})
-		current8=listmmrstart[7]
-		current9=listmmrstart[8]
+		m8.append({"current_mmr":listmmrstart[7][0],"date":datestart,"player__name":"mmr4"})
+		m9.append({"current_mmr":listmmrstart[8][0],"date":datestart,"player__name":"mmr5"})
+		current8=listmmrstart[lastQualif-1]
+		current9=listmmrstart[lastQualif]
 		minmmr=listmmrstart[-1][0]
 		for g in recentgames:
 			newmmr=int(g.current_mmr)
@@ -284,14 +285,14 @@ def graphmmr(request,server):
 			listmmrstart.sort(reverse=True)
 			if listmmrstart[-1][0]<minmmr:
 				minmmr=listmmrstart[-1][0]
-			if listmmrstart[7]!=current8:
-				current8=listmmrstart[7]
-				m8.append( {"current_mmr":listmmrstart[7][0],"date":g.date,"player__name":"mmr8"})
-			if listmmrstart[8]!=current9:
-				current9=listmmrstart[8]
-				m9.append({"current_mmr":listmmrstart[8][0],"date":g.date,"player__name":"mmr9"} )
+			if listmmrstart[lastQualif-1]!=current8:
+				current8=listmmrstart[lastQualif-1]
+				m8.append( {"current_mmr":listmmrstart[lastQualif-1][0],"date":g.date,"player__name":"mmr4"})
+			if listmmrstart[lastQualif]!=current9:
+				current9=listmmrstart[lastQualif]
+				m9.append({"current_mmr":listmmrstart[lastQualif-1][0],"date":g.date,"player__name":"mmr5"} )
 
-		m8.append({"current_mmr":listmmrstart[7][0],"date":time.time(),"player__name":"mmr8"})
+		m8.append({"current_mmr":listmmrstart[lastQualif-1][0],"date":time.time(),"player__name":"mmr4"})
 		m8.extend(g2)
 	except IndexError:
 		print("indexerror")
