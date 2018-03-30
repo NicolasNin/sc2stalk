@@ -21,6 +21,26 @@ def index(request):
 	return renderrandomtitle(request, 'starcraftHistory/index.html',{})
 ###########
 
+def pros(request):
+	title=" Progamers"
+	liste_pros=Progamer.objects.all()
+	pro_dict=liste_pros.values("pseudo","mainrace","nationality",
+	"wcsregion","idprogamer")
+	context={"title":title,"pro":pro_dict}
+	return render(request, 'starcraftHistory/pro.html', context)
+def proPlayer(request,proid):
+	pro=Progamer.objects.get(pk=proid)
+	accounts=Players.objects.filter(smurf=pro)
+	accounts_dict=accounts.values("path","server",
+	"league_id__sigle","name","rating","last_played")
+	games=Games.objects.filter(player__in=accounts)
+	(games_dict,a,b)=getalldict(games)
+	context={"title":pro.pseudo,"games":games_dict,
+	"accounts":accounts_dict,"number":len(games_dict),
+	"name":pro.pseudo,"race":pro.mainrace}
+	return render(request, 'starcraftHistory/proPlayer.html', context)
+
+
 def getalldict(games,orderbydate=True,max=200):
 	if orderbydate:
 		games=games.order_by("-date")
@@ -45,7 +65,6 @@ def getalldict(games,orderbydate=True,max=200):
 			previousgame=g
 
 		g["map"]=g["map"].split("(")[0]
-
 		g["date_human"]=datetime.datetime.fromtimestamp(g["date"]).strftime('%d %b %H:%M')
 		g["path_human"]=g["path"].split("/")[-1]
 		if g["player__smurf__pseudo"]!=None:

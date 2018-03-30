@@ -1,0 +1,45 @@
+{% extends 'starcraftHistory/base.html' %}
+{% block content %}
+{% load static starcraftHistory_extras %}
+
+<div class="row">
+  <div class="col-lg-12 "><h3> {{name}}</h3> </div>
+</div>
+<div class="row">
+  <div class="col-lg-12 "> <b>Known accounts as {{race|icon:"race"}}</b> </div>
+</div>
+{% for p in accounts %}
+
+<div class="row">
+    <div class="col-lg-12">
+ {{p.rating}}{{p.league_id__sigle|icon:"league"}}<a href="{%url 'index'  %}{{p.server}}{{p.path}}">
+   {{p.name}}</a> last active {{p.last_played|timestamp}}
+
+    </div>
+</div>
+{% endfor %}
+
+{% for g in games %}
+<div class="row  {{g.decision}} {{g.type}} games">
+   <div class="col-lg-2"> <b>#{{forloop.counter}}</b> {{g.date_human}}
+     <br><small>Duration ~ {{g.timesincelastgame}}</small></br></div>
+   <div class="col-lg-2">  {{g.map}}</div>
+   <div class="col-lg-1">  {{g.current_mmr}}({{g.guessmmrchange}})</div>
+
+
+   <div class="col-lg-2 ">
+     {{ g.current_league__sigle|icon:"league"}}
+     {{ g.player__mainrace|icon:"race"}}
+         <a href="{%url 'index'  %}{{server}}{{g.path}}">{{g.path_human}}</a>
+      </div>
+      <div class="col-lg-2 ">
+        {{ g.guessopgameid__current_league__sigle|icon:"league"}}
+        {{g.guessopid__mainrace|icon:"race"}}
+     <a href="{%url 'index'  %}{{server}}{{g.oppath}}">{{g.nameop}}</a>
+
+   </div>
+   <div class="col-lg-1"> {{g.opmmr}}({{g.opdmmr}})</div>
+   <div class="col-lg-1"> W:{{g.current_win}} L:{{g.current_losses}}</div>
+</div>
+{%endfor%}
+{% endblock content %}
