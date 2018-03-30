@@ -13,13 +13,14 @@
     </tr>
   </thead>
   <tbody>
+    {% load static starcraftHistory_extras %}
 
    {% for p in pro %}
 	   <tr>
 	     <th scope="row">{{forloop.counter}}</th>
-	     <th scope="row">{{p.pseudo}}</th>
-	     <th scope="row">{{p.nation}}</th>
-	     <th scope="row">{{p.race}}</th>
+	     <th scope="row"><a href="{%url 'index'%}pro/{{p.idprogamer}}" >{{p.pseudo}}</a></th>
+	     <th scope="row">{{p.nationality}}</th>
+	     <th scope="row">{{p.mainrace}}</th>
 	     <th scope="row">{{p.maxmmr}}</th>
 
     </tr>
