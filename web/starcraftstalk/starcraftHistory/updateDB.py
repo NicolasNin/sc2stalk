@@ -125,36 +125,40 @@ def beautifulPlayer(player):
 		print(e,player)
 		return "error"
 	return p
-def updatePlayer(pobj, p, lid,lastMHupdate,season,server):
+def updatePlayer(pobj, p, lid,lastMHupdate,season,server,msg):
 	"""update the Player object pobj with the data from api"""
-	pobj.name = p["name"]
-	pobj.server = server
-	pobj.rating = p["rating"]
-	pobj.wins = p["wins"]
-	pobj.loses = p["losses"]
-	pobj.ties = p["ties"]
-	pobj.last_played = p["last_played"]
-	pobj.join_time = p["join_time"]
-	pobj.legacy_id = p["legacy_id"]
-	pobj.realm = p["realm"]
-	pobj.path = p["path"]
-	pobj.clan_id = p["clan_id"]
-	pobj.idblizz = p["id_blizz"]
-	pobj.mainrace = p["mainrace"]
-	pobj.battletag = p["battletag"]
-	pobj.race_count = p["race_count"]
-	pobj.points = p["points"]
-	pobj.current_win_streak = p["current_win_streak"]
-	pobj.league = lid
-	pobj.lastmhupdate=lastMHupdate
-	pobj.rank=p["current_rank"]
-	pobj.season=season
-	#we check if there exist a preivous player with same race and path for smurf
-	if Players.objects.filter(battletag=p["battletag"],mainrace=p["mainrace"]).exists():
-		pold=Players.objects.filter(battletag=p["battletag"],mainrace=p["mainrace"])[0]
-		if pold.smurf!=None:
-			pobj.smurf=pold.smurf
-	pobj.save()
+	if msg!="nothing":
+		pobj.name = p["name"]
+		pobj.server = server
+		pobj.rating = p["rating"]
+		pobj.wins = p["wins"]
+		pobj.loses = p["losses"]
+		pobj.ties = p["ties"]
+		pobj.last_played = p["last_played"]
+		pobj.join_time = p["join_time"]
+		pobj.legacy_id = p["legacy_id"]
+		pobj.realm = p["realm"]
+		pobj.path = p["path"]
+		pobj.clan_id = p["clan_id"]
+		pobj.idblizz = p["id_blizz"]
+		pobj.mainrace = p["mainrace"]
+		pobj.battletag = p["battletag"]
+		pobj.race_count = p["race_count"]
+		pobj.points = p["points"]
+		pobj.current_win_streak = p["current_win_streak"]
+		pobj.league = lid
+		pobj.lastmhupdate=lastMHupdate
+		pobj.rank=p["current_rank"]
+		pobj.season=season
+		#we check if there exist a preivous player with same race and path for smurf
+		if lastMHupdate==0:
+			if Players.objects.filter(battletag=p["battletag"],mainrace=p["mainrace"]).exists():
+				pold=Players.objects.filter(battletag=p["battletag"],mainrace=p["mainrace"])[0]
+				if pold.smurf!=None:
+					pobj.smurf=pold.smurf
+
+
+		pobj.save()
 @background(schedule=10)
 def updateAll():
 	updateServerCycle("eu")
@@ -194,11 +198,11 @@ def updateServerCycle(server="eu"):
 				if str(p["id_blizz"]) in db_players:
 					pdb = db_players[str(p["id_blizz"])]
 					#big loop start here
-					(lastMHupdate,newgamesp)=addNewGamePlayer(pdb,p,lid,server)
+					(lastMHupdate,newgamesp,msg)=addNewGamePlayer(pdb,p,lid,server)
 					newgames.extend(newgamesp)
-					updatePlayer(pdb, p, lid,lastMHupdate,currentseason,server)
+					updatePlayer(pdb, p, lid,lastMHupdate,currentseason,server,msg)
 				else:
-					updatePlayer(Players(),p,lid,0,currentseason,server)
+					updatePlayer(Players(),p,lid,0,currentseason,server,msg="new")
 	print(newgames)
 	found=findOpListObject(newgames,save=False)
 	checkReciprocal(found,save=True)
@@ -249,7 +253,7 @@ def addNewGamePlayer(pdb,p,lid,server):
 			returngame=addGamesinDB(p,"","SOLO",getDecision(deltawins,deltalosses,deltaties),"FASTER",p["last_played"],
 				deltaMMR,msg,lid,player_id,False,server)
 			list_newgamesid.append(returngame)
-	return (maxdate,list_newgamesid)
+	return (maxdate,list_newgamesid,msg)
 
 def compareDbandHistory(match_db,mh,p,pdb,msg,lid,deltaMMR,deltawins,deltalosses,deltaties,server):
 	""" match_db is the games list without maps, we try to reconstruct the match
@@ -307,7 +311,7 @@ unknown=False,server="eu"):
 	print(p["path"],date,unknown,lid,deltaMMR,decision)
 	try:
 		sc2map=sc2map[0:44].encode("utf-8").decode("utf-8")
-	except error as e:
+	except UnicodeEncodeError as e:
 		print(e)
 		sc2map="error"
 	try:
