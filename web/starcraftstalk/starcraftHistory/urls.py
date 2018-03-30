@@ -5,7 +5,6 @@ from . import views
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^(?P<server>.*)/players/$', views.players, name='players'),
-    url(r'^pro/$', views.pro, name='pro'),
     url(r'^(?P<server>.*)/wcs/$', views.wcs, name='wcs'),
     url(r'^(?P<server>.*)/wcs2/$', views.wcsdata, name='wcsdata'),
 #    url(r'^wcs/$', views.wcsold, name='wcsold'),
@@ -24,5 +23,7 @@ urlpatterns = [
     url(r'^(?P<server>.*)/statswcs/$', views.statswcs, name='statswcs'),
     url(r'^testrecentlive/$', views.recentlive, name='rlive'),
     url(r'^testrecentlive/lm/$', views.lastmatchsince, name='since'),
-
+    #pro url
+    url(r'^pro/$', views.pros, name='pro'),
+    url(r'^pro/(?P<proid>[0-9]+)/$', views.proPlayer, name='proPlayer'),
 ]

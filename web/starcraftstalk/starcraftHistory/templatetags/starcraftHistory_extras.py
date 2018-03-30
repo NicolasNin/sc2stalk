@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 from django.templatetags.static import (
     do_static as _do_static, static as _static,
 )
-
+import datetime
 register = template.Library()
 
 @register.filter(name='split')
@@ -28,3 +28,7 @@ def icon(value,icontype):
         else:
             txt="?"
     return mark_safe(txt)
+
+@register.filter(name='timestamp')
+def timestamp(timestamp):
+    return datetime.datetime.fromtimestamp(timestamp).strftime('%d %b %H:%M')
