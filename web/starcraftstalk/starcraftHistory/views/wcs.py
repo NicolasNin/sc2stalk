@@ -53,7 +53,7 @@ def getPromotionWindows(server):
 	#cest= pytz.timezone('Europe/Paris')
 	utc = pytz.utc
 	now=pytz.utc.localize(datetime.datetime.now())
-	now_local=now.astimezone(utc)
+	now_local=now.astimezone(tz)
 	#promotion is between 21h each day
 	if now_local.hour>=21:
 		start=tz.localize(datetime.datetime(now_local.year,now_local.month,now_local.day,21)).astimezone(pytz.utc)
@@ -226,14 +226,14 @@ def graphmmr(request,server):
 	num=1
 	for p in playerwcs:
 		####HACK we should add a flag wcs to player in db
-		name2=p["name"].lower().split("#")[0]
-		if name2[0:6]=="liquid":
-			name2=name2[6:]
-		p["truename"]= name2==p["smurf__pseudo"].lower()
-		if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
-			p["truename"]=True
+	#	name2=p["name"].lower().split("#")[0]
+	#	if name2[0:6]=="liquid":
+	#		name2=name2[6:]
+	#	p["truename"]= name2==p["smurf__pseudo"].lower()
+	#	if name2=="thermy" and p["smurf__pseudo"].lower()=="uthermal":
+	#		p["truename"]=True
 		######################
-		if p["truename"]:
+		if True:
 			listegoodplayerid.append(p["idplayer"])
 			listemmr.append(p["rating"])
 			if num==lastQualif:
