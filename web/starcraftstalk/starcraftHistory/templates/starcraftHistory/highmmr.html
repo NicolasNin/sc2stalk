@@ -49,12 +49,13 @@ function hidenotsolo() {
 	   <tr class="{{g.type}}">
 	     <th scope="row">{{forloop.counter}}</th>
     	 <td>{{g.date_human}}</td>
-    	 <td><a href="{%url 'index'%}{{server}}{{g.path}}">{{g.path_human}}</a></td>
+
+    	 <td><a href="{%url 'index'%}{{g.server}}{{g.path}}">{{g.path_human}}</a></td>
     	 <td>
            {%if g.player__mainrace is not  None %} {{g.player__mainrace}}{%endif%}v{%if g.guessopid__mainrace is not  None %}{{g.guessopid__mainrace}} {%endif%}
   </td>
 
-      <td><a href="{{g.oppath}}">{{g.nameop}}</a></td>
+      <td><a href="{%url 'index'%}{{g.server}}{{g.oppath}}">{{g.nameop}}</a></td>
 
     	 <td>{{g.map}}</td>
       	<td>{{g.decision_human}}</td>
